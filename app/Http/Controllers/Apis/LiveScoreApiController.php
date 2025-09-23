@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Http\Controllers\Apis;
+use App\Http\Controllers\Controller;
+
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
+use App\Http\Controllers\LiveScoreController;
+
+use App\Models\User;
+
+class LiveScoreApiController extends Controller
+{
+
+    public function LiveScore(){
+        try{
+            $data = LiveScoreController::LiveScore();
+            if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
+            return response()->json([
+                'message' => 'สำเร็จ',
+                'data' => $data->data,
+                'code' => 200
+            ], 200);
+        }catch (\Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+
+    public function event(Request $request){
+        try{
+            $match_id = $request->id ?? 0;
+            $status = $request->status ?? 'FINISHED';
+            try{
+                $data = LiveScoreController::LiveEvent($match_id, $status);
+                return response()->json([
+                    'message' => 'สำเร็จ',
+                    'data' => $data,
+                    'code' => 200
+                ], 200);
+            }catch (\Throwable $e) {
+                $response = [
+                    'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                    'code' => 500,
+                ];
+                if(env('APP_DEBUG')) $response['debug'] = [
+                    'message' => $e->getMessage(),
+                    'request' => $request->all(),
+                ];
+                return response()->json($response, 500);
+            }
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+                'request' => $request->all(),
+                'data' => $data,
+            ];
+                return response()->json($response, 500);
+        }
+    }
+
+    public function history(Request $request){
+        try{
+            $page = $request->page ?? 1;
+            $data = LiveScoreController::HistoryScore($page);
+            if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
+            return response()->json([
+                'message' => 'สำเร็จ',
+                'data' => $data->data,
+                'code' => 200
+            ], 200);
+        }catch (\Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response($response, 500)->json();
+        }
+    }
+}
