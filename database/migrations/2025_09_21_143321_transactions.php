@@ -44,8 +44,8 @@ return new class extends Migration
             $table->string('gateway_txn_id', 100)->nullable();
             $table->json('raw_response')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('admin_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('admin_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

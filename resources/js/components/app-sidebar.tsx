@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, CirclePoundSterling, Folder, Landmark, LayoutGrid, NotebookPen, UsersRound, Wallet } from 'lucide-react';
+import { BookOpen, CirclePoundSterling, Folder, HandCoins, Landmark, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 import { UserType } from '@/types/user';
 import { AuthType } from '@/types/auth';
@@ -84,6 +84,18 @@ export function AppSidebar() {
                             href: dash.admin.users.payment().url,
                             isActive: true,
                             icon: Landmark
+                        },
+                        {
+                            title: "ประวัติการเติมพอยต์",
+                            href: dash.admin.wallet.table().url,
+                            isActive: true,
+                            icon: HandCoins,
+                        },
+                        {
+                            title: "ทีเด็ดทั้งหมด",
+                            href: dash.admin.post.table().url,
+                            isActive: true,
+                            icon: SwatchBook,
                         },
                     ],
                     icon: undefined

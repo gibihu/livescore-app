@@ -192,7 +192,7 @@ export function UserTable() {
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>คุณแน่ใจ?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        คุณต้องการเปลี่ยนบทบาทของ {row.original.username} เป็น {row.original.role == 'user' ? 'แอดมิน' : 'ผู้ใช้'} หรือไม่?
+                                        คุณต้องการเปลี่ยนบทบาทของ <span className="text-foreground">{row.original.username}</span> เป็น <span className="text-foreground">{row.original.role_text == 'user' ? 'แอดมิน' : 'ผู้ใช้'}</span> หรือไม่?
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

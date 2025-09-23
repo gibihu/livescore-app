@@ -37,7 +37,10 @@ class Transaction extends Model
 
     public $timestamps = true;
 
-    protected $appends = ['status_text'];
+    protected $appends = [
+        'status_text',
+        'type_text'
+    ];
 
     public function user()
     {
@@ -74,6 +77,17 @@ class Transaction extends Model
     public function getStatusTextAttribute()
     {
         return self::$statusLabels[$this->status] ?? 'unknown';
+    }
+
+    const DEPOSIT = 1;
+    const WITHDRAW = 2;
+    public static $typeLabels = [
+        self::DEPOSIT => 'deposit',
+        self::WITHDRAW => 'withdraw',
+    ];
+    public function getTypeTextAttribute()
+    {
+        return self::$typeLabels[$this->type] ?? 'unknown';
     }
 
             //     'pending',

@@ -35,6 +35,7 @@ import { MatchType } from "@/types/match"
 import { Link } from "@inertiajs/react"
 import MatchEvent from "./event"
 import { Badge } from "@/components/customs/badge"
+import TableMatch from "./table"
 
 const API_URL: string = import.meta.env.VITE_API_URL;
 export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch?: boolean}) {
@@ -67,8 +68,14 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
                     <TableCellViewer item={momItem} className="flex justify-between gap-2 items-center w-full h-full">
                         <MatchBadge item={momItem} home={true} />
                         <div className="flex gap-2">
-                            <span className="line-clamp-1 hidden md:block">{item.name}</span>
-                            <span className="line-clamp-1 md:hidden">{ShortName(item.name)}.</span>
+                            {momItem.country?.id && (
+                                <img
+                                    src={`/flag?type=country&id=${momItem.country.id}`}
+                                    className="h-3 w-5"
+                                />
+                            )}
+                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores.score) == '1' ? 'text-success' : whoWon(momItem.scores.score) == '2' && 'text-red-700')}>{item.name}</span>
+                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores.score) == '1' ? 'text-success' : whoWon(momItem.scores.score) == '2' && 'text-red-700')}>{ShortName(item.name)}.</span>
                             <img src={item.logo} alt={item.logo} className="size-4" />
                         </div>
                     </TableCellViewer>
@@ -81,7 +88,23 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
             cell: ({ row }) => {
                 const item = row.original.scores;
                 const momItem = row.original;
-                return (<TableCellViewer item={momItem} className="w-full h-full">{item.score}</TableCellViewer>);
+                const odds = momItem.odds;
+                return (
+                    <TableCellViewer item={momItem} className="w-full h-full py-2">
+                        <div className="flex flex-col justify-center items-center gap-2">
+                            {odds?.pre?.[1] && odds.pre[2] && odds.pre['X'] && (
+                                <div className="flex items-center justify-center gap-4">
+                                    <span>{odds?.pre?.[1]}</span>
+                                    <span>{odds?.pre?.['X']}</span>
+                                    <span>{odds?.pre?.[2]}</span>
+                                </div>
+                            )}
+                            <div className="flex">
+                                <span className="text-xs  rounded-full  bg-foreground  text-background  px-2">{item.score}</span>
+                            </div>
+                        </div>
+                    </TableCellViewer>
+                );
             },
         },
         {
@@ -94,8 +117,8 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
                     <TableCellViewer item={momItem} className="flex gap-2 justify-between items-center w-full h-full">
                         <div className="flex gap-2">
                             <img src={item.logo} alt={item.logo} className="size-4" />
-                            <span className="line-clamp-1 hidden md:block">{item.name}</span>
-                            <span className="line-clamp-1 md:hidden">{ShortName(item.name)}.</span>
+                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores.score) == '2' ? 'text-success' : whoWon(momItem.scores.score) == '1' && 'text-red-700')}>{item.name}</span>
+                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores.score) == '2' ? 'text-success' : whoWon(momItem.scores.score) == '1' && 'text-red-700')}>{ShortName(item.name)}.</span>
                         </div>
                         <MatchBadge item={momItem} home={false} />
                     </TableCellViewer>
@@ -151,65 +174,7 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
                 </div>
             </div>
             <div className="overflow-hidden rounded-md border">
-                <Table className="table-fixed">
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id} className={header.id === 'score' ? 'w-30' : ''}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {!isFetchBoard ? (
-                            table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className="p-0 px-2 h-10">
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className="h-24 text-center"
-                                    >
-                                        ยังไม่มีการแข่งขัน
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    กำลังโหลด...
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                <TableMatch columns={columns} table={table} isFetchBoard={isFetchBoard} />
             </div>
             <div className="flex items-center justify-between px-4 my-4">
                 <div className="text-muted-foreground hidden flex-1 text-sm md:flex">

@@ -24,6 +24,10 @@ class WalletHistory extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+    protected $appends = [
+        'type_text',
+        'role_text',
+    ];
 
     public $timestamps = true;
 
@@ -33,12 +37,22 @@ class WalletHistory extends Model
         return $this->belongsTo(Wallet::class, 'wallet_id', 'id');
     }
 
+    const ROLE_ADD = 1;
+    const ROLE_SUB = 2;
+    public static $roleLabels = [
+        self::ROLE_ADD => 'add',
+        self::ROLE_SUB => 'subtract',
+    ];
+    public function getRoleTextAttribute()
+    {
+        return self::$roleLabels[$this->role] ?? 'unknown';
+    }
 
     const TYPE_USED = 1;
     const TYPE_TOPUP = 2;
-    const TYPE_REMOVED = 2;
-    const TYPE_INCOME = 2;
-    const TYPE_BONUS = 2;
+    const TYPE_REMOVED = 3;
+    const TYPE_INCOME = 4;
+    const TYPE_BONUS = 5;
     public static $typeLabels = [
         self::TYPE_USED => 'used',
         self::TYPE_TOPUP => 'topup',

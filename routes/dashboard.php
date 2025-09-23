@@ -50,6 +50,19 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
             return Inertia::render('dashboard/admins/user-payment');
         })->name('payment');
     });
+
+    Route::prefix('wallet')->name('wallet.')->group(function(){
+        Route::get('table', function () {
+            return Inertia::render('dashboard/admins/wallet');
+        })->name('table');
+    });
+
+    Route::prefix('post')->name('post.')->group(function(){
+        Route::get('table', function () {
+            return Inertia::render('dashboard/admins/posts');
+        })->name('table');
+    });
+
 });
 
 

@@ -28,6 +28,7 @@ return new class extends Migration
             //     'refunded'
             // ])->default('pending');
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

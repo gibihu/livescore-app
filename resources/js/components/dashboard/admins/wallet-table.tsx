@@ -7,10 +7,11 @@ import type { WalletHistoryType } from "@/types/global";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { TranslateRole } from "../wallet-history-table";
 
 
 
-export default function WalletHistoryTable() {
+export default function WalletTable() {
     const [items, setItems] = useState<WalletHistoryType[]>([]);
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -19,13 +20,13 @@ export default function WalletHistoryTable() {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const res = await fetch(api.dash.wallet.history().url);
+                const res = await fetch(api.dash.admin.wallet.table().url);
                 const result = await res.json();
                 if (result.code == 200) {
                     const data = result.data;
                     setItems(data);
                 } else {
-                    toast.error(result.message, { description: result.code || '' });
+                    toast.error(result.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -67,11 +68,11 @@ export default function WalletHistoryTable() {
                             </TableCell>
                         </TableRow>
                     ) : items.length > 0 ? (
-                            items.map((item, index) => (
+                            items.map((item: WalletHistoryType, index) => (
                                 <TableRow key={index}>
                                     <TableCell className="ps-4">
                                         <div className="flex flex-col gap-2">
-                                            <p className="font-bold text-md">{TranslateRole(item.type_text ?? '')}</p>
+                                            <p className="font-bold text-md">{item.user?.username+' '+TranslateRole(item.type_text ?? '')}</p>
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-muted-foreground">{item.description}</span>
                                                 <span className="text-border">เมื่อ {timeAgoShort(item.updated_at)}</span>
@@ -93,27 +94,4 @@ export default function WalletHistoryTable() {
             </Table>
         </Card>
     );
-}
-
-
-export function TranslateRole(type: string) {
-    let text = '';
-    switch (type) {
-        case 'used':
-            text = 'แลกพอยต์';
-            break;
-        case 'topup':
-            text = 'เติมพอยต์';
-            break;
-        case 'removed':
-            text = 'ถอนออก';
-            break;
-        case 'income':
-            text = 'รายได้';
-            break;
-        default:
-            text = 'โบนัส';
-    }
-
-    return text;
 }

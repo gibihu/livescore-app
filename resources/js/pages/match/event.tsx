@@ -17,20 +17,34 @@ export default function MatchEvent({ match_id, main_item }: { match_id: number, 
 
     useEffect(() => {
         const fetchData = async () => {
-            setIsLoad(true);
-            // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
-            const res = await fetch(`${api.match.event().url}?id=${match_id}&status=${main_item.status}`);
+            try{
+                setIsLoad(true);
+                // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
+                const res = await fetch(`${api.match.event().url}?id=${match_id}&status=${main_item.status}`);
 
-            const result = await res.json();
-            // if (result.code == 200) {
-            if (result.code == 200) {
-                const data = await result.data;
-                setEvents(data.event);
-                // console.log(data.event);
-            } else {
-                toast.error(result.message);
+                const result = await res.json();
+                // if (result.code == 200) {
+                if (result.code == 200) {
+                    const data = await result.data;
+                    setEvents(data.event);
+                    // console.log(data.event);
+                } else {
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+
+                toast.error(message);
+            } finally {
+                setIsLoad(false);
             }
-            setIsLoad(false);
         };
         fetchData();
     }, [match_id]);
@@ -67,7 +81,7 @@ export default function MatchEvent({ match_id, main_item }: { match_id: number, 
                                             <div className="flex flex-col">
                                                 <p className="text-nowrap">{item.player || '-'}</p>
                                                 <div className="flex items-center gap-1  ps-1  text-ring  group-hover:text-accent-foreground">
-                                                    <CornerLeftUp className="size-3" /><span className="text-xs  cursor-default">{item.info || '-'}</span>
+                                                    <CornerLeftUp className="size-3" /><span className="text-xs  cursor-default pt-2">{item.info || '-'}</span>
                                                 </div>
                                             </div>
                                         </TableCell>

@@ -40,8 +40,16 @@ export interface WalletHistoryType {
     id: string;
     wallet_id: string;
     change_amount: number;
-    role: string;
-    type: string;
+    role: number;
+    role_text?: string;
+    type: number;
+    type_text?: string;
+    user?: {
+        id: string,
+        name?: string,
+        username: string,
+        email: string,
+    };
     description?: string;
     updated_at: string;
     created_at: string;
@@ -61,6 +69,7 @@ export interface PostType {
     user_id: string;
     user: UserGuast;
     title: string;
+    title_short?: string;
     contents: string;
     points: number;
     status: string;

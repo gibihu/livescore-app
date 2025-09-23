@@ -18,8 +18,9 @@ import type { MatchType } from "@/types/match"
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type ColumnDef, type ColumnFiltersState, type SortingState, type VisibilityState } from "@tanstack/react-table"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { MatchBadge, TableCellViewer } from "./match/board-score"
 import api from "@/routes/api"
+import { MatchBadge, TableCellViewer, whoWon } from "./board-score"
+import { cn } from "@/lib/utils"
 
 const API_URL: string = import.meta.env.VITE_API_URL;
 export default function HistoryScore() {
@@ -68,6 +69,7 @@ export default function HistoryScore() {
     }
 
 
+
     const columns: ColumnDef<MatchType>[] = [
         {
             accessorKey: "home",
@@ -86,8 +88,14 @@ export default function HistoryScore() {
                     <TableCellViewer item={momItem} className="flex justify-between gap-2 items-center w-full h-full">
                         <MatchBadge item={momItem} home={true} />
                         <div className="flex gap-2">
-                            <span className="line-clamp-1 hidden md:block">{item.name}</span>
-                            <span className="line-clamp-1 md:hidden">{ShortName(item.name)}.</span>
+                            {momItem.country?.id && (
+                                <img
+                                    src={`/flag?type=country&id=${momItem.country.id}`}
+                                    className="h-3 w-5"
+                                />
+                            )}
+                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores.score) == '1' ? 'text-success' : whoWon(momItem.scores.score) == '2' && 'text-red-700')}>{item.name}</span>
+                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores.score) == '1' ? 'text-success' : whoWon(momItem.scores.score) == '2' && 'text-red-700')}>{ShortName(item.name)}.</span>
                             <img src={item.logo} alt={item.logo} className="size-4" />
                         </div>
                     </TableCellViewer>
@@ -100,7 +108,23 @@ export default function HistoryScore() {
             cell: ({ row }) => {
                 const item = row.original.scores;
                 const momItem = row.original;
-                return (<TableCellViewer item={momItem} className="w-full h-full">{item.score}</TableCellViewer>);
+                const odds = momItem.odds;
+                return (
+                    <TableCellViewer item={momItem} className="w-full h-full py-2">
+                        <div className="flex flex-col justify-center items-center gap-2">
+                            {odds?.pre?.[1] && odds.pre[2] && odds.pre['X'] && (
+                                <div className="flex items-center justify-center gap-4">
+                                    <span>{odds?.pre?.[1]}</span>
+                                    <span>{odds?.pre?.['X']}</span>
+                                    <span>{odds?.pre?.[2]}</span>
+                                </div>
+                            )}
+                            <div className="flex">
+                                <span className="text-xs  rounded-full  bg-foreground  text-background  px-2">{item.score}</span>
+                            </div>
+                        </div>
+                    </TableCellViewer>
+                );
             },
         },
         {
@@ -113,8 +137,8 @@ export default function HistoryScore() {
                     <TableCellViewer item={momItem} className="flex gap-2 justify-between items-center w-full h-full">
                         <div className="flex gap-2">
                             <img src={item.logo} alt={item.logo} className="size-4" />
-                            <span className="line-clamp-1 hidden md:block">{item.name}</span>
-                            <span className="line-clamp-1 md:hidden">{ShortName(item.name)}.</span>
+                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores.score) == '2' ? 'text-success' : whoWon(momItem.scores.score) == '1' && 'text-red-700')}>{item.name}</span>
+                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores.score) == '2' ? 'text-success' : whoWon(momItem.scores.score) == '1' && 'text-red-700')}>{ShortName(item.name)}.</span>
                         </div>
                         <MatchBadge item={momItem} home={false} />
                     </TableCellViewer>
@@ -165,7 +189,7 @@ export default function HistoryScore() {
                 />
             </div>
             <div className="overflow-hidden rounded-md border">
-                <Table className="table-fixed">
+                <Table className="table-fixed bg-card">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>

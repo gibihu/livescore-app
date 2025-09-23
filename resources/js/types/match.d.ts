@@ -13,7 +13,11 @@ export interface MatchType {
     federation?: string | null;
     odds?: {
         live?: string[];
-        pre?: string[];
+        pre?: {
+            '1': number;
+            '2': number;
+            'X': number;
+        };
     };
     time: string;
     added?: string;
