@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\LiveScoreController;
 
 use App\Models\User;
+use App\Models\Matchs;
 
 class LiveScoreApiController extends Controller
 {
@@ -93,6 +94,27 @@ class LiveScoreApiController extends Controller
                 'message' => $e->getMessage(),
             ];
             return response($response, 500)->json();
+        }
+    }
+
+    public function match_detail($id){
+        try{
+            $data = Matchs::where('match_id', $id)->first();
+            if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
+            return response()->json([
+                'message' => 'สำเร็จ',
+                'data' => json_decode($data->json),
+                'code' => 200
+            ], 200);
+        }catch (\Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
         }
     }
 }

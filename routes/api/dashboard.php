@@ -42,6 +42,12 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
                 Route::delete('delete/{id}', 'delete')->name('delete');
             });
         });
+
+        Route::controller(LiveScoreApiController::class)->group(function(){
+            Route::prefix('match')->name('match.')->group(function(){
+                Route::get('{id}', 'match_detail')->name('detail');
+            });
+        });
     });
 });
 

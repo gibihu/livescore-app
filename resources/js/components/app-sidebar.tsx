@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, CirclePoundSterling, Folder, HandCoins, Landmark, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
+import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, Landmark, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 import { UserType } from '@/types/user';
 import { AuthType } from '@/types/auth';
@@ -49,6 +49,11 @@ export function AppSidebar() {
         {
             title: "พื้นที่สนุกสนาน",
             items: [
+                {
+                    title: "ภาพรวม",
+                    href: dash.index().url,
+                    icon: ChartSpline
+                },
                 {
                     title: "กระเป๋า",
                     href: dash.wallet().url,

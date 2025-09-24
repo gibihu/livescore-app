@@ -1,8 +1,6 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { PickMatch } from "@/components/dashboard/pick-match";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -16,37 +14,50 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
+import api from "@/routes/api";
 import dash from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
-import { CircleQuestionMark, LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Head, router, usePage } from "@inertiajs/react";
 import { AuthType } from "@/types/auth";
+import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
-import api from "@/routes/api";
-import { title } from "process";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Head, router } from "@inertiajs/react";
+import { CircleQuestionMark, LoaderCircle, Minus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
 
 // 1. schema ตรวจสอบค่า
 
-export default function CreatePostPage() {
+export default function CreatePostPage(request: any) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
     // 2. setup form
-    const auth = usePage().props.auth as AuthType;
+    const auth = request.auth as AuthType;
     const user = auth?.user as UserType;
     const [maxPoints, setMaxPoints] = useState<number>(100);
     useEffect(() => {
         setMaxPoints(MaxPoints(user?.tier_text || 'bronze'));
     }, [user]);
     const [isFetch, setIsFetch] = useState<boolean>(false);
+    const [matchItem, setMatchItem] = useState<MatchType>();
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),
         content: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
         points: z.number({ message: "กรุณากรอกจำนวนพอยต์" }).min(0, { message: 'ต้องมากกว่า 0' }).max(maxPoints, `จำนวนพอยต์ต้องไม่มากกว่า ${maxPoints.toLocaleString()}`),
         submit: z.string(),
+        home_score: z.number(),
+        away_score: z.number(),
+        odds_live_1: z.number(),
+        odds_live_2: z.number(),
+        odds_live_3: z.number(),
+        odds_pre_1: z.number(),
+        odds_pre_2: z.number(),
+        odds_pre_3: z.number(),
     });
     type FormValues = z.infer<typeof schema>;
     const form = useForm<FormValues>({
@@ -55,15 +66,54 @@ export default function CreatePostPage() {
             title: "",
             content: "",
             points: 100,
-            submit: 'private'
+            submit: 'private',
+            home_score: undefined,
+            away_score: undefined,
+            odds_live_1: undefined,
+            odds_live_2: undefined,
+            odds_live_3: undefined,
+            odds_pre_1: undefined,
+            odds_pre_2: undefined,
+            odds_pre_3: undefined,
         },
-        mode: "onChange",
     });
+    // mode: "onChange",
+
+    useEffect(() => {
+        const match_id = request.match_id;
+        const fetchData = async () => {
+            try {
+                setIsFetch(true);
+                const res = await fetch(api.dash.match.detail(match_id).url);
+                const result = await res.json();
+                if (result.code == 200) {
+                    const data = result.data;
+                    setMatchItem(data);
+                } else {
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        };
+        if (match_id) fetchData();
+    }, []);
 
     // 3. handle submit
     const onSubmit = (data: FormValues) => {
         const fetchData = async () => {
-            try{
+            try {
                 setIsFetch(true);
                 const res = await fetch(api.dash.post.create().url, {
                     method: 'POST',
@@ -183,6 +233,124 @@ export default function CreatePostPage() {
                                         </FormItem>
                                     )}
                                 />
+                            </div>
+
+                            <div className="w-full flex flex-col gap-4">
+                                <div className="w-full">
+                                    <PickMatch className="w-full" />
+                                </div>
+                                <div className="w-full grid md:grid-cols-4 lg:grid-cols-8 gap-4">
+                                    <div className="col-span-2 flex flex-col gap-2 w-full">
+                                        <div className="flex flex-col gap-2 justify-center ">
+                                            <span>คะแนน</span>
+                                            <div className="flex items-center gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="home_score"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <Minus className="size-4" />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="away_score"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-3 flex flex-col gap-2 w-full">
+                                        <div className="flex flex-col gap-2 justify-center ">
+                                            <span>live</span>
+                                            <div className="flex gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_live_1"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_live_2"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_live_3"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-3 flex flex-col gap-2 w-full">
+                                        <div className="flex flex-col gap-2 justify-center ">
+                                            <span>pre</span>
+                                            <div className="flex gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_pre_1"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_pre_2"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_pre_3"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Content */}

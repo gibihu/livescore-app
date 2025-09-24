@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Expand } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
@@ -32,13 +32,19 @@ import { cn } from "@/lib/utils"
 import { useEffect, useState, type ReactNode } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MatchType } from "@/types/match"
-import { Link } from "@inertiajs/react"
+import { Link, usePage } from "@inertiajs/react"
 import MatchEvent from "./event"
 import { Badge } from "@/components/customs/badge"
 import TableMatch from "./table"
+import dash from "@/routes/dash"
+import { AuthType } from "@/types/auth"
+import { UserType } from "@/types/user"
 
-const API_URL: string = import.meta.env.VITE_API_URL;
 export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch?: boolean}) {
+    const auth = usePage().props.auth as AuthType;
+    const user = auth.user as UserType;
+
+
     const [match, setmatch] = useState<MatchType[]>([]);
     const [isFetchBoard, setIsFetchBoard] = useState(isFetch);
 
@@ -262,9 +268,19 @@ function TableCellViewer({ item, className, children }: { item: MatchType, class
     return (
         <Dialog>
             <DialogTrigger className={cn(className)}>{children}</DialogTrigger>
-            <DialogContent className="md:max-w-[90svw] md:max-h-[90vh] w-auto h-auto overflow-y-auto">
+            <DialogContent className="[&>button]:hidden md:max-w-[90svw] md:max-h-[90vh] w-auto h-auto overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
+                        <div className="w-full flex justify-end gap-2">
+                            <Link href={`${dash.post.create().url}?match_id=${item.id}`}>
+                                <Button asChild>
+                                    <span>สร้างทีเด็ด</span>
+                                </Button>
+                            </Link>
+                            <Button>
+                                <Expand className="size-4" />
+                            </Button>
+                        </div>
                         <div className="flex flex-col items-center gap-4">
                             <div className="flex items-center gap-2">
                                 {item.country?.id && (
@@ -315,7 +331,6 @@ function TableCellViewer({ item, className, children }: { item: MatchType, class
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </DialogTitle>
                     <DialogDescription className="mt-4 w-max" asChild>
