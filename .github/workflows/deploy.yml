@@ -20,14 +20,14 @@ jobs:
 
       - name: Deploy code and Build on Server
         run: |
-          ssh -o StrictHostKeyChecking=no f4host@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
-            cd /home/f4host
+          ssh -o StrictHostKeyChecking=no smsbkk@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
+            cd /home/smsbkk
 
-            if [ ! -d "SYSTEMF4HOST" ]; then
-              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEMF4HOST
+            if [ ! -d "SYSTEMMSBKK" ]; then
+              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEMMSBKK
             fi
 
-            cd SYSTEMF4HOST
+            cd SYSTEMMSBKK
 
             git fetch origin main
             git reset --hard HEAD
@@ -35,7 +35,7 @@ jobs:
             git pull origin main
             echo 'Git pull completed on server.'
 
-            source /home/f4host/nodevenv/SYSTEMF4HOST/20/bin/activate
+            source /home/smsbkk/nodevenv/SYSTEMMSBKK/20/bin/activate
             echo 'Node.js virtual environment activated.'
 
             npm install --legacy-peer-deps || true
@@ -48,14 +48,14 @@ jobs:
             echo 'Permissions set completed on server.'
 
             php artisan storage:link
-            echo 'Laravel storage:link executed on SYSTEMF4HOST/public.'
+            echo 'Laravel storage:link executed on SYSTEMMSBKK/public.'
 
             rsync -avz --delete \
               --exclude 'index.php' \
-              /home/f4host/SYSTEMF4HOST/public/ \
-              /home/f4host/public_html/
-            echo 'Public folder synced from SYSTEMF4HOST to public_html.'
-            cat > /home/f4host/public_html/index.php << 'END'
+              /home/smsbkk/SYSTEMMSBKK/public/ \
+              /home/smsbkk/public_html/
+            echo 'Public folder synced from SYSTEMMSBKK to public_html.'
+            cat > /home/smsbkk/public_html/index.php << 'END'
           <?php
 
           use Illuminate\Foundation\Application;
@@ -63,13 +63,13 @@ jobs:
 
           define('LARAVEL_START', microtime(true));
 
-          if (file_exists($maintenance = __DIR__.'/../SYSTEMF4HOST/storage/framework/maintenance.php')) {
+          if (file_exists($maintenance = __DIR__.'/../SYSTEMMSBKK/storage/framework/maintenance.php')) {
               require $maintenance;
           }
 
-          require __DIR__.'/../SYSTEMF4HOST/vendor/autoload.php';
+          require __DIR__.'/../SYSTEMMSBKK/vendor/autoload.php';
 
-          $app = require_once __DIR__.'/../SYSTEMF4HOST/bootstrap/app.php';
+          $app = require_once __DIR__.'/../SYSTEMMSBKK/bootstrap/app.php';
 
           $app->handleRequest(Request::capture());
           END
