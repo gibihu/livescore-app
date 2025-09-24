@@ -114,7 +114,7 @@ export function PostTable() {
             accessorKey: "title",
             header: "หัวข้อ",
             cell: ({ row }) => (
-                <div className="capitalize line-clamp-1">{truncateMessage(row.getValue("title"), 100, true)}</div>
+                <div className="capitalize line-clamp-1">{row.getValue("title")}</div>
             ),
         },
         {

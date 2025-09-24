@@ -21,6 +21,7 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
         Route::controller(PointsApiController::class)->group(function(){
             Route::prefix('point')->name('point.')->group(function(){
                 Route::get('packages', 'show')->name('packages');
+                Route::get('generate', 'generatePackage')->name('generate');
             });
         });
         Route::controller(TransApiController::class)->group(function(){

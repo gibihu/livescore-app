@@ -77,7 +77,7 @@ export default function PaymentUploadPage() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={breadcrumbs[0].title} />
 
-            <div className="flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-4 p-4">
 
                 <ImageDropInput className="w-80 h-120" optional={false} onChange={(file) => file ? setImage(file) : setImage(undefined)} />
                 <div className="flex flex-col gap-2 w-80">

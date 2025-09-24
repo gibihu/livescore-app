@@ -19,6 +19,15 @@ php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 
+php artisan migrate
+
+php artisan make:migration add_title_to_posts_table --table=posts
+
+php artisan migrate:rollback
+
+php artisan migrate --path=/database/migrations/2025_09_24_112233_create_posts_table.php
+
+
 ```
 
 

@@ -6,6 +6,7 @@ import api from "@/routes/api";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ca } from "zod/v4/locales";
 
 type SelectPackpointProps = {
     onChange?: (id: string) => void;
@@ -24,7 +25,8 @@ export default function SelectPackpoint({ onChange, onSubmit, disabled }: Select
     const [selected, setSelected] = useState<string>('');
 
     const [isSelected, setIsSelected] = useState<boolean>(false);
-    const [isFetch, setIsFetch] = useState<boolean>(true);
+    const [isFetch, setIsFetch] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
     useEffect(() => {
@@ -53,7 +55,7 @@ export default function SelectPackpoint({ onChange, onSubmit, disabled }: Select
 
     useEffect(() => {
         const fetchData = async () => {
-            setIsFetch(true);
+            setIsLoading(true);
             const res = await fetch(api.dash.point.packages().url);
             const result = await res.json();
             if (result.code == 200) {
@@ -61,26 +63,60 @@ export default function SelectPackpoint({ onChange, onSubmit, disabled }: Select
                 setItems(data);
             } else {
                 const errors = result;
-                toast.error(result.message, { description: errors.detail || result.code || '' });
+                toast.error(result.message);
             }
-            setIsFetch(false);
+            setIsLoading(false);
         };
 
         fetchData();
     }, []);
 
 
+    function handleGenerate(){
+        const fetchData = async () => {
+            try{
+                setIsFetch(true);
+                const res = await fetch(api.dash.point.generate().url);
+                const result = await res.json();
+                if (result.code == 200) {
+                    const data = result.data;
+                    setItems(data);
+                    toast.success('สร้างแพ็คเกจสำเร็จ');
+                } else {
+                    const errors = result;
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        }
+
+        fetchData();
+    }
+
+
 
     return (
         <div className="space-y-4">
-            {isFetch ? (
+            {isLoading ? (
                 <div className="flex justify-center items-center h-10 w-full">
                     <LoaderCircle className="animate-spin" />
                 </div>
             ) : (
                 <>
                     <div className="grid grid-cols-4 gap-2">
-                        {items.map((item, index) => (
+                        {items.length > 0 ? items.map((item, index) => (
                             <div
                                 key={index}
                                 onClick={() => handleSelect(item.id)}
@@ -88,7 +124,14 @@ export default function SelectPackpoint({ onChange, onSubmit, disabled }: Select
                             >
                                 <CardPoints item={item} selected={selected == item.id ? true : false} />
                             </div>
-                        ))}
+                        )) : (
+                            <div className="col-start-2 col-span-2 flex justify-center">
+                                <Button onClick={handleGenerate} disabled={isFetch} variant="outline" className="w-full">
+                                    {isFetch && <LoaderCircle className="animate-spin size-4" />}
+                                    Generate
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
                     {/* <Button

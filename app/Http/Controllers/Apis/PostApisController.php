@@ -23,7 +23,7 @@ class PostApisController extends Controller
         try {
             $title = $request->title;
             $points = $request->points;
-            $content = $request->content;
+            $contents = $request->contents;
             $submit = $request->submit;
             $user_id = Auth::id();
 
@@ -31,7 +31,7 @@ class PostApisController extends Controller
                 'id' => Str::uuid(),
                 'user_id' => $user_id,
                 'title' => $title ?? '',
-                'contents' => $content ?? '',
+                'contents' => $contents ?? '',
                 'points' => $points ?? 100,
                 'status' => $submit ? Post::PUBLIC : Post::PRIVATE,
             ]);
@@ -65,21 +65,19 @@ class PostApisController extends Controller
             $user = Auth::user();
             $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
 
-            if (!empty($type) && $type === 'hidden') {
-                $posts->transform(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'user_id' => $item->user_id,
-                        'title' => $item->title,
-                        'contents' => 'hidden', // แทนค่าตรงนี้
-                        'points' => $item->points,
-                        'privacy' => $item->privacy,
-                        'privacy_text' => $item->privacy_text,
-                        'created_at' => $item->created_at,
-                        'updated_at' => $item->updated_at,
-                    ];
-                });
-            }
+            $posts->transform(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'user_id' => $item->user_id,
+                    'title' => Str::limit($item->title, 50, '...'),
+                    'contents' => !empty($type) && $type === 'hidden' ? 'hidden' : $item->contents, // แทนค่าตรงนี้
+                    'points' => $item->points,
+                    'privacy' => $item->privacy,
+                    'privacy_text' => $item->privacy_text,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                ];
+            });
 
             return response()->json([
                 'message' => 'สำเร็จ',
