@@ -1,4 +1,4 @@
-name: Deploy Laravel App
+name: Deploy to Server
 
 on:
   push:
@@ -10,51 +10,79 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Server
+      - name: Deploy code and Build on Server
         run: |
-          ssh -o StrictHostKeyChecking=no smsbkk@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
-            cd /home/smsbkk/repositories
+          ssh -o StrictHostKeyChecking=no f4host@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
+            cd /home/f4host
 
-            if [ ! -d "livescore-app" ]; then
-              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git livescore-app
+            if [ ! -d "SYSTEMF4HOST" ]; then
+              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEMF4HOST
             fi
 
-            cd livescore-app
+            cd SYSTEMF4HOST
 
             git fetch origin main
-            git reset --hard origin/main
+            git reset --hard HEAD
             git clean -fd
-            echo 'Git updated on server.'
+            git pull origin main
+            echo 'Git pull completed on server.'
 
-            # Backend
-            composer install --no-dev --optimize-autoloader
+            source /home/f4host/nodevenv/SYSTEMF4HOST/20/bin/activate
+            echo 'Node.js virtual environment activated.'
 
-            # Frontend
             npm install --legacy-peer-deps || true
+            echo 'Frontend dependencies installed on server.'
+
             npm run build
+            echo 'Frontend assets built on server.'
 
-            # Permissions
             chmod -R 775 storage bootstrap/cache
+            echo 'Permissions set completed on server.'
+
             php artisan storage:link
+            echo 'Laravel storage:link executed on SYSTEMF4HOST/public.'
 
-            # สร้าง symlink
-            rm -rf /home/public/smsbkk/public_html
-            ln -s /home/smsbkk/repositories/livescore-app/public /home/public/smsbkk/public_html
+            rsync -avz --delete \
+              --exclude 'index.php' \
+              /home/f4host/SYSTEMF4HOST/public/ \
+              /home/f4host/public_html/
+            echo 'Public folder synced from SYSTEMF4HOST to public_html.'
+            cat > /home/f4host/public_html/index.php << 'END'
+          <?php
 
-            # Artisan commands
+          use Illuminate\Foundation\Application;
+          use Illuminate\Http\Request;
+
+          define('LARAVEL_START', microtime(true));
+
+          if (file_exists($maintenance = __DIR__.'/../SYSTEMF4HOST/storage/framework/maintenance.php')) {
+              require $maintenance;
+          }
+
+          require __DIR__.'/../SYSTEMF4HOST/vendor/autoload.php';
+
+          $app = require_once __DIR__.'/../SYSTEMF4HOST/bootstrap/app.php';
+
+          $app->handleRequest(Request::capture());
+          END
+            echo 'Custom index.php created in public_html.'
+
+            composer update
             php artisan migrate --force
-            php artisan config:clear
             php artisan cache:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
 
-            echo 'Laravel optimized and deployed with symlink.'
+            echo 'Laravel Artisan commands executed on server.'
           EOF_SERVER_OPS
 
           echo 'Deploy completed.'
