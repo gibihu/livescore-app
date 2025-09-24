@@ -13,7 +13,7 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to Server
         run: |
@@ -43,7 +43,7 @@ jobs:
             php artisan storage:link
 
             # สร้าง symlink
-            rm -rf /home/smsbkk/public_html
+            rm -rf /home/public/smsbkk/public_html
             ln -s /home/smsbkk/repositories/livescore-app/public /home/public/smsbkk/public_html
 
             # Artisan commands
