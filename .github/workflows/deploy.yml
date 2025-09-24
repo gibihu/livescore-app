@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy Laravel App
 
 on:
   push:
@@ -10,79 +10,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 
-      - name: Deploy code and Build on Server
+      - name: Deploy to Server
         run: |
           ssh -o StrictHostKeyChecking=no smsbkk@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
-            cd /home/smsbkk
+            cd /home/smsbkk/repositories
 
-            if [ ! -d "SYSTEMMSBKK" ]; then
-              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEMMSBKK
+            if [ ! -d "livescore-app" ]; then
+              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git livescore-app
             fi
 
-            cd SYSTEMMSBKK
+            cd livescore-app
 
             git fetch origin main
-            git reset --hard HEAD
+            git reset --hard origin/main
             git clean -fd
-            git pull origin main
-            echo 'Git pull completed on server.'
+            echo 'Git updated on server.'
 
-            source /home/smsbkk/nodevenv/SYSTEMMSBKK/20/bin/activate
-            echo 'Node.js virtual environment activated.'
+            # Backend
+            composer install --no-dev --optimize-autoloader
 
+            # Frontend
             npm install --legacy-peer-deps || true
-            echo 'Frontend dependencies installed on server.'
-
             npm run build
-            echo 'Frontend assets built on server.'
 
+            # Permissions
             chmod -R 775 storage bootstrap/cache
-            echo 'Permissions set completed on server.'
-
             php artisan storage:link
-            echo 'Laravel storage:link executed on SYSTEMMSBKK/public.'
 
-            rsync -avz --delete \
-              --exclude 'index.php' \
-              /home/smsbkk/SYSTEMMSBKK/public/ \
-              /home/smsbkk/public_html/
-            echo 'Public folder synced from SYSTEMMSBKK to public_html.'
-            cat > /home/smsbkk/public_html/index.php << 'END'
-          <?php
+            # สร้าง symlink
+            rm -rf /home/smsbkk/public_html
+            ln -s /home/smsbkk/repositories/livescore-app/public /home/public/smsbkk/public_html
 
-          use Illuminate\Foundation\Application;
-          use Illuminate\Http\Request;
-
-          define('LARAVEL_START', microtime(true));
-
-          if (file_exists($maintenance = __DIR__.'/../SYSTEMMSBKK/storage/framework/maintenance.php')) {
-              require $maintenance;
-          }
-
-          require __DIR__.'/../SYSTEMMSBKK/vendor/autoload.php';
-
-          $app = require_once __DIR__.'/../SYSTEMMSBKK/bootstrap/app.php';
-
-          $app->handleRequest(Request::capture());
-          END
-            echo 'Custom index.php created in public_html.'
-
-            composer update
+            # Artisan commands
             php artisan migrate --force
-            php artisan cache:clear
             php artisan config:clear
-            php artisan route:clear
-            php artisan view:clear
+            php artisan cache:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
 
-            echo 'Laravel Artisan commands executed on server.'
+            echo 'Laravel optimized and deployed with symlink.'
           EOF_SERVER_OPS
 
           echo 'Deploy completed.'
