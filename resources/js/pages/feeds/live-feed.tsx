@@ -51,7 +51,7 @@ export default function FeedLive() {
     return (
         <div className="grid grid-cols-3 gap-4">
             {items.map((item, index) => (
-                <Card>
+                <Card key={index}>
                     <CardHeader key={index}>
                         <CardTitle className="line-clamp-2">{item.title}</CardTitle>
                         <CardDescription>ปลล็อกเพื่ออ่านต่อ</CardDescription>

@@ -20,7 +20,7 @@ export function LiveScore() {
             const result = await res.json();
             // if (result.code == 200) {
             if (result.code == 200) {
-                const data = await result.data.match;
+                const data = await result.data;
                 setmatch(data);
             } else {
                 const errors = result;
@@ -43,7 +43,7 @@ export function LiveScore() {
             const result = await res.json();
             // if (result.code == 200) {
             if (result.code == 200) {
-                const data = await result.data.match;
+                const data = await result.data;
                 setmatch(data);
             } else {
                 const errors = result;

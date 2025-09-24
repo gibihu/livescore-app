@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 
 Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function () {
@@ -21,8 +22,9 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         Route::get('/', function () {
             return Inertia::render('dashboard/posts-page');
         })->name('index');
-        Route::get('create', function () {
-            return Inertia::render('dashboard/create-post');
+        Route::get('create', function (Request $request) {
+            $match_id = $request->query('match_id');
+            return Inertia::render('dashboard/create-post', compact('match_id'));
         })->name('create');
         // Route::get('edit/{id}', function ($id) {
         //     return Inertia::render('dashboard/post-edit-page', ['id' => $id]);

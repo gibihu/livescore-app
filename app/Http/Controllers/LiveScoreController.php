@@ -16,12 +16,41 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Flag;
 use App\Models\MatchEvent;
+use App\Models\Matchs;
 
 class LiveScoreController extends Controller
 {
     public static function LiveScore()
     {
         try {
+            // ตรวจสอบข้อมูลล่าสุดในตาราง matches
+            $latestMatch = Matchs::latest('updated_at')->first();
+
+            if ($latestMatch) {
+                $lastUpdateTime = Carbon::parse($latestMatch->updated_at);
+                $currentTime = Carbon::now();
+                $timeDifference = $currentTime->diffInMinutes($lastUpdateTime);
+
+                // ถ้ายังไม่เกิน 1 นาที ให้ return ข้อมูล 3 ชั่วโมงที่ผ่านมา
+                if ($timeDifference < 1) {
+                    $threeHoursAgo = $currentTime->subHours(3);
+                    $recentMatches = Matchs::where('updated_at', '>=', $threeHoursAgo)->orderBy('updated_at', 'desc')->get();
+
+                    // แปลง json string กลับเป็น object สำหรับแต่ละ record
+                    $matchesData = $recentMatches->map(function ($match) {
+                        return json_decode($match->json);
+                    });
+
+                    return (object) [
+                        'success' => true,
+                        'data' => $matchesData,
+                        'from_cache' => true,
+                        'message' => 'Data retrieved from database (last update was less than 1 minute ago)',
+                    ];
+                }
+            }
+
+            // ถ้าเกิน 1 นาที หรือไม่มีข้อมูลเลย ให้เรียก API ใหม่
             $API_KEY = env('LIVE_SCORE_API_KEY');
             $API_SECRET = env('LIVE_SCORE_API_SECRET');
             $LANG = env('APP_LOCALE');
@@ -33,7 +62,45 @@ class LiveScoreController extends Controller
             ]);
 
             if ($response->successful()) {
-                return json_decode($response);
+                try {
+                    $data = $response->object(); // ใช้ object() แทน json_decode()
+                    if ($data && $data->success) {
+                        // ตรวจสอบว่า match มีข้อมูลหรือไม่
+                        $hasMatches = isset($data->data->match) && !empty($data->data->match) && is_array($data->data->match) && count($data->data->match) > 0;
+
+                        if ($hasMatches) {
+                            self::SaveMatch($data->data);
+
+                            return (object) [
+                                'success' => true,
+                                'data' => $data->data->match,
+                                'from_cache' => false,
+                                'message' => 'Fresh data retrieved from API',
+                            ];
+                        } else {
+                            // ถ้าไม่มี match หรือเป็น [] ให้ดึงข้อมูล 3 ชั่วโมงจากฐานข้อมูล
+                            $currentTime = \Carbon::now();
+                            $threeHoursAgo = $currentTime->subHours(3);
+                            $recentMatches = Matchs::where('updated_at', '>=', $threeHoursAgo)->orderBy('updated_at', 'desc')->get();
+
+                            // แปลง json string กลับเป็น object สำหรับแต่ละ record
+                            $matchesData = $recentMatches->map(function ($match) {
+                                return json_decode($match->json);
+                            });
+
+                            return (object) [
+                                'success' => true,
+                                'data' => $matchesData,
+                                'from_cache' => true,
+                                'message' => 'API returned no matches, retrieved data from database (last 3 hours)',
+                            ];
+                        }
+                    }
+                    return json_decode($response);
+                } catch (\Exception $e) {
+                    throw $e;
+                    return false;
+                }
             }
 
             return false;
@@ -102,7 +169,6 @@ class LiveScoreController extends Controller
         $path = $this->getFlag($type, $id); // เรียกใช้ function ที่แก้ไขแล้ว
 
         if ($path) {
-
             // เช็คว่าไฟล์มีอยู่ไหม
             if (!Storage::disk('public')->exists($path)) {
                 return response()->json(
@@ -223,6 +289,62 @@ class LiveScoreController extends Controller
                 return $response->object(); // ใช้ object() แทน json_decode()
             }
             return false;
+        } catch (\Exception $e) {
+            throw $e;
+            return false;
+        }
+    }
+
+    public static function SaveMatch($matches)
+    {
+        try {
+            // dd($matches);
+            foreach ($matches->match as $item) {
+                // dd($item);
+                $match = Matchs::where('match_id', $item->id)->first();
+                if ($match && $match->status != 'FINISHED') {
+                    $match->update([
+                        'json' => json_encode($item),
+                        'status' => $item->status,
+                    ]);
+                } elseif ($match && $match->status == 'FINISHED') {
+                    // ถ้าสถานะเป็น FINISHED แล้ว ไม่ต้องอัพเดท
+                    continue;
+                } else {
+                    Matchs::create([
+                        'match_id' => $item->id,
+                        'json' => json_encode($item),
+                        'status' => $item->status,
+                    ]);
+                }
+            }
+            return true;
+        } catch (\Exception $e) {
+            throw $e;
+            return false;
+        }
+    }
+
+    public function Fixture($competition_id)
+    {
+        try {
+            $API_KEY = env('LIVE_SCORE_API_KEY');
+            $API_SECRET = env('LIVE_SCORE_API_SECRET');
+            $LANG = env('APP_LOCALE');
+            $now = Carbon::now()->format('Y-m-d');
+            $twoWeeksAgo = Carbon::now()->subWeeks(2)->format('Y-m-d');
+
+            $response = Http::get('https://livescore-api.com/api-client/matches/commentary.json', [
+                'key' => $API_KEY,
+                'secret' => $API_SECRET,
+                'lang' => $LANG,
+                'competition_id' => $competition_id,
+            ]);
+
+            // ตรวจสอบสถานะ
+            if ($response->getStatusCode() === 200) {
+                return $response->object(); // ใช้ object() แทน json_decode()
+            }
         } catch (\Exception $e) {
             throw $e;
             return false;
