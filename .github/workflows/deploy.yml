@@ -81,6 +81,8 @@ jobs:
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
+            composer dump-autoload
+
 
             echo 'Laravel Artisan commands executed on server.'
           EOF_SERVER_OPS
