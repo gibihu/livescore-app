@@ -43,9 +43,7 @@ class AuthenticatedSessionController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
 
-        $request->session()->invalidate();  // ล้าง session เก่า
-        $request->session()->regenerateToken(); // สร้าง CSRF token ใหม่
-        $request->session()->regenerate();      // สร้าง session id ใหม่
+        $request->session()->regenerate();
 
         return redirect()->intended(route('dash.index', absolute: false));
     }
