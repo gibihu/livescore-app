@@ -6,55 +6,93 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, gd, zip
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --optimize-autoloader --no-dev --no-interaction
+
+      - name: Create deployment archive
+        run: |
+          # สร้าง archive ที่มี built assets และ dependencies
+          tar -czf deployment.tar.gz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='.env.example' \
+            --exclude='README.md' \
+            --exclude='package-lock.json' \
+            .
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy code and Build on Server
+      - name: Upload and Deploy
         run: |
+          # อัปโหลด deployment archive ไปยัง server
+          scp -o StrictHostKeyChecking=no deployment.tar.gz smsbkk@${{ secrets.STAGING_SERVER_IP }}:/tmp/
+
+          # Deploy บน server
           ssh -o StrictHostKeyChecking=no smsbkk@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
             cd /home/smsbkk
 
-            if [ ! -d "SYSTEMSMSBKK" ]; then
-              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEMSMSBKK
+            # Backup ปัจจุบัน (ถ้ามี)
+            if [ -d "SYSTEMSMSBKK" ]; then
+              mv SYSTEMSMSBKK SYSTEMSMSBKK_backup_$(date +%Y%m%d_%H%M%S)
             fi
 
+            # สร้าง directory ใหม่
+            mkdir -p SYSTEMSMSBKK
             cd SYSTEMSMSBKK
 
-            git fetch origin main
-            git reset --hard HEAD
-            git clean -fd
-            git pull origin main
-            echo 'Git pull completed on server.'
+            # แตก deployment archive
+            tar -xzf /tmp/deployment.tar.gz
+            rm /tmp/deployment.tar.gz
 
-            source /home/smsbkk/nodevenv/SYSTEMSMSBKK/20/bin/activate
-            echo 'Node.js virtual environment activated.'
+            echo 'Deployment files extracted on server.'
 
-            npm install --legacy-peer-deps || true
-            echo 'Frontend dependencies installed on server.'
-
-            npm run build
-            echo 'Frontend assets built on server.'
-
+            # ตั้งค่า permissions
             chmod -R 775 storage bootstrap/cache
             echo 'Permissions set completed on server.'
 
+            # สร้าง storage link
             php artisan storage:link
-            echo 'Laravel storage:link executed on SYSTEMSMSBKK/public.'
+            echo 'Laravel storage:link executed.'
 
+            # Sync public folder
             rsync -avz --delete \
               --exclude 'index.php' \
               /home/smsbkk/SYSTEMSMSBKK/public/ \
               /home/smsbkk/public_html/
             echo 'Public folder synced from SYSTEMSMSBKK to public_html.'
+
+            # สร้าง custom index.php
             cat > /home/smsbkk/public_html/index.php << 'END'
           <?php
 
@@ -75,7 +113,7 @@ jobs:
           END
             echo 'Custom index.php created in public_html.'
 
-            composer update
+            # รัน Laravel commands
             php artisan migrate --force
             php artisan cache:clear
             php artisan config:clear
@@ -83,6 +121,15 @@ jobs:
             php artisan view:clear
 
             echo 'Laravel Artisan commands executed on server.'
+
+            # ลบ backup เก่าที่เก็บไว้เกิน 3 วัน
+            find /home/smsbkk -name "SYSTEMSMSBKK_backup_*" -type d -mtime +3 -exec rm -rf {} + 2>/dev/null || true
+
           EOF_SERVER_OPS
 
-          echo 'Deploy completed.'
+          echo 'Deploy completed successfully.'
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f deployment.tar.gz || true

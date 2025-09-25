@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventory', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->char('user_id', 36)->uniqid();
+            $table->id();
+            $table->char('user_id', 36)->unique();
             $table->char('source_id', 36);
             $table->string('source_type', 20)->nullable();
             $table->integer('amount')->default(1);
