@@ -75,7 +75,7 @@ jobs:
           END
             echo 'Custom index.php created in public_html.'
 
-            composer update
+            composer install
             php artisan migrate --force
             php artisan cache:clear
             php artisan config:clear
