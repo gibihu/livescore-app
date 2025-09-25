@@ -18,19 +18,19 @@ return new class extends Migration
             $table->string('source_type', 20)->nullable();
             $table->integer('amount')->default(1);
             $table->tinyInteger('status')->default(1);
-            // $table->enum('status', [
-            //     'pending',
-            //     'cancle',
-            //     'awaiting_approval',
-            //     'approved',
-            //     'rejected',
-            //     'failed',
-            //     'refund',
-            //     'refunded'
-            // ])->default('pending');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
+        // $table->enum('status', [
+        //     'pending',
+        //     'cancle',
+        //     'awaiting_approval',
+        //     'approved',
+        //     'rejected',
+        //     'failed',
+        //     'refund',
+        //     'refunded'
+        // ])->default('pending');
     }
 
     /**
