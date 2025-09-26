@@ -104,7 +104,6 @@ export function LiveScore() {
     }, [matches, leagues]);
 
     return (
-        // <BoardScore items={matches} isFetch={isFetchBoard} />
         <BoardTable items={filters} isFetch={isloading} />
     );
 }

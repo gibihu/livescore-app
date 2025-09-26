@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { BoardTable } from "./board-table";
 
 
-export default function HistoryScore() {
+export default function FixtureScore() {
     const [matches, setMatches] = useState<MatchType[]>([]);
     const [isFetchBoard, setIsFetchBoard] = useState(false);
     const [leagues, setLeagues] = useState<CompetitionType[]>([]);
@@ -20,7 +20,7 @@ export default function HistoryScore() {
             setIsFetchBoard(true);
             setIsMatchFetch(true);
             // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
-            const res = await fetch(`${api.match.history().url}`);
+            const res = await fetch(`${api.match.fixture().url}`);
 
             const result = await res.json();
             // if (result.code == 200) {
@@ -36,6 +36,7 @@ export default function HistoryScore() {
         };
         fetchData();
     }, []);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,6 +81,6 @@ export default function HistoryScore() {
 
     return (
         // <BoardScore items={matches} isFetch={isFetchBoard} />
-        <BoardTable items={filters} isFetch={isFetchBoard} />
+        <BoardTable items={filters} isFetch={isFetchBoard} type="fixture" />
     );
 }

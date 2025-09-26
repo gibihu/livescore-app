@@ -343,26 +343,31 @@ class LiveScoreController extends Controller
         }
     }
 
-    public function Fixture($competition_id)
+    public static function getFixture($date)
     {
         try {
             $API_KEY = env('LIVE_SCORE_API_KEY');
             $API_SECRET = env('LIVE_SCORE_API_SECRET');
             $LANG = env('APP_LOCALE');
-            $now = Carbon::now()->format('Y-m-d');
-            $twoWeeksAgo = Carbon::now()->subWeeks(2)->format('Y-m-d');
+            $date_carbon = Carbon::parse($date);
+            $date_format = $date_carbon->format('Y-m-d');
 
-            $response = Http::get('https://livescore-api.com/api-client/matches/commentary.json', [
+            $response = Http::get('https://livescore-api.com/api-client/fixtures/list.json', [
                 'key' => $API_KEY,
                 'secret' => $API_SECRET,
                 'lang' => $LANG,
-                'competition_id' => $competition_id,
+                'date' => $date_format
             ]);
 
             // ตรวจสอบสถานะ
             if ($response->getStatusCode() === 200) {
-                return $response->object(); // ใช้ object() แทน json_decode()
+                $data = $response->object();
+                if($data->success){
+                    return $data->data->fixtures;
+                }
             }
+
+            throw new Exception("ไม่สามารถดำเนินการได้!");
         } catch (\Exception $e) {
             throw $e;
             return false;

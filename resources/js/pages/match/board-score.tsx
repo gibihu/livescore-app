@@ -59,7 +59,7 @@ import dash from "@/routes/dash"
 import { AuthType } from "@/types/auth"
 import { UserType } from "@/types/user"
 
-export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch?: boolean}) {
+export function BoardScore({ items, isFetch = false }: { items: MatchType[], isFetch?: boolean }) {
     const auth = usePage().props.auth as AuthType;
     const user = auth.user as UserType;
 
@@ -67,10 +67,10 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
     const [match, setmatch] = useState<MatchType[]>([]);
     const [isFetchBoard, setIsFetchBoard] = useState(isFetch);
 
-    useEffect(()=>{
+    useEffect(() => {
         setmatch(items);
     }, [items]);
-    useEffect(()=>{
+    useEffect(() => {
         setIsFetchBoard(isFetch);
     }, [isFetch]);
 
@@ -99,8 +99,8 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
                                     className="h-3 w-5"
                                 />
                             )}
-                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores.score) == '1' ? 'text-success' : whoWon(momItem.scores.score) == '2' && 'text-red-700')}>{item.name}</span>
-                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores.score) == '1' ? 'text-success' : whoWon(momItem.scores.score) == '2' && 'text-red-700')}>{ShortName(item.name)}.</span>
+                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores?.score || '?-?') == '1' ? 'text-success' : whoWon(momItem.scores?.score || '?-?') == '2' && 'text-red-700')}>{item.name}</span>
+                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores?.score || '?-?') == '1' ? 'text-success' : whoWon(momItem.scores?.score || '?-?') == '2' && 'text-red-700')}>{ShortName(item.name)}.</span>
                             <img src={item.logo} alt={item.logo} className="size-4" />
                         </div>
                     </TableCellViewer>
@@ -125,7 +125,7 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
                                 </div>
                             )}
                             <div className="flex">
-                                <span className="text-xs  rounded-full  bg-foreground  text-background  px-2">{item.score}</span>
+                                <span className="text-xs  rounded-full  bg-foreground  text-background  px-2">{item?.score}</span>
                             </div>
                         </div>
                     </TableCellViewer>
@@ -142,8 +142,8 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
                     <TableCellViewer item={momItem} className="flex gap-2 justify-between items-center w-full h-full">
                         <div className="flex gap-2">
                             <img src={item.logo} alt={item.logo} className="size-4" />
-                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores.score) == '2' ? 'text-success' : whoWon(momItem.scores.score) == '1' && 'text-red-700')}>{item.name}</span>
-                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores.score) == '2' ? 'text-success' : whoWon(momItem.scores.score) == '1' && 'text-red-700')}>{ShortName(item.name)}.</span>
+                            <span className={cn("line-clamp-1 hidden md:block", whoWon(momItem.scores?.score || '?-?') == '2' ? 'text-success' : whoWon(momItem.scores?.score || '?-?') == '1' && 'text-red-700')}>{item.name}</span>
+                            <span className={cn("line-clamp-1 md:hidden", whoWon(momItem.scores?.score || '?-?') == '2' ? 'text-success' : whoWon(momItem.scores?.score || '?-?') == '1' && 'text-red-700')}>{ShortName(item.name)}.</span>
                         </div>
                         <MatchBadge item={momItem} home={false} />
                     </TableCellViewer>
@@ -281,143 +281,135 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
     )
 }
 
-
-function TableCellViewer({ item, className, children }: { item: MatchType, className?: string, children?: ReactNode }) {
+function TableCellViewer({ item, className, children, type }: { item: MatchType, className?: string, children?: ReactNode, type?: string}) {
     const auth = usePage().props.auth as AuthType;
     const [selectedTab, setSelectedTab] = useState("event");
     return (
         <Dialog>
             <DialogTrigger className={cn(className)}>{children}</DialogTrigger>
-            <DialogContent className="[&>button]:hidden md:max-w-[90svw] md:max-h-[90vh] w-auto h-auto overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>
-                        <div className="w-full flex justify-end gap-2">
-                            {auth && (
-                                <Link href={`${dash.post.create().url}?match_id=${item.id}`}>
-                                    <Button asChild>
-                                        <span>สร้างทีเด็ด</span>
-                                    </Button>
-                                </Link>
-                            )}
-                            <Button>
-                                <Expand className="size-4" />
-                            </Button>
-                        </div>
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                {item.country?.id && (
-                                    <img
-                                        src={`/flag?type=country&id=${item.country.id}`}
-                                        className="h-3 w-5"
-                                    />
+                <DialogContent className="[&>button]:hidden md:max-w-[90svw] md:max-h-[90vh] w-auto h-auto overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>
+                            <div className="w-full flex justify-end gap-2">
+                                {auth && (
+                                    <Link href={`${dash.post.create().url}?fixture_id=${item.id}`}>
+                                        <Button asChild>
+                                            <span>สร้างทีเด็ด</span>
+                                        </Button>
+                                    </Link>
                                 )}
-
-                                <span className="text-xs text-ring">{item.location}</span>
-                                {IsPlay(item.status) && (
-                                    <span className="relative flex size-3">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                                        <span className="relative inline-flex size-3 rounded-full bg-green-500"></span>
-                                    </span>
-                                )}
+                                <Button>
+                                    <Expand className="size-4" />
+                                </Button>
                             </div>
-                            <div className="w-full flex items-center gap-4">
-                                <div className="flex-1 flex flex-col gap-2 items-end">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <img src={item.home.logo} alt={item.home.logo} className="size-12" />
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <span className="text-xs uppercase cursor-default">{ShortName(item.home.name)}.</span>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="bottom">
-                                                <p>{item.home.name}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    {item.country?.id && (
+                                        <img
+                                            src={`/flag?type=country&id=${item.country.id}`}
+                                            className="h-3 w-5"
+                                        />
+                                    )}
+
+                                    <span className="text-xs text-ring">{item.location}</span>
+                                    {IsPlay(item.status) && (
+                                        <span className="relative flex size-3">
+                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                                            <span className="relative inline-flex size-3 rounded-full bg-green-500"></span>
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="w-full flex items-center gap-4">
+                                    <div className="flex-1 flex flex-col gap-2 items-end">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <img src={item.home.logo} alt={item.home.logo} className="size-12" />
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <span className="text-xs uppercase cursor-default">{ShortName(item.home.name)}.</span>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom">
+                                                    <p>{item.home.name}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="text-center">
-                                    <span>{item.scores.score}</span>
-                                </div>
+                                    <div className="text-center">
+                                        <span>{item.scores?.score}</span>
+                                    </div>
 
-                                <div className="flex-1 flex flex-col gap-2 items-start">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <img src={item.away.logo} alt={item.away.logo} className="size-12" />
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <span className="text-xs uppercase cursor-default">{ShortName(item.away.name)}.</span>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="bottom">
-                                                <p>{item.away.name}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
+                                    <div className="flex-1 flex flex-col gap-2 items-start">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <img src={item.away.logo} alt={item.away.logo} className="size-12" />
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <span className="text-xs uppercase cursor-default">{ShortName(item.away.name)}.</span>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom">
+                                                    <p>{item.away.name}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </DialogTitle>
-                    <DialogDescription className="mt-4 w-max" asChild>
+                        </DialogTitle>
+                        <DialogDescription className="mt-4 w-max" asChild>
 
-                        <div>
-                            <div className="flex flex-col gap-4">
-                                <div className="w-full flex justify-center">
+                            <div>
+                                <div className="flex flex-col gap-4">
+                                    <div className="w-full flex justify-center">
 
-                                    {IsTime(item.time) ? "เวลา: " + item.time + ` น. (${matchStatus(item.status)})` : matchStatus(item.status)}
+                                        {IsTime(item.time) ? "เวลา: " + item.time + ` น. (${matchStatus(item.status)})` : matchStatus(item.status)}
 
-                                </div>
-
-                                <div className="grid grid-cols-6 border rounded-xl p-2 py-4 divide-x  divide-border">
-
-                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                        <p className="font-bold text-sm">คะแนนครึ่งแรก</p>
-                                        <span>{item.scores.ht_score || "-"}</span>
-                                    </div>
-                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                        <p className="font-bold text-sm">คะแนนครึ่งหลัง</p>
-                                        <span>{item.scores.ft_score || "-"}</span>
-                                    </div>
-                                    {/*  */}
-
-                                    <div className="col-span-2">
-                                        <div className="bg-chart-1">123</div>
                                     </div>
 
-                                    {/*  */}
-                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                        <p className="font-bold text-sm">คะแนนต่อเวลา</p>
-                                        <span>{item.scores.et_score || "-"}</span>
-                                    </div>
-                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                        <p className="font-bold text-sm">จุดโทษ</p>
-                                        <span>{item.scores.ps_score || "-"}</span>
-                                    </div>
+                                    <div className="grid grid-cols-4 border rounded-xl p-2 py-4 divide-x  divide-border">
 
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <Tabs defaultValue="event" className="w-full" value={selectedTab} onValueChange={setSelectedTab}>
-                                        <TabsList>
-                                            <TabsTrigger value="event">อีเว้น</TabsTrigger>
-                                            <TabsTrigger value="player">ผู้เล่น</TabsTrigger>
-                                        </TabsList>
-
-                                        {/* Render ทั้งหมด แต่ซ่อนด้วย class */}
-                                        <div className={selectedTab === "event" ? "block w-full" : "hidden w-full"}>
-                                            <MatchEvent match_id={item.id} main_item={item} />
+                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                            <p className="font-bold text-sm">คะแนนครึ่งแรก</p>
+                                            <span>{item.scores?.ht_score || "-"}</span>
+                                        </div>
+                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                            <p className="font-bold text-sm">คะแนนครึ่งหลัง</p>
+                                            <span>{item.scores?.ft_score || "-"}</span>
+                                        </div>
+                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                            <p className="font-bold text-sm">คะแนนต่อเวลา</p>
+                                            <span>{item.scores?.et_score || "-"}</span>
+                                        </div>
+                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                            <p className="font-bold text-sm">จุดโทษ</p>
+                                            <span>{item.scores?.ps_score || "-"}</span>
                                         </div>
 
-                                        <div className={selectedTab === "player" ? "block w-full" : "hidden w-full"}>
-                                            Change your password here.
-                                        </div>
-                                    </Tabs>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Tabs defaultValue="event" className="w-full" value={selectedTab} onValueChange={setSelectedTab}>
+                                            <TabsList>
+                                                <TabsTrigger value="event">อีเว้น</TabsTrigger>
+                                                <TabsTrigger value="player">ผู้เล่น</TabsTrigger>
+                                            </TabsList>
+
+                                            {/* Render ทั้งหมด แต่ซ่อนด้วย class */}
+                                            <div className={selectedTab === "event" ? "block w-full" : "hidden w-full"}>
+                                                <MatchEvent match_id={item.id} main_item={item} />
+                                            </div>
+
+                                            <div className={selectedTab === "player" ? "block w-full" : "hidden w-full"}>
+                                                Change your password here.
+                                            </div>
+                                        </Tabs>
+
+                                    </div>
 
                                 </div>
-
                             </div>
-                        </div>
 
-                    </DialogDescription>
-                </DialogHeader>
-            </DialogContent>
+                        </DialogDescription>
+                    </DialogHeader>
+                </DialogContent>
         </Dialog>
     )
 }
@@ -495,7 +487,7 @@ function MatchBadge({ item, home = true }: { item: any, home: boolean }) {
     if (home) return whoWon(score) == "1" ? <Badge variant="success">ชนะ</Badge> : (whoWon(score) == "2" ? <Badge variant="destructive">แพ้</Badge> : <Badge variant="default">เสมอ</Badge>)
     return whoWon(score) == "2" ? <Badge variant="success">ชนะ</Badge> : (whoWon(score) == "1" ? <Badge variant="destructive">แพ้</Badge> : <Badge variant="default">เสมอ</Badge>)
 }
-function MatcTimehBadge({ item}: { item: MatchType}) {
+function MatcTimehBadge({ item }: { item: MatchType }) {
     const status = item.status;
     if (status === "ADDED TIME") {
         return <Badge variant="outline">{item.time} น.</Badge>;
@@ -503,7 +495,7 @@ function MatcTimehBadge({ item}: { item: MatchType}) {
         return <Badge variant="outline">{item.time} น.</Badge>;
     } else if (status == "HALF TIME BREAK") {
         return <Badge variant="outline">พัก</Badge>;
-    }else{
+    } else {
         return '';
     }
 }

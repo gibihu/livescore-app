@@ -24,8 +24,8 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
             return Inertia::render('dashboard/posts-page');
         })->name('index');
         Route::get('create', function (Request $request) {
-            $match_id = $request->query('match_id');
-            return Inertia::render('dashboard/create-post', compact('match_id'));
+            $fixture_id = $request->query('fixture_id');
+            return Inertia::render('dashboard/create-post', compact('fixture_id'));
         })->name('create');
         // Route::get('edit/{id}', function ($id) {
         //     return Inertia::render('dashboard/post-edit-page', ['id' => $id]);

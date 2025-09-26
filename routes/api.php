@@ -23,6 +23,7 @@ Route::prefix('api')->name('api.')->group(function(){
             Route::get('event', 'event')->name('event');
             Route::get('history', 'history')->name('history');
             Route::get('live', 'LiveScore')->name('live');
+            Route::get('fixture', 'fixture')->name('fixture');
         });
     });
 

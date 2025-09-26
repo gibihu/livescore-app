@@ -8,14 +8,14 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table"
-import { ShortName } from "@/lib/functions"
+import { convertUTC, ShortName } from "@/lib/functions"
 import { cn } from "@/lib/utils"
 import { CompetitionType } from "@/types/league"
 import { LoaderCircle } from "lucide-react"
 import React, { useState } from "react"
 import { MatcTimehBadge, TableCellViewer, whoWon } from "./board-score"
 
-export function BoardTable({ items, isFetch = false }: { items: CompetitionType[], isFetch?: boolean }) {
+export function BoardTable({ items, isFetch = false, type = 'live' }: { items: CompetitionType[], isFetch?: boolean, type?: string}) {
     const [visibleCount, setVisibleCount] = useState(10);
 
 
@@ -72,8 +72,8 @@ export function BoardTable({ items, isFetch = false }: { items: CompetitionType[
                                                             />
                                                         ) : (<span></span>)}
                                                         <div className="flex gap-2  justify-end  items-center ">
-                                                            <span className={cn("line-clamp-1 hidden md:block", whoWon(match.scores.score) == '1' ? 'text-success' : whoWon(match.scores.score) == '2' && 'text-red-700')}>{match.home.name}</span>
-                                                            <span className={cn("line-clamp-1 md:hidden", whoWon(match.scores.score) == '1' ? 'text-success' : whoWon(match.scores.score) == '2' && 'text-red-700')}>{ShortName(match.home.name)}.</span>
+                                                            <span className={cn("line-clamp-1 hidden md:block", whoWon(match.scores?.score || '?-?') == '1' ? 'text-success' : whoWon(match.scores?.score || '?-?') == '2' && 'text-red-700')}>{match.home.name}</span>
+                                                            <span className={cn("line-clamp-1 md:hidden", whoWon(match.scores?.score || '?-?') == '1' ? 'text-success' : whoWon(match.scores?.score || '?-?') == '2' && 'text-red-700')}>{ShortName(match.home.name)}.</span>
                                                             <img src={match.home.logo} alt={match.home.logo} className="size-4" />
                                                         </div>
                                                     </div>
@@ -90,7 +90,7 @@ export function BoardTable({ items, isFetch = false }: { items: CompetitionType[
                                                             </div>
                                                         )}
                                                         <div className="flex">
-                                                            <span className="text-xs  rounded-full  bg-foreground  text-background  px-2">{match.scores.score}</span>
+                                                            <span className="text-xs  rounded-full  bg-foreground  text-background  px-2">{match.scores?.score || '?-?'}</span>
                                                         </div>
                                                     </div>
                                                 </TableCellViewer>
@@ -100,10 +100,14 @@ export function BoardTable({ items, isFetch = false }: { items: CompetitionType[
                                                     <div className="flex justify-between">
                                                         <div className="flex gap-2 items-center">
                                                             <img src={match.away.logo} alt={match.away.logo} className="size-4" />
-                                                            <span className={cn("line-clamp-1 hidden md:block", whoWon(match.scores.score) == '2' ? 'text-success' : whoWon(match.scores.score) == '1' && 'text-red-700')}>{match.away.name}</span>
-                                                            <span className={cn("line-clamp-1 md:hidden", whoWon(match.scores.score) == '2' ? 'text-success' : whoWon(match.scores.score) == '1' && 'text-red-700')}>{ShortName(match.away.name)}.</span>
+                                                            <span className={cn("line-clamp-1 hidden md:block", whoWon(match.scores?.score || '?-?') == '2' ? 'text-success' : whoWon(match.scores?.score || '?-?') == '1' && 'text-red-700')}>{match.away.name}</span>
+                                                            <span className={cn("line-clamp-1 md:hidden", whoWon(match.scores?.score || '?-?') == '2' ? 'text-success' : whoWon(match.scores?.score || '?-?') == '1' && 'text-red-700')}>{ShortName(match.away.name)}.</span>
                                                         </div>
-                                                        <MatcTimehBadge item={match} />
+                                                        {type == 'live' ? (
+                                                            <MatcTimehBadge item={match} />
+                                                        ) : (
+                                                            <span className="text-muted-foreground">{convertUTC(match.date || new Date().toISOString(), match.time, 7, 'time')} น.</span>
+                                                        )}
                                                     </div>
                                                 </TableCellViewer>
                                             </TableCell>
