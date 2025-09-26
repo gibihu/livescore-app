@@ -37,10 +37,10 @@ export function LiveScore() {
             setIsMatchFetch(false);
         };
         fetchData();
-        // const intervalId = setInterval(hanffleRelod, 60000);
+        const intervalId = setInterval(hanffleRelod, 60000);
 
         // ล้าง interval เมื่อ component ถูก unmount
-        // return () => clearInterval(intervalId);
+        return () => clearInterval(intervalId);
     }, []);
     useEffect(() => {
         const fetchData = async () => {
