@@ -8,6 +8,7 @@ use App\Http\Controllers\Apis\PointsApiController;
 use App\Http\Controllers\Apis\TransApiController;
 use App\Http\Controllers\Apis\WalletApiController;
 use App\Http\Controllers\Apis\PostApisController;
+use App\Http\Controllers\Apis\Football\CompetitionApiController as LeagueApiController;
 
 Route::prefix('api')->name('api.')->group(function(){
     Route::controller(PostApisController::class)->group(function(){
@@ -23,6 +24,11 @@ Route::prefix('api')->name('api.')->group(function(){
             Route::get('history', 'history')->name('history');
             Route::get('live', 'LiveScore')->name('live');
         });
+    });
+
+    Route::controller(LeagueApiController::class)->prefix('league')->name('league.')->group(function(){
+        Route::get('football/all', 'all')->name('all');
+        Route::get('football/{id}', 'show')->name('show');
     });
 
 });

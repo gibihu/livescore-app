@@ -1,3 +1,22 @@
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+// ห้ามลบ ใช้ component บางส่วน
+
+
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Expand } from "lucide-react"
 import * as React from "react"
 
@@ -31,7 +50,7 @@ import { ShortName } from "@/lib/functions"
 import { cn } from "@/lib/utils"
 import { useEffect, useState, type ReactNode } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MatchType } from "@/types/match"
+import { MatchType, ScoreType } from "@/types/match"
 import { Link, usePage } from "@inertiajs/react"
 import MatchEvent from "./event"
 import { Badge } from "@/components/customs/badge"
@@ -264,6 +283,7 @@ export function BoardScore({items, isFetch = false}:{items: MatchType[], isFetch
 
 
 function TableCellViewer({ item, className, children }: { item: MatchType, className?: string, children?: ReactNode }) {
+    const auth = usePage().props.auth as AuthType;
     const [selectedTab, setSelectedTab] = useState("event");
     return (
         <Dialog>
@@ -272,11 +292,13 @@ function TableCellViewer({ item, className, children }: { item: MatchType, class
                 <DialogHeader>
                     <DialogTitle>
                         <div className="w-full flex justify-end gap-2">
-                            <Link href={`${dash.post.create().url}?match_id=${item.id}`}>
-                                <Button asChild>
-                                    <span>สร้างทีเด็ด</span>
-                                </Button>
-                            </Link>
+                            {auth && (
+                                <Link href={`${dash.post.create().url}?match_id=${item.id}`}>
+                                    <Button asChild>
+                                        <span>สร้างทีเด็ด</span>
+                                    </Button>
+                                </Link>
+                            )}
                             <Button>
                                 <Expand className="size-4" />
                             </Button>
@@ -473,10 +495,22 @@ function MatchBadge({ item, home = true }: { item: any, home: boolean }) {
     if (home) return whoWon(score) == "1" ? <Badge variant="success">ชนะ</Badge> : (whoWon(score) == "2" ? <Badge variant="destructive">แพ้</Badge> : <Badge variant="default">เสมอ</Badge>)
     return whoWon(score) == "2" ? <Badge variant="success">ชนะ</Badge> : (whoWon(score) == "1" ? <Badge variant="destructive">แพ้</Badge> : <Badge variant="default">เสมอ</Badge>)
 }
+function MatcTimehBadge({ item}: { item: MatchType}) {
+    const status = item.status;
+    if (status === "ADDED TIME") {
+        return <Badge variant="outline">{item.time} น.</Badge>;
+    } else if (status == "IN PLAY") {
+        return <Badge variant="outline">{item.time} น.</Badge>;
+    } else if (status == "HALF TIME BREAK") {
+        return <Badge variant="outline">พัก</Badge>;
+    }else{
+        return '';
+    }
+}
 
 
 export {
     IsPlay,
-    IsTime, MatchBadge, matchStatus, TableCellViewer, whoWon
+    IsTime, MatchBadge, matchStatus, TableCellViewer, whoWon, MatcTimehBadge
 }
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Football\CompetitionController as LeagueController;
 
 
 Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function () {
@@ -63,6 +64,10 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
         Route::get('table', function () {
             return Inertia::render('dashboard/admins/posts');
         })->name('table');
+    });
+
+    Route::controller(LeagueController::class)->group(function(){
+        Route::get('football/setup', 'index')->name('setup');
     });
 
 });

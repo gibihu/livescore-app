@@ -12,7 +12,7 @@ Route::get('/', function () {
 
 route::prefix('match')->name('match.')->group(function(){
     Route::get('history', function () {
-        return Inertia::render('match/historyMatch');
+        return Inertia::render('history');
     })->name('history');
 });
 

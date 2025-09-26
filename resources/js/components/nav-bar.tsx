@@ -3,7 +3,7 @@ import { UserType } from "@/types/user";
 import { Link, usePage } from "@inertiajs/react";
 import { Button } from "./ui/button";
 import { CirclePoundSterling } from "lucide-react";
-import { login, logout } from "@/routes";
+import { home, login, logout } from "@/routes";
 
 
 
@@ -18,7 +18,9 @@ export default function NavBar(){
     return (
         <>
             <div className="w-full flex gap-2 justify-between items-center rounded-xl bg-foreground text-background  shadow-xl p-4">
-                <h4 className="text-xl capitalize">My App</h4>
+                <Link href={home().url}>
+                    <h4 className="text-xl capitalize">My App</h4>
+                </Link>
                 <div className="flex gap-2 items-center">
                     { user ? (
                         user.role && (
