@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
-use App\Http\Controllers\LiveScoreController;
+use App\Http\Controllers\LiveScoreController as LiveController;
 
 use App\Models\User;
 use App\Models\Matchs;
@@ -19,14 +20,14 @@ class LiveScoreApiController extends Controller
 
     public function LiveScore(){
         try{
-            $data = LiveScoreController::LiveScore();
+            $data = LiveController::LiveScore();
             if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
             return response()->json([
                 'message' => 'สำเร็จ',
                 'data' => $data->data,
                 'code' => 200
             ], 200);
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,
@@ -44,7 +45,7 @@ class LiveScoreApiController extends Controller
             $match_id = $request->id ?? 0;
             $status = $request->status ?? 'FINISHED';
             try{
-                $data = LiveScoreController::LiveEvent($match_id, $status);
+                $data = LiveController::LiveEvent($match_id, $status);
                 return response()->json([
                     'message' => 'สำเร็จ',
                     'data' => $data,
@@ -78,14 +79,14 @@ class LiveScoreApiController extends Controller
     public function history(Request $request){
         try{
             $page = $request->page ?? 1;
-            $data = LiveScoreController::HistoryScore($page);
+            $data = LiveController::HistoryScore($page);
             if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
             return response()->json([
                 'message' => 'สำเร็จ',
                 'data' => $data->data,
                 'code' => 200
             ], 200);
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,
@@ -106,7 +107,29 @@ class LiveScoreApiController extends Controller
                 'data' => json_decode($data->json),
                 'code' => 200
             ], 200);
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function fixture(Request $request){
+        try{
+            $date = $request->date ?? Carbon::tomorrow();
+            $return = LiveController::getFixture($date);
+
+            return response()->json([
+                'message' => 'สำเร็จ',
+                'data' => $return,
+                'code' => 200
+            ], 200);
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,

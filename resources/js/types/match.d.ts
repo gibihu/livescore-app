@@ -20,6 +20,7 @@ export interface MatchType {
         };
     };
     time: string;
+    date?: string;
     added?: string;
     competition?: CompetitionType;
     outcomes?: {
@@ -28,7 +29,7 @@ export interface MatchType {
         extra_time?: string | null;
         penalty_shootout?: string | null;
     };
-    scores: ScoreType;
+    scores?: ScoreType;
     urls?: {
         events?: string;
         statistics?: string;

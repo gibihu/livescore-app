@@ -43,7 +43,6 @@ export default function CreatePostPage(request: any) {
         setMaxPoints(MaxPoints(user?.tier_text || 'bronze'));
     }, [user]);
     const [isFetch, setIsFetch] = useState<boolean>(false);
-    const [matchItem, setMatchItem] = useState<MatchType>();
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),
@@ -79,36 +78,6 @@ export default function CreatePostPage(request: any) {
     });
     // mode: "onChange",
 
-    useEffect(() => {
-        const match_id = request.match_id;
-        const fetchData = async () => {
-            try {
-                setIsFetch(true);
-                const res = await fetch(api.dash.match.detail(match_id).url);
-                const result = await res.json();
-                if (result.code == 200) {
-                    const data = result.data;
-                    setMatchItem(data);
-                } else {
-                    toast.error(result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                let message = "เกิดข้อผิดพลาดบางอย่าง";
-
-                if (error instanceof Error) {
-                    message = error.message;
-                } else if (typeof error === "string") {
-                    message = error;
-                }
-
-                toast.error(message);
-            } finally {
-                setIsFetch(false);
-            }
-        };
-        if (match_id) fetchData();
-    }, []);
 
     // 3. handle submit
     const onSubmit = (data: FormValues) => {
@@ -237,7 +206,7 @@ export default function CreatePostPage(request: any) {
 
                             <div className="w-full flex flex-col gap-4">
                                 <div className="w-full">
-                                    <PickMatch className="w-full" />
+                                    <PickMatch className="w-full" select_id={request.fixture_id ?? null}/>
                                 </div>
                                 <div className="w-full grid md:grid-cols-4 lg:grid-cols-8 gap-4">
                                     <div className="col-span-2 flex flex-col gap-2 w-full">

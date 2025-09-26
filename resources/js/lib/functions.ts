@@ -135,7 +135,7 @@ function timeAgoShort(isoDate?: string): string {
 
 function truncateMessage(message: string, maxLength = 200, dot = false): string {
     let show = message.length > maxLength ? message.slice(0, maxLength) : message;
-    return show+(dot && '...');
+    return show + (dot && '...');
 }
 
 function translateStatus(status: string) {
@@ -177,6 +177,37 @@ function translateStatus(status: string) {
     return text;
 }
 
+function convertUTC(
+    date: string,
+    time: string,
+    targetOffset: number = 7,
+    returnType: "date" | "time" | "both" = "both"
+): string {
+    // สร้าง Date จาก date + time ในฐานะ UTC
+    const utcDate = new Date(`${date}T${time}Z`);
+
+    // คำนวณเวลาใหม่จาก offset
+    const localTime = new Date(utcDate.getTime() + targetOffset * 60 * 60 * 1000);
+
+    // ดึงค่า
+    const yyyy = localTime.getUTCFullYear();
+    const mm = String(localTime.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(localTime.getUTCDate()).padStart(2, "0");
+    const hh = String(localTime.getUTCHours()).padStart(2, "0");
+    const min = String(localTime.getUTCMinutes()).padStart(2, "0");
+    const ss = String(localTime.getUTCSeconds()).padStart(2, "0");
+
+    // คืนค่าตามประเภทที่เลือก
+    switch (returnType) {
+        case "date":
+            return `${yyyy}-${mm}-${dd}`;
+        case "time":
+            return `${hh}:${min}`;
+        default:
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    }
+}
+
 export {
     ShortName, // แปลงชื่อเป็ตัวย่อ
     EventTrans, //แปลง status เป็นภาษาไทย
@@ -187,4 +218,5 @@ export {
     timeAgoShort, //แปลงวันที่เป็นอดีตแบบสั้น
     truncateMessage, // ตัดข้อความ
     translateStatus, // แปลงสถานะเป็นภาษาไทย
+    convertUTC,
 }

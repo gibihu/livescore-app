@@ -14,6 +14,9 @@ route::prefix('match')->name('match.')->group(function(){
     Route::get('history', function () {
         return Inertia::render('history');
     })->name('history');
+    Route::get('fixture', function(){
+        return Inertia::render('fixture');
+    })->name('fixture');
 });
 
 
