@@ -70,7 +70,7 @@ class TransAdminApiController extends Controller
                             ]);
                             $wallet = Wallet::where('user_id', $tranDB->user_id)->first();
                             if($wallet){
-                                $update = WalletController::AddPoint($wallet->user_id, $tranDB->points, WalletHistory::TYPE_TOPUP, 'เติมพอยต์ผ่านการยืนยัน');
+                                $update = WalletController::ActionsPoint($wallet->user_id, $tranDB->points, WalletHistory::TYPE_TOPUP, 'เติมพอยต์ผ่านการยืนยัน');
                                 return response()->json([
                                     'message' => 'สำเร็จ',
                                     'data' => $update,

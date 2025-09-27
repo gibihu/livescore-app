@@ -14,8 +14,19 @@ import { CompetitionType } from "@/types/league"
 import { LoaderCircle } from "lucide-react"
 import React, { useState } from "react"
 import { MatcTimehBadge, TableCellViewer, whoWon } from "./board-score"
+import { PostType } from "@/types/post"
+import { Avatar } from "@radix-ui/react-avatar"
+import { AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Link } from "@inertiajs/react"
+import * as route_post from "@/routes/post";
 
-export function BoardTable({ items, isFetch = false, type = 'live' }: { items: CompetitionType[], isFetch?: boolean, type?: string}) {
+interface TypeOfCompo {
+    items: CompetitionType[];
+    isFetch?: boolean;
+    type?: string;
+}
+
+export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfCompo) {
     const [visibleCount, setVisibleCount] = useState(10);
 
 
@@ -112,6 +123,24 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: { items: C
                                                 </TableCellViewer>
                                             </TableCell>
                                         </TableRow>
+                                        {
+                                            match.posts && match.posts?.length > 0 && (
+                                                match.posts.map((post: PostType) => (
+                                                    <TableRow>
+                                                        <TableCell colSpan={3} className="">
+                                                            <div className="flex gap-2 max-h-8">
+                                                                <Link href={route_post.view(post.id).url} className="size-6 rounded-full overflow-hidden">
+                                                                    <Avatar>
+                                                                        <AvatarImage src="https://github.com/shadcn.png" />
+                                                                        <AvatarFallback>CN</AvatarFallback>
+                                                                    </Avatar>
+                                                                </Link>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )
+                                        }
                                     </React.Fragment>
                                 );
                             })}

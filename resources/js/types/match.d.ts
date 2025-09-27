@@ -1,4 +1,4 @@
-
+import { PostType } from './post'
 
 export interface MatchType {
     location?: string;
@@ -35,7 +35,8 @@ export interface MatchType {
         statistics?: string;
         lineups?: string;
         head2head?: string;
-    }
+    };
+    posts?: PostType[];
 }
 
 export interface ScoreType {
@@ -82,3 +83,8 @@ export interface CompetitionType {
     id: number;
 }
 
+export interface OddsType{
+    1: number;
+    2: number;
+    X: number;
+}

@@ -3,7 +3,7 @@ import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader,
 import { truncateMessage } from "@/lib/functions";
 import api from "@/routes/api";
 import post from "@/routes/post";
-import type { PostType } from "@/types/global";
+import { PostType } from "@/types/post";
 import { Link } from "@inertiajs/react";
 import { CirclePoundSterling, Lock } from "lucide-react";
 import { useEffect, useState } from "react";

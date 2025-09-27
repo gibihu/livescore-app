@@ -17,7 +17,7 @@ class WalletAdminApiController extends Controller
 {
     public function show(Request $request) {
         try{
-            $history = WalletHistory::with('wallet.user')->where('role', WalletHistory::ROLE_ADD)->orderBy('created_at', 'desc')->get();
+            $history = WalletHistory::with('wallet.user')->where('role', WalletHistory::ROLE_ADD)->where('type', WalletHistory::TYPE_TOPUP)->orderBy('created_at', 'desc')->get();
             $history->transform(function($item) {
                 return [
                     'id' => $item->id,

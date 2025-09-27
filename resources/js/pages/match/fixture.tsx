@@ -5,15 +5,18 @@ import type { MatchType } from "@/types/match";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BoardTable } from "./board-table";
+import { PostType } from "@/types/post";
 
 
 export default function FixtureScore() {
     const [matches, setMatches] = useState<MatchType[]>([]);
-    const [isFetchBoard, setIsFetchBoard] = useState(false);
     const [leagues, setLeagues] = useState<CompetitionType[]>([]);
     const [filters, setFilters] = useState<(CompetitionType & { matches: MatchType[] })[]>([]);
+    const [posts, setPost] = useState<PostType[]>([]);
 
+    const [isFetchBoard, setIsFetchBoard] = useState(false);
     const [isMatchFetch, setIsMatchFetch] = useState<boolean>(true);
+    const [isPostfetch, setPostFetch] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,6 +43,39 @@ export default function FixtureScore() {
 
     useEffect(() => {
         const fetchData = async () => {
+            setPostFetch(true);
+            try {
+                const res = await fetch(api.post.feed().url);
+                const result = await res.json();
+                if (result.code == 200) {
+                    const data = await result.data;
+                    console.log(data);
+                    setPost(data);
+                } else {
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+
+                toast.error(message);
+            } finally {
+                setPostFetch(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+    useEffect(() => {
+        const fetchData = async () => {
             const ids = matches.map((item: MatchType) => item.competition?.id).join(",");
             setIsFetchBoard(true);
             // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
@@ -56,13 +92,27 @@ export default function FixtureScore() {
             }
             setIsFetchBoard(false);
         };
-        if(!isMatchFetch){
+        if (!isMatchFetch) {
             fetchData();
         }
     }, [isMatchFetch]);
 
+
+
     useEffect(() => {
-        // แสดง leagues เสมอ แม้ว่า matches จะยังไม่มีข้อมูล
+        if (posts && posts.length > 0) {
+            const matchesWithPosts1: MatchType[] = matches.map(item => ({
+                ...item,
+                posts: posts.filter(post => post.ref_id === item.id)
+            }));
+            console.log(matchesWithPosts1);
+            setMatches(matchesWithPosts1);
+        }
+    }, [isMatchFetch, posts])
+
+
+
+    useEffect(() => {
         if (leagues && leagues.length > 0) {
             const updatedFilters = leagues.map((league: CompetitionType) => {
                 // หา matches ที่เป็นของ league นี้
@@ -75,9 +125,14 @@ export default function FixtureScore() {
                 };
             });
 
+            console.log(updatedFilters)
+
             setFilters(updatedFilters);
         }
     }, [matches, leagues]);
+
+
+
 
     return (
         // <BoardScore items={matches} isFetch={isFetchBoard} />

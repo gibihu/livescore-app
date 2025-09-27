@@ -14,6 +14,7 @@ Route::prefix('api')->name('api.')->group(function(){
     Route::controller(PostApisController::class)->group(function(){
         Route::prefix('post')->name('post.')->group(function(){
             Route::get('', 'feed')->name('feed');
+            Route::get('{id}', 'show')->name('show');
         });
     });
 

@@ -64,15 +64,3 @@ export interface WalletType {
 }
 
 
-export interface PostType {
-    id: string;
-    user_id: string;
-    user: UserGuast;
-    title: string;
-    title_short?: string;
-    contents: string;
-    points: number;
-    status: string;
-    updated_at: string;
-    created_at: string;
-}

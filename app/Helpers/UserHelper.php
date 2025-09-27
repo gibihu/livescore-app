@@ -18,25 +18,25 @@ class UserHelper
             case 'admin':
                 return User::ROLE_ADMIN;
             default:
-                return $statusString; // หรือ throw exception
+                return $roleString; // หรือ throw exception
         }
     }
 
-    public static function checkTier(string $tireString, int $tireCode): bool
+    public static function checkTier(string $tierString, int $tierCode): bool
     {
-        return $tireCode === self::toModelTire($tireString);
+        return $tierCode === self::toModelTire($tierString);
     }
-    public static function toModelTire(string $tireString)
+    public static function toModelTire(string $tierString)
     {
-        switch (strtolower($tireString)) {
+        switch (strtolower($tierString)) {
             case 'bronze':
-                return User::TIRE_BRONZE;
+                return User::TIER_BRONZE;
             case 'silver':
-                return User::TIRE_SILVER;
+                return User::TIER_SILVER;
             case 'gold':
-                return User::TIRE_GOLD;
+                return User::TIER_GOLD;
             case 'vip':
-                return User::TIRE_VIP;
+                return User::TIER_VIP;
             default:
                 return $statusString; // หรือ throw exception
         }
