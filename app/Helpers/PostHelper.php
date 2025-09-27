@@ -17,7 +17,7 @@ class PostHelper
             case 'private':
                 return Post::PRIVATE;
             default:
-                return $statusString; // หรือ throw exception
+                return $privacyString; // หรือ throw exception
         }
     }
 

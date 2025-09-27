@@ -15,8 +15,11 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->char('id', 36)->primary();
             $table->char('user_id', 36);
-            $table->text('title');
-            $table->mediumText('contents');
+            $table->integer('ref_id')->nullable();
+            $table->text('title')->nullable();
+            $table->mediumText('contents')->nullable();
+            $table->char('score', 20);
+            $table->char('odds', 255);
             $table->unsignedBigInteger('points')->default(0);
             $table->tinyInteger('privacy')->default(1);
             // $table->enum('privacy', ['public', 'private'])->default('private');

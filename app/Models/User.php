@@ -98,14 +98,14 @@ class User extends Authenticatable
     }
 
     const TIER_BRONZE = 1;
-    const TIRE_SILVER = 2;
-    const TIRE_GOLD = 3;
-    const TIRE_VIP = 4;
+    const TIER_SILVER = 2;
+    const TIER_GOLD = 3;
+    const TIER_VIP = 4;
     public static $tierLabels = [
         self::TIER_BRONZE => 'bronze',
-        self::TIRE_SILVER => 'silver',
-        self::TIRE_GOLD => 'gold',
-        self::TIRE_VIP => 'vip',
+        self::TIER_SILVER => 'silver',
+        self::TIER_GOLD => 'gold',
+        self::TIER_VIP => 'vip',
     ];
     public function getTierTextAttribute()
     {

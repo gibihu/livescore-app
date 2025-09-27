@@ -13,7 +13,7 @@ use App\Models\WalletHistory;
 
 class WalletController extends Controller
 {
-    public static function AddPoint($user_id, $points, $type, $description){
+    public static function ActionsPoint($user_id, $points, $type, $description){
         try{
             if($user_id && $points){
                 try{

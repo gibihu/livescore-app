@@ -292,7 +292,7 @@ function TableCellViewer({ item, className, children, type }: { item: MatchType,
                         <DialogTitle>
                             <div className="w-full flex justify-end gap-2">
                                 {auth && (
-                                    <Link href={`${dash.post.create().url}?fixture_id=${item.id}`}>
+                                    <Link href={`${dash.post.create().url}?fixture_id=${item.fixture_id ?? item.id}`}>
                                         <Button asChild>
                                             <span>สร้างทีเด็ด</span>
                                         </Button>

@@ -78,7 +78,7 @@ export default function WalletHistoryTable() {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className={cn('text-right font-bold text-lg pe-4', isUpper(item.change_amount) ? 'text-green-600' : 'text-red-600')}>{(isUpper(item.change_amount) ? '+' : '-') + item.change_amount}</TableCell>
+                                    <TableCell className={cn('text-right font-bold text-lg pe-4', isUpper(item.change_amount) ? 'text-green-600' : 'text-red-600')}>{(isUpper(item.change_amount) ? '+' : '') + item.change_amount}</TableCell>
                                 </TableRow>
                             ))
                         ): (

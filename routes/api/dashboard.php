@@ -12,6 +12,12 @@ use App\Http\Controllers\Apis\PostApisController;
 
 
 Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
+    Route::controller(PostApisController::class)->prefix('post')->name('post.')->group(function(){
+        Route::patch('{id}', 'unlock')->name('unlock');
+    });
+
+
+//    dashboard
     Route::prefix('dashboard')->name('dash.')->group(function () {
         Route::controller(WalletApiController::class)->group(function(){
             Route::prefix('wallet')->name('wallet.')->group(function(){

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->char('user_id', 36);
             $table->char('source_id', 36);
-            $table->string('source_type', 20)->nullable();
+            $table->tinyInteger('source_type')->default(1);
             $table->integer('amount')->default(1);
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

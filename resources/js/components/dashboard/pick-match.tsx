@@ -24,7 +24,7 @@ import { toast } from "sonner"
 type Type = {
     className?: string;
     classPopover?: string;
-    onChange?: (file: File | null) => void;
+    onChange?: (target: number | null) => void;
     select_id?: number;
 };
 
@@ -108,6 +108,7 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
             }
             setIsFetch(false);
             setId(Number(select_id));
+            onChange?.(Number(select_id));
         };
         fetchData();
     }
@@ -128,7 +129,7 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                         return item ? (
                             <div className="w-full flex justify-center gap-2">
                                 <div className="flex gap-2 w-full justify-end">
-                                    <span>{item.home.name}</span>
+                                    <span className="text-end">{item.home.name}</span>
                                     <img src={item.home.logo} alt={item.home.logo} className="size-4" />
                                 </div>
                                 <span>vs</span>
@@ -137,7 +138,7 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                                     <span>{item.away.name}</span>
                                 </div>
                             </div>
-                        ) : <span className="w-full text-center">Select Team...</span>;
+                        ) : <span className="w-full text-center">รอสักครู่...</span>;
                     })()
                         : isFetch ? <LoaderCircle className="size-3 animate-spin" /> : <span className="w-full text-center">Select Team...</span>}
                     <ChevronsUpDown className="opacity-50" />
@@ -154,12 +155,14 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                                     value={item.home.name + ' vs ' + item.away.name}
                                     onSelect={() => {
                                         setId(item.id);
+                                        onChange?.(item.id);
                                         setOpen(false);
+                                        console.log(item.id);
                                     }}
                                 >
                                     <div className="w-full flex justify-center gap-2">
                                         <div className="flex gap-2 w-full justify-end">
-                                            <span>{item.home.name}</span>
+                                            <span className="text-end">{item.home.name}</span>
                                             <img src={item.home.logo} alt={item.home.logo} className="size-4" />
                                         </div>
                                         <span>vs</span>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Post extends Model
 {
@@ -13,20 +14,39 @@ class Post extends Model
     protected $fillable = [
         'id',
         'user_id',
+        'ref_id',
         'title',
         'contents',
         'points',
         'privacy',
+        'odds',
+        'score',
     ];
 
     public $timestamps = true;
+
+    protected $casts = [
+        'odds' => 'json',
+    ];
     protected $appends = [
         'privacy_text',
     ];
+    protected static function boot()
+    {
+        parent::boot();
+
+        // ก่อนบันทึก record ใหม่
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
+    }
+
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id')->select('id', 'name', 'username');
+        return $this->belongsTo(User::class, 'user_id', 'id')->select('id', 'name', 'username', 'tier');
     }
 
     const PUBLIC = 1;

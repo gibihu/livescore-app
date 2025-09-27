@@ -23,6 +23,11 @@ php artisan migrate:rollback
 
 php artisan migrate --path=/database/migrations/2025_09_24_112233_create_posts_table.php
 
+php artisan migrate:reset --path=/database/migrations/2025_09_27_123456_create_users_table.php
+
+php artisan migrate:rollback --path=/database/migrations/2025_09_21_144028_posts.php.php
+
+dashboard/admin/football/setup
 
 ```
 

@@ -25,7 +25,7 @@ import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
-import { CircleQuestionMark, LoaderCircle, Minus } from "lucide-react";
+import { CircleQuestionMark, LoaderCircle, Minus, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -46,9 +46,10 @@ export default function CreatePostPage(request: any) {
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),
-        content: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
+        contents: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
         points: z.number({ message: "กรุณากรอกจำนวนพอยต์" }).min(0, { message: 'ต้องมากกว่า 0' }).max(maxPoints, `จำนวนพอยต์ต้องไม่มากกว่า ${maxPoints.toLocaleString()}`),
         submit: z.string(),
+        fixture_id: z.number('กรุณาเลือกทีม'),
         home_score: z.number(),
         away_score: z.number(),
         odds_live_1: z.number(),
@@ -63,9 +64,10 @@ export default function CreatePostPage(request: any) {
         resolver: zodResolver(schema),
         defaultValues: {
             title: "",
-            content: "",
+            contents: "",
             points: 100,
             submit: 'private',
+            fixture_id: undefined,
             home_score: undefined,
             away_score: undefined,
             odds_live_1: undefined,
@@ -118,12 +120,14 @@ export default function CreatePostPage(request: any) {
             }
         }
 
+        console.log(data);
         fetchData();
+        // console.log('hendleSubmit');
     };
 
 
     const [wordCount, setWordCount] = useState(0);
-    const contentValue = form.watch("content");
+    const contentValue = form.watch("contents");
     useEffect(() => {
         setWordCount(contentValue.length);
     }, [contentValue]);
@@ -206,7 +210,21 @@ export default function CreatePostPage(request: any) {
 
                             <div className="w-full flex flex-col gap-4">
                                 <div className="w-full">
-                                    <PickMatch className="w-full" select_id={request.fixture_id ?? null}/>
+                                    <FormField
+                                        control={form.control}
+                                        name="fixture_id"
+                                        render={({ field, fieldState }) => (
+                                            <FormItem className="col-span-4">
+                                                <FormControl>
+                                                    <PickMatch className="w-full" select_id={request.fixture_id ?? null} onChange={(target: number | null) => {
+                                                        form.setValue("fixture_id", Number(target));
+                                                    }} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
                                 </div>
                                 <div className="w-full grid md:grid-cols-4 lg:grid-cols-8 gap-4">
                                     <div className="col-span-2 flex flex-col gap-2 w-full">
@@ -325,7 +343,7 @@ export default function CreatePostPage(request: any) {
                             {/* Content */}
                             <FormField
                                 control={form.control}
-                                name="content"
+                                name="contents"
                                 render={({ field, fieldState }) => (
                                     <FormItem>
                                         <div className="flex items-center gap-1">
