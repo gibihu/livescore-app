@@ -128,7 +128,7 @@ export default function SelectPackpoint({ onChange, onSubmit, disabled }: Select
                             <div className="col-start-2 col-span-2 flex justify-center">
                                 <Button onClick={handleGenerate} disabled={isFetch} variant="outline" className="w-full">
                                     {isFetch && <LoaderCircle className="animate-spin size-4" />}
-                                    Generate
+                                    Generate (ใช้ทดสอบ)
                                 </Button>
                             </div>
                         )}
