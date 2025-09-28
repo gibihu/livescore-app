@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Transaction extends Model
 {
@@ -19,6 +20,7 @@ class Transaction extends Model
         'payment_method',
         'amount',
         'points',
+        'rate',
         'currency',
         'status',
         'slip_url',
@@ -41,6 +43,17 @@ class Transaction extends Model
         'status_text',
         'type_text'
     ];
+    protected static function boot()
+    {
+        parent::boot();
+
+        // ก่อนบันทึก record ใหม่
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
+    }
 
     public function user()
     {

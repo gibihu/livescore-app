@@ -21,7 +21,10 @@ export interface TransactionType{
     payment_method: string;
     amount: number;
     points: number;
+    rate?: number;
     currency?: string;
+    type: number;
+    type_text?: string;
     status: string;
     status_text?: string;
     slip_url?: string;

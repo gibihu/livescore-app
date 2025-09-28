@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Football\CompetitionController as LeagueController;
+use App\Http\Controllers\Pages\DashPageController;
 
 
 Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function () {
@@ -68,6 +69,12 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
 
     Route::controller(LeagueController::class)->group(function(){
         Route::get('football/setup', 'index')->name('setup');
+    });
+
+    Route::controller(DashPageController::class)->group(function(){
+        Route::prefix('exchange')->name('exchange.')->group(function (){
+            Route::get('{id}', 'exchangePage')->name('index');
+        });
     });
 
 });

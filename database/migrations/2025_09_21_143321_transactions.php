@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->char('id', 36)->primary();
             $table->char('user_id', 36);
-            $table->char('package_id', 36);
+            $table->char('package_id', 36)->nullable();
             $table->string('user_reference', 10)->nullable();
             $table->string('reference_code', 100)->nullable();
             $table->tinyInteger('payment_method')->default(1);
             $table->decimal('amount', 12, 2);
             $table->decimal('points', 12, 0);
+            $table->decimal('rate', 12, 2)->nullable();
             $table->string('currency', 10)->default('THB');
             $table->tinyInteger('type')->default(1);
             // $table->enum('type', ['deposit', 'withdraw'])->default('deposit');
