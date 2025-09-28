@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Apis\FollowApiController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Apis\UserApiController;
@@ -14,6 +15,10 @@ use App\Http\Controllers\Apis\PostApisController;
 Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
     Route::controller(PostApisController::class)->prefix('post')->name('post.')->group(function(){
         Route::patch('{id}', 'unlock')->name('unlock');
+    });
+
+    Route::controller(FollowApiController::class)->prefix('follow')->name('follow.')->group(function(){
+        Route::post('{user_id}', 'update')->name('update');
     });
 
 

@@ -21,6 +21,7 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
             Route::prefix('trans')->name('trans.')->group(function(){
                 Route::get('/', 'userPayment')->name('users.payment');
                 Route::patch('update', 'update')->name('update');
+                Route::post('exchange', 'UpdateExchange')->name('exchange');
             });
         });
         Route::controller(WalletAdminApiController::class)->prefix('wallet')->name('wallet.')->group(function(){

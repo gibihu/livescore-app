@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDateTime, translateStatus } from "@/lib/functions";
 import { cn } from "@/lib/utils";
 import api from "@/routes/api";
+import dash from "@/routes/dash";
 import type { TransactionType } from "@/types/global";
+import { Link } from "@inertiajs/react";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -172,26 +174,11 @@ export default function UserPaymentTable() {
                                             </div>
                                         ) : (
                                             <div className="flex gap-2 justify-end">
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button variant="default">
-                                                            ดำเนินการ
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete your account
-                                                                and remove your data from our servers.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction>Continue</AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
+                                                <Link href={dash.admin.exchange.index({id: item.id}).url}>
+                                                    <Button variant="default" asChild>
+                                                        <span>ดำเนินการ</span>
+                                                    </Button>
+                                                </Link>
                                             </div>
                                         )}
                                     </TableCell>

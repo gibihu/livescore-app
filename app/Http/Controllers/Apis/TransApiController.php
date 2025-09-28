@@ -159,12 +159,12 @@ class TransApiController extends Controller
 
     public function UplodSlip(Request $request){
         try{
-            $tran_id = $request->id;
+            $trans_id = $request->id;
             $status = $request->status;
             $file = $request->file('file'); // ใช้ Laravel method แทน $_FILES
             $user = Auth::user();
 
-            $transac = Transaction::where('id', $tran_id)->first();
+            $transac = Transaction::where('id', $trans_id)->first();
             if (!$transac) {
                 return response()->json([
                     'message' => 'ไม่พบข้อมูลการทำรายการ',
