@@ -19,21 +19,21 @@ export default function UserPaymentPage() {
             <Head title={breadcrumbs[0].title} />
             <div className="flex flex-col gap-4 p-4">
                 <Tabs defaultValue="transaction">
-                    <TabsList>
-                        <TabsTrigger value="transaction">รายการเติมพอยต์</TabsTrigger>
-                        <TabsTrigger value="history">ประวัติการเติม</TabsTrigger>
-                        <TabsTrigger value="withdraw">ประวัติการเติม</TabsTrigger>
-                    </TabsList>
+                    <div className="flex gap-4">
+                        <TabsList>
+                            <TabsTrigger value="transaction">รายการเติมพอยต์</TabsTrigger>
+                            <TabsTrigger value="transaction_history">ประวัติรายการ</TabsTrigger>
+                        </TabsList>
+                        <TabsList>
+                            <TabsTrigger value="history">ประวัติการเติม</TabsTrigger>
+                        </TabsList>
+                    </div>
 
                     <TabsContent value="transaction">
                         <UserPaymentTable />
                     </TabsContent>
 
                     <TabsContent value="history">
-                        <WalletTable />
-                    </TabsContent>
-
-                    <TabsContent value="withdraw">
                         <WalletTable />
                     </TabsContent>
 

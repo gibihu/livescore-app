@@ -233,6 +233,7 @@ class TransApiController extends Controller
                     $trans->user_id = $user->id;
                     $trans->amount = $total->price;
                     $trans->points = $total->point;
+                    $trans->rate = $rate;
                     $trans->type = Transaction::WITHDRAW;
                     $trans->status = Transaction::STATUS_AWAITING_APPROVAL;
                     $trans->user_reference = Functions::generateRandomCode();

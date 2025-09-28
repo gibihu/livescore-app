@@ -21,6 +21,7 @@ export interface TransactionType{
     payment_method: string;
     amount: number;
     points: number;
+    rate?: number;
     currency?: string;
     type: number;
     type_text?: string;

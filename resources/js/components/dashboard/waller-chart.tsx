@@ -166,7 +166,7 @@ function PopUpExchange({ children }: { children: ReactNode }) {
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
-            amount: 100,
+            amount: user.wallet.income,
         },
         mode: "onChange",
     });

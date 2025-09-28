@@ -20,6 +20,7 @@ class Transaction extends Model
         'payment_method',
         'amount',
         'points',
+        'rate',
         'currency',
         'status',
         'slip_url',

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime, translateStatus } from "@/lib/functions";
+import { cn } from "@/lib/utils";
 import api from "@/routes/api";
 import type { TransactionType } from "@/types/global";
 import { LoaderCircle } from "lucide-react";
@@ -26,7 +27,6 @@ export default function UserPaymentTable() {
                 if (res.status == 200) {
                     const result = await res.json();
                     const data = result.data;
-                    console.log(data);
                     setItems(data);
                 } else {
                     const result = await res.json();
@@ -95,69 +95,105 @@ export default function UserPaymentTable() {
                         items.length > 0 ? (
                             items.map((item, index) => (
                                 <TableRow className="h-16" key={index}>
-                                    <TableCell className="">
-                                        <TableViewImage item={item} className="min-w-12">
-                                            {item.type == 1 && <img className="size-15  rounded-md  object-cover" src={item.slip_url} alt={item.slip_url} />}
-                                        </TableViewImage>
-                                    </TableCell>
-                                    <TableCell className="text-start min-w-20">
+                                    {item.type_text == 'deposit' &&
+                                        <TableCell className="">
+                                            <TableViewImage item={item} className="min-w-12">
+                                                <img className="size-15  rounded-md  object-cover" src={item.slip_url} alt={item.slip_url} />
+                                            </TableViewImage>
+                                        </TableCell>
+                                    }
+                                    <TableCell className={cn('text-start min-w-20', item.type_text == 'withdraw' && 'col-start-1')} colSpan={item.type_text == 'deposit' ? 1 : 2}>
                                         <div className="flex flex-col">
-                                            <span>เติม {item.points} พอยต์</span>
-                                            <span>ราคา {item.amount} {item.currency}</span>
+                                            {item.type_text == 'deposit' ? (
+                                                <>
+                                                    <span>เติม {item.points} พอยต์</span>
+                                                    <span>ราคา {item.amount} {item.currency}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>แลกเงิน {item.amount} {item.currency}</span>
+                                                    <span>จาก {item.points} พอยต์ | เรต {item.rate}</span>
+                                                </>
+                                            )}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-start min-w-12">
                                         {item.user_reference}
                                     </TableCell>
                                     <TableCell className="text-center">{formatDateTime(item.paid_at || '')}</TableCell>
-                                    <TableCell className="text-center">{translateStatus(item.status)}</TableCell>
+                                    <TableCell className="text-center">{translateStatus(item.status_text || '')}</TableCell>
                                     <TableCell className="max-w-40  min-w-20">
-                                        <div className="flex gap-2 justify-end">
+                                        {item.type_text == 'deposit' ? (
+                                            <div className="flex gap-2 justify-end">
 
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="destructive" disabled={isFetch}>
-                                                        {isFetch && <LoaderCircle className="animate-spin size-4" />}
-                                                        ปฏิเสธ
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>ต้อการปฏิเสธหรือไม่?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            แน่ใจที่จะกดปฏิเสธไหม?
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>ปิด</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleChange(item.id, 'rejected')}>ปฏิเสธ</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="destructive" disabled={isFetch}>
+                                                            {isFetch && <LoaderCircle className="animate-spin size-4" />}
+                                                            ปฏิเสธ
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>ต้อการปฏิเสธหรือไม่?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                แน่ใจที่จะกดปฏิเสธไหม?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>ปิด</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleChange(item.id, 'rejected')}>ปฏิเสธ</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
 
 
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant='primary' disabled={isFetch}>
-                                                        {isFetch && <LoaderCircle className="animate-spin size-4" />}
-                                                        อนุมัติ
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>ต้องการยินยันหรือไม่</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            การกดยืนยันจะเพิ่มพอยต์ให้ผู้ซื้อทันที คุณแน่ใจว่าได้ตรวจสอบการทำธุรกรมมแล้ว?
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>ปิด</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleChange(item.id, 'approved')}>อนุมัติ</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant='primary' disabled={isFetch}>
+                                                            {isFetch && <LoaderCircle className="animate-spin size-4" />}
+                                                            อนุมัติ
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>ต้องการยินยันหรือไม่</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                การกดยืนยันจะเพิ่มพอยต์ให้ผู้ซื้อทันที คุณแน่ใจว่าได้ตรวจสอบการทำธุรกรมมแล้ว?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>ปิด</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleChange(item.id, 'approved')}>อนุมัติ</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
 
-                                        </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2 justify-end">
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="default">
+                                                            ดำเนินการ
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                This action cannot be undone. This will permanently delete your account
+                                                                and remove your data from our servers.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction>Continue</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </div>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))

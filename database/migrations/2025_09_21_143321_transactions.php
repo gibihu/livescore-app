@@ -20,6 +20,7 @@ return new class extends Migration
             $table->tinyInteger('payment_method')->default(1);
             $table->decimal('amount', 12, 2);
             $table->decimal('points', 12, 0);
+            $table->decimal('rate', 12, 2)->nullable();
             $table->string('currency', 10)->default('THB');
             $table->tinyInteger('type')->default(1);
             // $table->enum('type', ['deposit', 'withdraw'])->default('deposit');
