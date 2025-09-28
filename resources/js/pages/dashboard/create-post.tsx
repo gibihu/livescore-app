@@ -125,14 +125,6 @@ export default function CreatePostPage(request: any) {
         // console.log('hendleSubmit');
     };
 
-
-    const [wordCount, setWordCount] = useState(0);
-    const contentValue = form.watch("contents");
-    useEffect(() => {
-        setWordCount(contentValue.length);
-    }, [contentValue]);
-
-
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'สร้างทีเด็ด',
@@ -373,7 +365,7 @@ export default function CreatePostPage(request: any) {
                                                 )}
                                                 <FormMessage />
                                             </div>
-                                            <FormDescription>{wordCount}/3000</FormDescription>
+                                            <FormDescription>{field.value.length}/3000</FormDescription>
                                         </div>
                                     </FormItem>
                                 )}

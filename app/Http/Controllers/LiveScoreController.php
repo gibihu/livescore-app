@@ -59,7 +59,6 @@ class LiveScoreController extends Controller
                 'secret' => $API_SECRET,
                 'lang' => $LANG,
             ]);
-
             if ($response->successful()) {
                 try {
                     $data = $response->object(); // ใช้ object() แทน json_decode()
@@ -76,36 +75,6 @@ class LiveScoreController extends Controller
                                 'from_cache' => false,
                                 'message' => 'Fresh data retrieved from API',
                             ];
-                        } else {
-                            // ถ้าไม่มี match หรือเป็น [] ให้ดึงข้อมูล 3 ชั่วโมงจากข้อมูลล่าสุดในฐานข้อมูล
-                            $latestMatch = Matchs::orderBy('updated_at', 'desc')->first();
-
-                            if ($latestMatch) {
-                                // ใช้เวลาของข้อมูลล่าสุด แล้วย้อนหลังไป 3 ชั่วโมง
-                                $latestTime = Carbon::parse($latestMatch->updated_at);
-                                $threeHoursFromLatest = $latestTime->subHours(3);
-
-                                $recentMatches = Matchs::where('updated_at', '>=', $threeHoursFromLatest)
-                                                    ->orderBy('updated_at', 'desc')
-                                                    ->get();
-                            } else {
-                                // ถ้าไม่มีข้อมูลเลยในฐานข้อมูล
-                                $recentMatches = collect([]);
-                            }
-
-                            // แปลง json string กลับเป็น object สำหรับแต่ละ record
-                            $matchesData = $recentMatches->map(function ($match) {
-                                return json_decode($match->json);
-                            });
-
-                            return (object) [
-                                'success' => true,
-                                'data' => $matchesData,
-                                'from_cache' => true,
-                                'message' => $latestMatch
-                                    ? 'API returned no matches, retrieved data from database (3 hours from latest record)'
-                                    : 'API returned no matches, no data available in database',
-                            ];
                         }
                     }
                     return json_decode($response);
@@ -115,7 +84,35 @@ class LiveScoreController extends Controller
                 }
             }
 
-            return false;
+            // ถ้าไม่มี match หรือเป็น [] ให้ดึงข้อมูล 3 ชั่วโมงจากข้อมูลล่าสุดในฐานข้อมูล
+            $latestMatch = Matchs::orderBy('updated_at', 'desc')->first();
+
+            if ($latestMatch) {
+                // ใช้เวลาของข้อมูลล่าสุด แล้วย้อนหลังไป 3 ชั่วโมง
+                $latestTime = Carbon::parse($latestMatch->updated_at);
+                $threeHoursFromLatest = $latestTime->subHours(3);
+
+                $recentMatches = Matchs::where('updated_at', '>=', $threeHoursFromLatest)
+                    ->orderBy('updated_at', 'desc')
+                    ->get();
+            } else {
+                // ถ้าไม่มีข้อมูลเลยในฐานข้อมูล
+                $recentMatches = collect([]);
+            }
+
+            // แปลง json string กลับเป็น object สำหรับแต่ละ record
+            $matchesData = $recentMatches->map(function ($match) {
+                return json_decode($match->json);
+            });
+
+            return (object) [
+                'success' => true,
+                'data' => $matchesData,
+                'from_cache' => true,
+                'message' => $latestMatch
+                    ? 'API returned no matches, retrieved data from database (3 hours from latest record)'
+                    : 'API returned no matches, no data available in database',
+            ];
         } catch (\Exception $e) {
             throw $e;
             return false;

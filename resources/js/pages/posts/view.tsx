@@ -77,14 +77,14 @@ export default function Home(request: any) {
                             toast.error('เกิดข้อผิดพลาดจาก server');
                         }
                         return; // ไม่ไป setPost
-                    }
-
-                    const result = await res.json();
-                    if (result.code === 200) {
-                        const data = result.data;
-                        setPost(data);
-                        setIslock(false);
-                        toast.error(result.message);
+                    }else{
+                        const result = await res.json();
+                        if (result.code === 201) {
+                            const data = result.data;
+                            setPost(data);
+                            setIslock(false);
+                            toast.error(result.message);
+                        }
                     }
                 } catch (error) {
                     console.error('Error:', error);
