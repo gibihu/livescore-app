@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->char('id', 36)->primary();
             $table->char('user_id', 36);
-            $table->char('package_id', 36);
+            $table->char('package_id', 36)->nullable();
             $table->string('user_reference', 10)->nullable();
             $table->string('reference_code', 100)->nullable();
             $table->tinyInteger('payment_method')->default(1);

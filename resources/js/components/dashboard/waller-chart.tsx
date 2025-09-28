@@ -1,6 +1,6 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import { LoaderCircle, TrendingUp } from "lucide-react"
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 
 import {
@@ -18,13 +18,24 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { timeAgoShort } from "@/lib/functions"
-import { usePage } from "@inertiajs/react"
+import { router, usePage } from "@inertiajs/react"
 import { AuthType } from "@/types/auth"
 import { UserType } from "@/types/user"
+import { Button } from "../ui/button"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
+import { ReactNode, useState } from "react"
+import z from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
+import { Input } from "../ui/input"
+import api from "@/routes/api"
+import { toast } from "sonner"
 
 export const description = "A radial chart with stacked sections"
 
 
+const EXCHANGE_RATE: string = import.meta.env.VITE_APP_EXCHANGE_RATE;
 const chartConfig = {
     income: {
         label: "รายได้",
@@ -128,14 +139,134 @@ export function WallerChart() {
 
                 </div>
             </CardContent>
-            <CardFooter className="flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 leading-none font-medium">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="text-muted-foreground leading-none">
-                    Showing total visitors for the last 6 months
-                </div>
+            <CardFooter className="flex-col gap-2 text-sm items-end">
+                <PopUpExchange>
+                    <Button>
+                        แลก
+                    </Button>
+                </PopUpExchange>
             </CardFooter>
         </Card>
     )
+}
+
+
+function PopUpExchange({ children }: { children: ReactNode }) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+    const auth: AuthType = usePage().props.auth as AuthType;
+    const user = auth.user as UserType;
+
+    const [isFetch, setIsFetch] = useState<boolean>(false);
+    const [open, setOpen] = useState(false);
+
+    const schema = z.object({
+        amount: z.number().int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.income, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" })
+    });
+    type FormValues = z.infer<typeof schema>;
+    const form = useForm<FormValues>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            amount: 100,
+        },
+        mode: "onChange",
+    });
+
+
+    const onSubmit = (data: FormValues) => {
+        const fetchData = async () => {
+            try {
+                setIsFetch(true);
+                const res = await fetch(api.dash.transaction.exchange().url, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (result.code == 201) {
+                    toast.error(result.message);
+                    setOpen(false);
+                    router.reload();
+                } else {
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        };
+        fetchData();
+    }
+
+    const amount = form.watch('amount');
+    const calculated = ((amount - amount * 0.3) * Number(EXCHANGE_RATE)).toFixed(2);
+
+    return (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+                {children}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription asChild>
+
+                                <div className="flex flex-col gap-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="amount"
+                                        render={({ field, fieldState }) => (
+                                            <FormItem className="col-span-4">
+                                                <FormLabel>พอยต์</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="กรอกจำนวน" type="number" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                </FormControl>
+                                                {!fieldState.error && (
+                                                    <FormDescription>
+                                                        พอยต์จะถูกหัก 30% รายได้สุทธิ {field.value - (field.value * 30 / 100)} พอยต์
+                                                    </FormDescription>
+                                                )}
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <div className="flex flex-col gap-2">
+                                        <span>อัตตราการแลกเปลี่ยน 1 : {EXCHANGE_RATE}</span>
+                                        <span>รายได้สุทธิ {calculated} ฿</span>
+                                    </div>
+                                </div>
+
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <Button
+                                disabled={isFetch}
+                            >
+                                {isFetch && (<LoaderCircle className="size-4 animate-spin" />)}
+                                ยืนบัน
+                            </Button>
+                        </AlertDialogFooter>
+                    </form>
+                </Form>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
 }

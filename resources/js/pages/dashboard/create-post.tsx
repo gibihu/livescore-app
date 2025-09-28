@@ -14,18 +14,16 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
 import api from "@/routes/api";
 import dash from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
 import { AuthType } from "@/types/auth";
-import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
-import { CircleQuestionMark, LoaderCircle, Minus, Target } from "lucide-react";
+import { CircleQuestionMark, LoaderCircle, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

@@ -199,10 +199,8 @@ class PostApisController extends Controller
                 if(
                     WalletController::ActionsPoint($post->user_id, $post->points - ($post->points * $fee /100), WalletHistory::TYPE_INCOME, "ได้รับจากการปลดล็อโพสต์ $post->title")
                     &&
-                    WalletController::ActionsPoint($user->id, -$post->points, WalletHistory::TYPE_REMOVED, "ลกเปลี่ยนโพสต์ $post->title")
+                    WalletController::ActionsPoint($user->id, -$post->points, WalletHistory::TYPE_USED, "ลกเปลี่ยนโพสต์ $post->title")
                 ){
-                    $user->wallet->points = $user->wallet->points - $post->points;
-                    $user->wallet->save();
                     $inventory = new Inventory();
                     $inventory->user_id = $user->id;
                     $inventory->source_type = Inventory::TYPE_POST;

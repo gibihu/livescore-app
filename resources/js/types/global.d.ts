@@ -22,6 +22,8 @@ export interface TransactionType{
     amount: number;
     points: number;
     currency?: string;
+    type: number;
+    type_text?: string;
     status: string;
     status_text?: string;
     slip_url?: string;

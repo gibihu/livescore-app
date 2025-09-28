@@ -1,5 +1,4 @@
 import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
@@ -14,11 +13,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { NavGroup, type NavItem } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, Landmark, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
-import AppLogo from './app-logo';
-import { UserType } from '@/types/user';
 import { AuthType } from '@/types/auth';
+import { UserType } from '@/types/user';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
+import AppLogo from './app-logo';
 
 import dash from '@/routes/dash';
 const mainNavItems: NavItem[] = [
@@ -85,16 +84,10 @@ export function AppSidebar() {
                             icon: UsersRound
                         },
                         {
-                            title: "ธุรกรรม",
+                            title: "รายการพอยต์",
                             href: dash.admin.users.payment().url,
                             isActive: true,
-                            icon: Landmark
-                        },
-                        {
-                            title: "ประวัติการเติมพอยต์",
-                            href: dash.admin.wallet.table().url,
-                            isActive: true,
-                            icon: HandCoins,
+                            icon: HandCoins
                         },
                         {
                             title: "ทีเด็ดทั้งหมด",

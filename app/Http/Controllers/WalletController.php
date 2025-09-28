@@ -21,7 +21,7 @@ class WalletController extends Controller
                     if($wallet){
                         $history = self::history($wallet->id, $points, $type, $description);
                         if($history){
-                            if($type == WalletHistory::TYPE_INCOME){
+                            if($type == WalletHistory::TYPE_INCOME || $type == WalletHistory::TYPE_REMOVED) {
                                 $wallet->income = $wallet->income + $points;
                             }else{
                                 $wallet->points = $wallet->points + $points;

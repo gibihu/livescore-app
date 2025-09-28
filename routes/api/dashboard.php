@@ -37,6 +37,7 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
                 Route::get('history', 'showAll')->name('history');
                 Route::patch('update', 'update_onec')->name('update');
                 Route::get('{id}', 'show')->name('show');
+                Route::post('exchange', 'withdraw')->name('exchange');
             });
         });
         Route::prefix('post')->name('post.')->group(function(){
