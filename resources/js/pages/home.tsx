@@ -36,7 +36,7 @@ export default function Home() {
                 <LiveScore />
                 {/* <span>{route('api.match.live')}</span> */}
                 {/* <MatchDashboard /> */}
-                <FeedLive />
+                {/* <FeedLive /> */}
             </div>
         </AppLayout>
     );

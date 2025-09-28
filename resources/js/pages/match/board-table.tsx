@@ -125,20 +125,22 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                         </TableRow>
                                         {
                                             match.posts && match.posts?.length > 0 && (
-                                                match.posts.map((post: PostType) => (
-                                                    <TableRow>
-                                                        <TableCell colSpan={3} className="">
-                                                            <div className="flex gap-2 max-h-8">
-                                                                <Link href={route_post.view(post.id).url} className="size-6 rounded-full overflow-hidden">
-                                                                    <Avatar>
-                                                                        <AvatarImage src="https://github.com/shadcn.png" />
-                                                                        <AvatarFallback>CN</AvatarFallback>
-                                                                    </Avatar>
-                                                                </Link>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))
+                                                <TableRow>
+                                                    <TableCell colSpan={3} className="">
+                                                        <div className="flex gap-2 max-h-8">
+                                                            {
+                                                                match.posts.map((post: PostType) => (
+                                                                    <Link href={route_post.view(post.id).url} className="size-6 rounded-full overflow-hidden">
+                                                                        <Avatar>
+                                                                            <AvatarImage src="https://github.com/shadcn.png" />
+                                                                            <AvatarFallback>CN</AvatarFallback>
+                                                                        </Avatar>
+                                                                    </Link>
+                                                                ))
+                                                            }
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
                                             )
                                         }
                                     </React.Fragment>

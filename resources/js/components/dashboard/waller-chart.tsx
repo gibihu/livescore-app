@@ -39,7 +39,6 @@ const chartConfig = {
 export function WallerChart() {
     const auth: AuthType = usePage().props.auth as AuthType;
     const user = auth.user as UserType;
-    console.log(user);
     const chartData = [{ income: user.wallet.income || 0, points: user.wallet.points || 0 }]
     const totalVisitors = chartData[0].income + chartData[0].points;
 
