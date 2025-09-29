@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Pages\WebPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -24,11 +25,17 @@ Route::prefix('post')->name('post.')->group(function(){
     Route::get('{id}', function ($id) {
         return Inertia::render('posts/view', ['id' => $id]);
     })->name('view');
+
+    Route::controller(WebPageController::class)->prefix('report')->name('report.')->group(function(){
+        Route::get('{post_id}', 'ReportPage')->name('index');
+    });
 });
 
 // show upload
 Route::get('flag', [LiveScoreController:: class, 'showFlag'])->name('flag');
 Route::get('image/{name}', [ImageController:: class, 'show'])->name('image.show');
+
+
 
 require __DIR__.'/api.php';
 require __DIR__.'/settings.php';

@@ -16,7 +16,7 @@ import { NavGroup, type NavItem } from '@/types';
 import { AuthType } from '@/types/auth';
 import { UserType } from '@/types/user';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
+import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, LayoutGrid, NotebookPen, SwatchBook, TicketSlash, UsersRound, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 import dash from '@/routes/dash';
@@ -94,6 +94,12 @@ export function AppSidebar() {
                             href: dash.admin.post.table().url,
                             isActive: true,
                             icon: SwatchBook,
+                        },
+                        {
+                            title: "รายงาน",
+                            href: dash.admin.post.report.list().url,
+                            isActive: true,
+                            icon: TicketSlash,
                         },
                     ],
                     icon: undefined

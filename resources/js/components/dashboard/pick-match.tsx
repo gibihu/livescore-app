@@ -148,8 +148,13 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                 <Command>
                     <CommandInput placeholder="Search framework..." className="h-9" />
                     <CommandList>
+                        <CommandGroup heading="หมวดหมู่ A">
+                            <CommandItem value="apple">🍎 Apple</CommandItem>
+                            <CommandItem value="avocado">🥑 Avocado</CommandItem>
+                        </CommandGroup>
+                        <CommandEmpty >No framework found.</CommandEmpty>
                         <CommandGroup>
-                            {!isFetch ? (fixtures.length > 0 ? fixtures.map((item: MatchType, index) => (
+                            {!isFetch ? (fixtures.length > 0 && fixtures.map((item: MatchType, index) => (
                                 <CommandItem
                                     key={item.id}
                                     value={item.home.name + ' vs ' + item.away.name}
@@ -178,9 +183,7 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                                         )}
                                     />
                                 </CommandItem>
-                            )) : (
-                                <CommandEmpty className="w-full">No framework found.</CommandEmpty>
-                            )) : (
+                            ))) : (
                                 <CommandEmpty>
                                     <LoaderCircle className="animate-spin size-4 w-full" />
                                 </CommandEmpty>

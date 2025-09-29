@@ -33,6 +33,8 @@ class TransApiController extends Controller
                     'user_id' => Auth::id(),
                     'package_id' => $pack->id,
                     'user_reference' => Functions::generateRandomCode(),
+                    'account_name' => env('BANK_ACCOUNT_NAME'),
+                    'account_number' => env('BANK_ACCOUNT_NUMBER'),
                     'amount' => $pack->price,
                     'points' => $pack->points,
                     'expired_at' => Carbon::now()->addDays(3),

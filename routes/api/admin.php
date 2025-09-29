@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Apis\Post\PostReportApiController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Apis\Admins\UserAdminApiController;
@@ -15,6 +16,9 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
                 Route::get('/', 'show')->name('table');
                 Route::patch('update', 'update')->name('update');
                 Route::get('payment', 'showPayment')->name('payment');
+                Route::prefix('tier')->name('tier.')->group(function(){
+                    Route::patch('{user_id}/tier', 'update_tier', )->name('update');
+                });
             });
         });
         Route::controller(TransAdminApiController::class)->group(function(){

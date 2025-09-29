@@ -11,15 +11,17 @@ import { Head, Link } from "@inertiajs/react";
 import { CirclePoundSterling, LoaderCircle, Lock, Target } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
+import * as postRoute from '@/routes/post';
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 export default function Home(request: any) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
     const id = request.id as string;
     const [post, setPost] = useState<PostType>();
     const [isLock, setIslock] = useState<boolean>(true);
 
     const [isLOading, setIsloading] = useState<boolean>(true);
     const [isFetch, setIsFetch] = useState<boolean>(false);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,7 +79,7 @@ export default function Home(request: any) {
                             toast.error('เกิดข้อผิดพลาดจาก server');
                         }
                         return; // ไม่ไป setPost
-                    }else{
+                    } else {
                         const result = await res.json();
                         if (result.code === 201) {
                             const data = result.data;
@@ -128,14 +130,20 @@ export default function Home(request: any) {
                                         </div>
                                     </Link>
 
-                                    {isLock && (
-                                        <WannaPayAlert onConfirm={handleUnlock}>
-                                            <Button disabled={isFetch}>
-                                                <CirclePoundSterling className="size-4 text-yellow-600" />
-                                                <span>{post.points > 0 ? post.points.toLocaleString() : 'free'}</span>
-                                            </Button>
-                                        </WannaPayAlert>
-                                    )}
+                                    <div className="flex gap-2">
+                                        <Link href={postRoute.default.report.index({post_id: post.id}).url}>
+                                            <Button variant="destructive">รายงาน</Button>
+                                        </Link>
+                                        {isLock && (
+                                            <WannaPayAlert onConfirm={handleUnlock}>
+                                                <Button disabled={isFetch}>
+                                                    <CirclePoundSterling className="size-4 text-yellow-600" />
+                                                    <span>{post.points > 0 ? post.points.toLocaleString() : 'free'}</span>
+                                                </Button>
+                                            </WannaPayAlert>
+                                        )}
+                                        <FollowSpace post={post} />
+                                    </div>
 
                                 </div>
                             </Card>
@@ -193,5 +201,91 @@ function WannaPayAlert({ children, onConfirm }: { children?: ReactNode, onConfir
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+    );
+}
+
+
+function FollowSpace({ post }: { post: PostType }) {
+    // const post = request.
+    const [item, setItem] = useState<any>();
+    const [isFollow, setIsFollow] = useState<boolean>(false);
+    const [isFetch, setIsFetch] = useState<boolean>(false);
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsFetch(true);
+                const res = await fetch(api.follow.following.id({ id: post.user_id }).url);
+                const result = await res.json();
+
+                if (result.code == 200) {
+                    setIsFollow(true);
+                } else {
+                    setIsFollow(false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+
+    function handleFollow() {
+        const fetchData = async () => {
+            try {
+                setIsFetch(true);
+                const res = await fetch(api.follow.update({ user_id: post.user_id }).url, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                });
+
+                const result = await res.json();
+                if (result.code === 200) {
+                    setIsFollow(false);
+                    toast.success(result.message);
+                } else if (result.code === 201) {
+                    setIsFollow(true);
+                    toast.success(result.message);
+                }else{
+                    toast.success(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        };
+        fetchData();
+    }
+
+
+    return (
+        <>
+            <Button variant={isFollow ? "outline" : "primary"} disabled={isFetch} onClick={handleFollow}>
+                {isFollow ? "ติดตามแล้ว" : "ติดตาม"}
+            </Button>
+        </>
     );
 }

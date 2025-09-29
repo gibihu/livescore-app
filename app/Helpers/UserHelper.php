@@ -38,7 +38,7 @@ class UserHelper
             case 'vip':
                 return User::TIER_VIP;
             default:
-                return $statusString; // หรือ throw exception
+                return $tierString; // หรือ throw exception
         }
     }
 }

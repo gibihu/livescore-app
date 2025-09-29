@@ -35,12 +35,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import type { PostType } from "@/types/global"
 import { toast } from "sonner"
 import { translateStatus, truncateMessage } from "@/lib/functions"
 import { Link } from "@inertiajs/react"
 import dash from "@/routes/dash"
 import api from "@/routes/api"
+import { PostType } from "@/types/post"
 
 
 

@@ -35,12 +35,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import type { PostType } from "@/types/global"
 import { toast } from "sonner"
 import { translateStatus, truncateMessage } from "@/lib/functions"
 import { Link } from "@inertiajs/react"
 import dash from "@/routes/dash"
 import api from "@/routes/api"
+import { PostType } from "@/types/post"
+import post from "@/routes/post"
 
 
 
@@ -174,15 +175,12 @@ export function PostTable() {
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(payment.id)}
-                            >
-                                Copy payment ID
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>View customer</DropdownMenuItem>
-                            <DropdownMenuItem>View payment details</DropdownMenuItem>
+                            <a href={post.view({id: row.original.id}).url} target="_blank">
+                                <DropdownMenuItem>เส้นทาง</DropdownMenuItem>
+                            </a>
+                            <Link href={dash.admin.post.report.list().url}>
+                                <DropdownMenuItem>รายงาน</DropdownMenuItem>
+                            </Link>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )

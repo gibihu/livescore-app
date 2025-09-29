@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Pages\Dash\PostPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -65,6 +66,10 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
         Route::get('table', function () {
             return Inertia::render('dashboard/admins/posts');
         })->name('table');
+
+        Route::controller(PostPageController::class)->prefix('report')->name('report.')->group(function(){
+            Route::get('/', 'ReportList')->name('list');
+        });
     });
 
     Route::controller(LeagueController::class)->group(function(){

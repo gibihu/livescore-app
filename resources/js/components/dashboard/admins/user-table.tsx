@@ -107,12 +107,57 @@ export function UserTable() {
             }
         }
         fetchData();
+    };
+
+
+    function handleUpdateTier(id: string, tier: string){
+        const fetchData = async () => {
+            try{
+                setIsFetch(true);
+                const res = await fetch(api.dash.admin.users.tier.update({user_id: id}).url, {
+                    method: 'PATCH',
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken ?? ''
+                    },
+                    body: JSON.stringify({
+                        tier: tier,
+                        id: id
+                    })
+                })
+                const result = await res.json();
+                if(result.code == 200){
+                    const data = result.data;
+                    setUsers(prev =>
+                        prev.map(user =>
+                            user.id === id ? { ...user, tier_text: data.tier_text } : user
+                        )
+                    );
+                    toast.success(result.message);
+                }else{
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        }
+        fetchData();
     }
 
 
 
 
-    const createColumns = (handdleUpdateRole: (id: string, roel:string) => void, isFetch: () => boolean): ColumnDef<any>[] => [
+    const createColumns = (handdleUpdateRole: (id: string, roel:string) => void, handleUpdateTier: (id: string, tier: string) => void, isFetch: () => boolean): ColumnDef<any>[] => [
         {
             accessorKey: "no",
             header: (() => (null)),
@@ -145,13 +190,61 @@ export function UserTable() {
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="lowercase">{row.getValue("tier_text")}</div>,
+            cell: ({ row }) => {
+                const [value, setValue] = React.useState<string>(row.original.tier_text);
+                const [isOpen, setIsOpen] = React.useState<boolean>(false);
+                // const [i, setI] = React.useState<string>();
+
+
+
+                return (
+                    <div className="flex justify-end">
+                        <Label htmlFor={`${row.original.id}`} className="sr-only">
+                            tier
+                        </Label>
+                        <Select defaultValue={value} value={value} onValueChange={(val)=>{
+                            setIsOpen(true);
+                            setValue(val);
+                            }} disabled={isFetch()}>
+                            <SelectTrigger
+                                className="w-full capitalize **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
+                                id={`${row.original.id}`}
+                            >
+                                <SelectValue placeholder="เลือกสถาณะ"/>
+                            </SelectTrigger>
+                            <SelectContent align="end" className="w-full" >
+                                <SelectItem value="bronze" className="capitalize">bronze</SelectItem>
+                                <SelectItem value="silver" className="capitalize">silver</SelectItem>
+                                <SelectItem value="gold" className="capitalize">gold</SelectItem>
+                                <SelectItem value="vip" className="capitalize">vip</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <AlertDialog open={isOpen}>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>คุณแน่ใจ?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        คุณต้องการเปลี่ยนบทบาทของ <span className="text-foreground">{row.original.username}</span> เป็น <span className="text-foreground capitalize">{value}</span> หรือไม่?
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel onClick={()=>{setIsOpen(false); setValue(row.original.tier_text)}}>ยกเลิก</AlertDialogCancel>
+                                    <AlertDialogAction onClick={()=>(handleUpdateTier(row.original.id, value))}>ยืนยัน</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                )
+            },
         },
         {
             accessorKey: "point",
-            header: "Point",
+            header: ()=>(
+                <div className="w-full text-center">Point</div>
+            ),
             cell: ({ row }) => (
-                <div className="capitalize">{row.original.wallet.points}</div>
+                <div className="capitalize text-center">{row.original.wallet.points}</div>
             ),
         },
         {
@@ -209,7 +302,7 @@ export function UserTable() {
 
 
 
-    const columns = createColumns(handdleUpdateRole, () => isFetch);
+    const columns = createColumns(handdleUpdateRole, handleUpdateTier, () => isFetch);
 
 
     const table = useReactTable({
