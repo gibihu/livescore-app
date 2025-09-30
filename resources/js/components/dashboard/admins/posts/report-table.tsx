@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import post from "@/routes/post";
-import { Link } from "@inertiajs/react";
+import web from "@/routes/web";
 import { MoreHorizontal } from "lucide-react";
 
 export default function ReportTable({ items }: { items: any }) {
@@ -18,7 +17,7 @@ export default function ReportTable({ items }: { items: any }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {items.map((item: any, index: number) => (
+                    {items.leght > 0 ? items.map((item: any, index: number) => (
                         <TableRow key={index}>
                             <TableCell className="flex flex-col">
                                 <span><span className="text-muted-foreground">เรื่อง:</span> {item.title}</span>
@@ -38,7 +37,7 @@ export default function ReportTable({ items }: { items: any }) {
                                         <DropdownMenuLabel className="text-sm text-muted-foreground">ดำเนินการ</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
 
-                                        <a href={post.view({id: item.post_id}).url} target="_blank">
+                                        <a href={web.post.view({id: item.post_id}).url} target="_blank">
                                             <DropdownMenuItem>ตรวจสอบ</DropdownMenuItem>
                                         </a>
                                         <AlertDialog>
@@ -71,7 +70,13 @@ export default function ReportTable({ items }: { items: any }) {
 
                             </TableCell>
                         </TableRow>
-                    ))}
+                    )) : (
+                        <TableRow>
+                            <TableCell colSpan={2} className="text-center text-muted-foreground">
+                                ไม่มีรายการ
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </Card>

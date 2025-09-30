@@ -6,12 +6,12 @@ import { Card } from "@/components/ui/card";
 import AppLayout from "@/layouts/layout";
 import { truncateMessage } from "@/lib/functions";
 import api from "@/routes/api";
+import web from "@/routes/web";
 import { PostType } from "@/types/post";
 import { Head, Link } from "@inertiajs/react";
 import { CirclePoundSterling, LoaderCircle, Lock, Target } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
-import * as postRoute from '@/routes/post';
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 export default function Home(request: any) {
@@ -131,7 +131,7 @@ export default function Home(request: any) {
                                     </Link>
 
                                     <div className="flex gap-2">
-                                        <Link href={postRoute.default.report.index({post_id: post.id}).url}>
+                                        <Link href={web.post.report.index({post_id: post.id}).url}>
                                             <Button variant="destructive">รายงาน</Button>
                                         </Link>
                                         {isLock && (

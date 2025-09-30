@@ -158,8 +158,8 @@ class PostApisController extends Controller
             if(Auth::check()){
                 $user = Auth::user();
                 $inventory = Inventory::where('user_id', $user->id)->where('source_type', Inventory::TYPE_POST)->where('source_id', $id)->first();
-                if($inventory) {
-                    $post = Post::with('user')->where('id', $inventory->source_id)->first();
+                if($inventory || $user->role == User::ROLE_ADMIN) {
+                    $post = Post::with('user')->where('id', $id)->first();
                     return response()->json([
                         'message' => 'สำเร็จ',
                         'data' => $post,

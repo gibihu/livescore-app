@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/layout";
 import { cn } from "@/lib/utils";
-import { home } from "@/routes";
 import api from "@/routes/api";
 import { PostType } from "@/types/post";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +17,7 @@ import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
+import web from "@/routes/web";
 
 
 
@@ -61,7 +61,7 @@ export default function Home(request: any) {
                     setIsFinish(true);
                     toast.success(result.message);
                     setTimeout(() => {
-                        router.visit(home().url);
+                        router.visit(web.home().url);
                     }, 1000);
                 } else {
                     toast.error(result.message);

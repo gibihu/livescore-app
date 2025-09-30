@@ -78,7 +78,7 @@ const mock: dataType[] = [
 
 export function IncomeChart({ range = '7d' }: Types) {
     const [timeRange, setTimeRange] = React.useState(range);
-    const [rawDate, setRawDate] = React.useState<dataType[]>(mock);
+    const [rawDate, setRawDate] = React.useState<dataType[]>([]);
     const [chartData, setChartData] = React.useState<dataType[]>([]);
     const [filterDate, setFilterDate] = React.useState<filterListType>({
         "7d": [],
@@ -97,11 +97,11 @@ export function IncomeChart({ range = '7d' }: Types) {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const res = await fetch(api.dash.wallet.history().url);
+                const res = await fetch(api.dash.wallet.income().url);
                 const result = await res.json();
                 if (result.code == 200) {
                     const data = result.data;
-                    setItems(data);
+                    setRawDate(data);
                 } else {
                     toast.error(result.message, { description: result.code || '' });
                 }

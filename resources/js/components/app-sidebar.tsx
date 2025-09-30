@@ -20,6 +20,7 @@ import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, LayoutGr
 import AppLogo from './app-logo';
 
 import dash from '@/routes/dash';
+import web from '@/routes/web';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -113,7 +114,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dash.index()} prefetch>
+                            <Link href={web.home()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

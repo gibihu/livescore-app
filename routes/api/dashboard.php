@@ -18,6 +18,7 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
         Route::controller(WalletApiController::class)->group(function(){
             Route::prefix('wallet')->name('wallet.')->group(function(){
                 Route::get('history', 'showHistory')->name('history');
+                Route::get('income', 'showIncome')->name('income');
             });
         });
         Route::controller(PointsApiController::class)->group(function(){
