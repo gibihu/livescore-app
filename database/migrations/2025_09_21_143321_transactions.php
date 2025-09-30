@@ -18,23 +18,14 @@ return new class extends Migration
             $table->string('user_reference', 10)->nullable();
             $table->string('reference_code', 100)->nullable();
             $table->tinyInteger('payment_method')->default(1);
+            $table->string('account_name', 100)->nullable();
+            $table->string('account_number', 100)->nullable();
             $table->decimal('amount', 12, 2);
             $table->decimal('points', 12, 0);
             $table->decimal('rate', 12, 2)->nullable();
             $table->string('currency', 10)->default('THB');
             $table->tinyInteger('type')->default(1);
-            // $table->enum('type', ['deposit', 'withdraw'])->default('deposit');
             $table->tinyInteger('status')->default(1);
-            // $table->enum('status', [
-            //     'pending',
-            //     'cancle',
-            //     'awaiting_approval',
-            //     'approved',
-            //     'rejected',
-            //     'failed',
-            //     'refund',
-            //     'refunded'
-            // ])->default('pending');
             $table->string('slip_url', 255)->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('approved_at')->nullable();
@@ -48,6 +39,17 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('admin_id')->references('id')->on('users')->onDelete('set null');
         });
+            // $table->enum('type', ['deposit', 'withdraw'])->default('deposit');
+            // $table->enum('status', [
+            //     'pending',
+            //     'cancle',
+            //     'awaiting_approval',
+            //     'approved',
+            //     'rejected',
+            //     'failed',
+            //     'refund',
+            //     'refunded'
+            // ])->default('pending');
     }
 
     /**

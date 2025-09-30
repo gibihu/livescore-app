@@ -19,6 +19,7 @@ import {
 import { MatchType } from "@/types/match"
 import api from "@/routes/api"
 import { toast } from "sonner"
+import { CompetitionType } from "@/types/league"
 
 
 type Type = {
@@ -26,15 +27,20 @@ type Type = {
     classPopover?: string;
     onChange?: (target: number | null) => void;
     select_id?: number;
+    data: {
+        matches: MatchType[],
+        leagues: CompetitionType[];
+    }
 };
 
 
-export function PickMatch({ select_id, className, onChange, classPopover }: Type) {
+export function PickMatch({ select_id, className, onChange, classPopover, data }: Type) {
     const [open, setOpen] = React.useState(false);
     const [value, setValue] = React.useState("");
     const [id, setId] = React.useState<Number>();
     const [fixtures, setFixtures] = React.useState<MatchType[]>([]);
     const [isFetch, setIsFetch] = React.useState<boolean>(true);
+    const [items, setItems] = React.useState<CompetitionType[]>();
 
 
     React.useEffect(() => {
@@ -49,7 +55,6 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                 } else {
                     toast.error(result.message);
                 }
-                handelNextStep();
             } catch (error) {
                 console.error('Error:', error);
                 let message = "เกิดข้อผิดพลาดบางอย่าง";
@@ -68,51 +73,28 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
         fetchData();
     }, []);
 
-    function handelNextStep() {
-        const fetchData = async () => {
-            setIsFetch(true);
-            // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
-            const res = await fetch(api.match.live().url);
+    React.useEffect(() => {
+        if (data.leagues && data.leagues.length > 0) {
+            // เรียง leagues ตาม tier จากน้อยไปมาก
+            const sortedLeagues = [...data.leagues].sort((a, b) => a.tier - b.tier);
 
-            const result = await res.json();
-            // if (result.code == 200) {
-            if (result.code == 200) {
-                const data = await result.data;
+            const updatedFilters = sortedLeagues.map((league: CompetitionType) => {
+                // หา matches ของ league นี้
+                const leagueMatches = (data.matches || [])
+                    .filter((match) => match.competition && match.competition.id === league.id)
+                    // เรียง matches ตาม added (ใหม่ -> เก่า) ถ้าอยากเก่า -> ใหม่ ให้เปลี่ยน b - a
+                    .sort((a: any, b: any) => new Date(a.added).getTime() - new Date(b.added).getTime());
 
-                // กรองข้อมูลที่มี fixture_id เป็น 0 หรือ null ออกไป
-                const validData = data.filter((item: MatchType) =>
-                    item.fixture_id && item.fixture_id !== 0
-                );
+                return {
+                    ...league,
+                    matches: leagueMatches, // จะเป็น array ว่างถ้าไม่มี matches
+                };
+            });
 
-                const newData = validData.map((item: MatchType) => ({
-                    ...item,
-                    id: item.fixture_id,
-                }));
-
-                setFixtures(prev => {
-                    // update element เดิม
-                    const updatedPrev = prev.map(m =>
-                        newData.some((d: any) => d.id === m.id)
-                            ? { ...m, ...newData.find((d: any) => d.id === m.id) }
-                            : m
-                    );
-
-                    // เพิ่ม element ใหม่ที่ยังไม่มี
-                    const newItems = newData.filter((d: any) => !prev.some(m => m.id === d.id));
-
-                    return [...updatedPrev, ...newItems];
-                });
-            } else {
-                const errors = result;
-                toast.error(result.message);
-            }
-            setIsFetch(false);
-            setId(Number(select_id));
-            onChange?.(Number(select_id));
-        };
-        fetchData();
-    }
-
+            setItems(updatedFilters);
+            // console.log(updatedFilters);
+        }
+    }, [fixtures]);
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -125,7 +107,7 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                     disabled={isFetch}
                 >
                     {id ? (() => {
-                        const item = fixtures.find(item => item.id === id);
+                        const item = data.matches.find(item => item.id === id);
                         return item ? (
                             <div className="w-full flex justify-center gap-2">
                                 <div className="flex gap-2 w-full justify-end">
@@ -148,44 +130,41 @@ export function PickMatch({ select_id, className, onChange, classPopover }: Type
                 <Command>
                     <CommandInput placeholder="Search framework..." className="h-9" />
                     <CommandList>
-                        <CommandGroup>
-                            {!isFetch ? (fixtures.length > 0 ? fixtures.map((item: MatchType, index) => (
-                                <CommandItem
-                                    key={item.id}
-                                    value={item.home.name + ' vs ' + item.away.name}
-                                    onSelect={() => {
-                                        setId(item.id);
-                                        onChange?.(item.id);
-                                        setOpen(false);
-                                        console.log(item.id);
-                                    }}
-                                >
-                                    <div className="w-full flex justify-center gap-2">
-                                        <div className="flex gap-2 w-full justify-end">
-                                            <span className="text-end">{item.home.name}</span>
-                                            <img src={item.home.logo} alt={item.home.logo} className="size-4" />
+                        {items?.map((league: CompetitionType) => (
+                            <CommandGroup heading={<div className="w-full text-center pe-6">{league.name}</div>} key={league.id}>
+                                {league.matches?.map((item: MatchType) => (
+                                    <CommandItem
+                                        key={item.id}
+                                        value={item.home.name + ' vs ' + item.away.name}
+                                        onSelect={() => {
+                                            setId(item.id);
+                                            onChange?.(item.id);
+                                            setOpen(false);
+                                            // console.log(item.id);
+                                        }}
+                                    >
+                                        <div className="w-full flex justify-center gap-2">
+                                            <div className="flex gap-2 w-full justify-end">
+                                                <span className="text-end">{item.home.name}</span>
+                                                <img src={item.home.logo} alt={item.home.logo} className="size-4" />
+                                            </div>
+                                            <span>vs</span>
+                                            <div className="flex gap-2 w-full">
+                                                <img src={item.away.logo} alt={item.away.logo} className="size-4" />
+                                                <span>{item.away.name}</span>
+                                            </div>
                                         </div>
-                                        <span>vs</span>
-                                        <div className="flex gap-2 w-full">
-                                            <img src={item.away.logo} alt={item.away.logo} className="size-4" />
-                                            <span>{item.away.name}</span>
-                                        </div>
-                                    </div>
-                                    <Check
-                                        className={cn(
-                                            "ml-auto",
-                                            id === item.id ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                </CommandItem>
-                            )) : (
-                                <CommandEmpty className="w-full">No framework found.</CommandEmpty>
-                            )) : (
-                                <CommandEmpty>
-                                    <LoaderCircle className="animate-spin size-4 w-full" />
-                                </CommandEmpty>
-                            )}
-                        </CommandGroup>
+                                        <Check
+                                            className={cn(
+                                                "ml-auto",
+                                                id === item.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        ))}
+                        <CommandEmpty >No framework found.</CommandEmpty>
                     </CommandList>
                 </Command>
             </PopoverContent>

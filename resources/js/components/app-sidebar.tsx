@@ -16,10 +16,11 @@ import { NavGroup, type NavItem } from '@/types';
 import { AuthType } from '@/types/auth';
 import { UserType } from '@/types/user';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, LayoutGrid, NotebookPen, SwatchBook, UsersRound, Wallet } from 'lucide-react';
+import { BookOpen, ChartSpline, CirclePoundSterling, Folder, HandCoins, LayoutGrid, NotebookPen, SwatchBook, TicketSlash, UsersRound, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 import dash from '@/routes/dash';
+import web from '@/routes/web';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -95,6 +96,12 @@ export function AppSidebar() {
                             isActive: true,
                             icon: SwatchBook,
                         },
+                        {
+                            title: "รายงาน",
+                            href: dash.admin.post.report.list().url,
+                            isActive: true,
+                            icon: TicketSlash,
+                        },
                     ],
                     icon: undefined
                 }
@@ -107,7 +114,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dash.index()} prefetch>
+                            <Link href={web.home()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

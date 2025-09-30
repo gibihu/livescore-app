@@ -3,7 +3,8 @@ import { UserType } from "@/types/user";
 import { Link, usePage } from "@inertiajs/react";
 import { Button } from "./ui/button";
 import { CirclePoundSterling } from "lucide-react";
-import { home, login, logout } from "@/routes";
+import { login, logout } from "@/routes";
+import web from "@/routes/web";
 
 
 
@@ -19,7 +20,7 @@ export default function NavBar(){
     return (
         <>
             <div className="w-full flex gap-2 justify-between items-center rounded-xl bg-foreground text-background  shadow-xl p-4">
-                <Link href={home().url} prefetch>
+                <Link href={web.home().url} prefetch>
                     <h4 className="text-xl font-bold capitalize">{API_NAME}</h4>
                 </Link>
                 <div className="flex gap-2 items-center">

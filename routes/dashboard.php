@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Pages\Dash\PostPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -24,10 +25,6 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         Route::get('/', function () {
             return Inertia::render('dashboard/posts-page');
         })->name('index');
-        Route::get('create', function (Request $request) {
-            $fixture_id = $request->query('fixture_id');
-            return Inertia::render('dashboard/create-post', compact('fixture_id'));
-        })->name('create');
         // Route::get('edit/{id}', function ($id) {
         //     return Inertia::render('dashboard/post-edit-page', ['id' => $id]);
         // })->name('edit');
@@ -40,6 +37,10 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         Route::get('upload/{id}', function ($id) {
             return Inertia::render('dashboard/payment-upload-page', ['id' => $id]);
         })->name('upload');
+    });
+
+    Route::controller(PostPageController::class)->prefix('post')->name('post.')->group(function () {
+        Route::get('create', 'CreatePostPage')->name('create');
     });
 });
 
@@ -65,6 +66,10 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
         Route::get('table', function () {
             return Inertia::render('dashboard/admins/posts');
         })->name('table');
+
+        Route::controller(PostPageController::class)->prefix('report')->name('report.')->group(function(){
+            Route::get('/', 'ReportList')->name('list');
+        });
     });
 
     Route::controller(LeagueController::class)->group(function(){

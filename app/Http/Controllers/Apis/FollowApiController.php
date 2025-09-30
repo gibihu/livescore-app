@@ -26,16 +26,45 @@ class FollowApiController extends Controller
                 ], 200);
             }else{
                 $create = new Follow();
-                $create->followed_id = $fan->id;
+                $create->follower_id = $fan->id;
                 $create->followed_id = $creater->id;
                 $create->save();
                 return response()->json([
                     'message' => 'ติดตามแล้ว',
-                    'data' => $creater,
                     'code' => 201,
                 ], 201);
             }
 
+        }catch (Exception $e) {
+            $response = [
+                'message' => $e->getMessage() ?? 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function following(Request $request, $id)
+    {
+        try{
+            $follow = Follow::with('followed')->where('follower_id', Auth::id())->where('followed_id', $id)->first();
+
+            if($follow){
+                return response()->json([
+                    'message' => 'สำเร็จ',
+                    'data' => $follow,
+                    'code' => 200,
+                ], 200);
+            }else{
+                return response()->json([
+                    'message' => 'ยังไม่ได้ติดตาม',
+                    'data' => null,
+                    'code' => 404,
+                ], 404);
+            }
         }catch (Exception $e) {
             $response = [
                 'message' => $e->getMessage() ?? 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',

@@ -27,7 +27,7 @@ class UserAdminApiController extends Controller
             }else{
                 throw new Exception("ไม่สามารถหารด้วยศูนย์ได้!");
             }
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,
@@ -57,7 +57,48 @@ class UserAdminApiController extends Controller
             }else{
                 throw new Exception("ไม่สามารถหารด้วยศูนย์ได้!");
             }
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+                'request' => $request->all(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function update_tier(Request $request, $user_id){
+        try{
+            $user = User::find($user_id ?? $request->id);
+            if($user){
+                $tier = $request->tier ?? $request->tier;
+                $exp = $request->exp ?? $user->exp;
+
+                $user->tier = UserHelper::toModelTire($tier);
+                $user->exp = $exp;
+                if($user->save()){
+                    return response()->json([
+                        'message' => 'สำเร็จ',
+                        'data' => [
+                            'tier' => $user->tier,
+                            'tier_text' => $user->tier_text,
+                            'exp' => $user->exp,
+                        ],
+                        'code' => 200
+                    ], 200);
+                }else{
+                    throw  new  Exception('ไม่สามารถบันทึกได้');
+                }
+            }else{
+                return response()->json([
+                    'message' => 'ไม่พบผู้ใช้',
+                    'code' => 404,
+                ], 404);
+            }
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,

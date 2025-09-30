@@ -18,6 +18,8 @@ class Transaction extends Model
         'user_reference',
         'reference_code',
         'payment_method',
+        'account_name',
+        'account_number',
         'amount',
         'points',
         'rate',

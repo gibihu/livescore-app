@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('points')->default(0);
             $table->tinyInteger('privacy')->default(1);
             // $table->enum('privacy', ['public', 'private'])->default('private');
+            $table->softDeletes();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

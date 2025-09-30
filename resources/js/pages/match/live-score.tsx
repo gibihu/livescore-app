@@ -10,35 +10,38 @@ import { PostType } from "@/types/post";
 
 
 const API_URL: string = import.meta.env.VITE_API_URL;
-export function LiveScore() {
-    const [matches, setMatches] = useState<MatchType[]>([]);
+export function LiveScore({match_items, leagues_items, posts_items}:{match_items: MatchType[], leagues_items: CompetitionType[], posts_items: PostType[]}) {
+    const [matches, setMatches] = useState<MatchType[]>(match_items);
     const [isloading, setIsloading] = useState(true);
-    const [leagues, setLeagues] = useState<CompetitionType[]>([]);
+    const [leagues, setLeagues] = useState<CompetitionType[]>(leagues_items);
     const [filters, setFilters] = useState<(CompetitionType & { matches: MatchType[] })[]>([]);
-        const [posts, setPost] = useState<PostType[]>([]);
+    const [posts, setPost] = useState<PostType[]>(posts_items);
 
     const [isMatchFetch, setIsMatchFetch] = useState<boolean>(true);
     const [isLeagueFetch, setIsLeagueFetch] = useState<boolean>(false);
     const [isPostfetch, setPostFetch] = useState<boolean>(false);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsMatchFetch(true);
-            // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
-            const res = await fetch(api.match.live().url);
+    const [restep, setRestep] = useState<number>(1);
 
-            const result = await res.json();
-            // if (result.code == 200) {
-            if (result.code == 200) {
-                const data = await result.data;
-                setMatches(data);
-            } else {
-                const errors = result;
-                toast.error(result.message);
-            }
-            setIsMatchFetch(false);
-        };
-        fetchData();
+    useEffect(() => {
+        // const fetchData = async () => {
+        //     setIsMatchFetch(true);
+        //     // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
+        //     const res = await fetch(api.match.live().url);
+
+        //     const result = await res.json();
+        //     // if (result.code == 200) {
+        //     if (result.code == 200) {
+        //         const data = await result.data;
+        //         setMatches(data);
+        //     } else {
+        //         const errors = result;
+        //         toast.error(result.message);
+        //     }
+        //     setIsMatchFetch(false);
+        // };
+        // fetchData();
+        setRestep(3);
         const intervalId = setInterval(hanffleRelod, 60000);
 
         // ล้าง interval เมื่อ component ถูก unmount
@@ -48,21 +51,22 @@ export function LiveScore() {
     function hanffleRelod() {
         const fetchData = async () => {
             setIsMatchFetch(true);
-            // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
             const res = await fetch(api.match.live().url);
 
             const result = await res.json();
-            // if (result.code == 200) {
             if (result.code == 200) {
                 const data = await result.data;
                 setMatches(data);
+                setRestep(2);
             } else {
                 const errors = result;
                 toast.error(result.message);
             }
             setIsMatchFetch(false);
         };
-        fetchData();
+        if(restep == 1){
+            fetchData();
+        }
     }
 
     useEffect(() => {
@@ -75,6 +79,7 @@ export function LiveScore() {
                     const data = await result.data;
                     console.log(data);
                     setPost(data);
+                    setRestep(3);
                 } else {
                     toast.error(result.message);
                 }
@@ -94,8 +99,10 @@ export function LiveScore() {
             }
         };
 
-        fetchData();
-    }, []);
+        if(restep == 2){
+            fetchData();
+        }
+    }, [restep]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -108,6 +115,7 @@ export function LiveScore() {
             if (result.code == 200) {
                 const data = await result.data;
                 setLeagues(data);
+                setRestep(4);
             } else {
                 const errors = result;
                 toast.error(result.message);
@@ -115,27 +123,31 @@ export function LiveScore() {
             setIsLeagueFetch(false);
             setIsloading(false);
         };
-        if(!isMatchFetch){
+        if(restep == 3){
             fetchData();
         }
-    }, [isMatchFetch]);
+    }, [restep]);
 
 
     useEffect(() => {
-        if (posts && posts.length > 0) {
-            const matchesWithPosts1: MatchType[] = matches.map(item => ({
-                ...item,
-                posts: posts.filter(post => post.ref_id === item.fixture_id)
-            }));
-            console.log(matchesWithPosts1);
-            setMatches(matchesWithPosts1);
+        if(restep == 4){
+            if (posts && posts.length > 0) {
+                const matchesWithPosts1: MatchType[] = matches.map(item => ({
+                    ...item,
+                    posts: posts.filter(post => post.ref_id === item.fixture_id)
+                }));
+                // console.log(matchesWithPosts1);
+                setMatches(matchesWithPosts1);
+
+            }
+            setRestep(5);
         }
-    }, [isMatchFetch, posts])
+    }, [restep]);
 
 
 
     useEffect(() => {
-        if (leagues && leagues.length > 0) {
+        if (restep == 5 &&leagues && leagues.length > 0) {
             const updatedFilters = leagues.map((league: CompetitionType) => {
                 // หา matches ที่เป็นของ league นี้
                 const leagueMatches = (matches || []).filter(
@@ -147,14 +159,15 @@ export function LiveScore() {
                 };
             });
 
-            console.log(updatedFilters)
+            // console.log(updatedFilters)
 
             setFilters(updatedFilters);
+            setRestep(1);
         }
-    }, [matches, leagues]);
+    }, [restep]);
 
 
     return (
-        <BoardTable items={filters} isFetch={isloading} />
+        <BoardTable items={filters} isFetch={false} />
     );
 }

@@ -18,7 +18,7 @@ import { PostType } from "@/types/post"
 import { Avatar } from "@radix-ui/react-avatar"
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link } from "@inertiajs/react"
-import * as route_post from "@/routes/post";
+import web from "@/routes/web"
 
 interface TypeOfCompo {
     items: CompetitionType[];
@@ -130,7 +130,7 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                         <div className="flex gap-2 max-h-8">
                                                             {
                                                                 match.posts.map((post: PostType) => (
-                                                                    <Link href={route_post.view(post.id).url} className="size-6 rounded-full overflow-hidden">
+                                                                    <Link href={web.post.view(post.id).url} className="size-6 rounded-full overflow-hidden" key={post.id}>
                                                                         <Avatar>
                                                                             <AvatarImage src="https://github.com/shadcn.png" />
                                                                             <AvatarFallback>CN</AvatarFallback>
@@ -138,6 +138,11 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                                     </Link>
                                                                 ))
                                                             }
+                                                            <Link href={web.match.show({match_id: match.id}).url}>
+                                                                <Button>
+                                                                    ทีเด็ด
+                                                                </Button>
+                                                            </Link>
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>
