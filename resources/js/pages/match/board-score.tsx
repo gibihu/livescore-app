@@ -389,7 +389,7 @@ function TableCellViewer({ item, className, children, type }: { item: MatchType,
                                         <Tabs defaultValue="event" className="w-full" value={selectedTab} onValueChange={setSelectedTab}>
                                             <TabsList>
                                                 <TabsTrigger value="event">อีเว้น</TabsTrigger>
-                                                <TabsTrigger value="player">ผู้เล่น</TabsTrigger>
+                                                {/* <TabsTrigger value="player">ผู้เล่น</TabsTrigger> */}
                                             </TabsList>
 
                                             {/* Render ทั้งหมด แต่ซ่อนด้วย class */}

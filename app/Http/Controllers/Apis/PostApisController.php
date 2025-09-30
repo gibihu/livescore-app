@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Wallet;
 use App\Models\WalletHistory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -26,6 +27,20 @@ class PostApisController extends Controller
     public function store(Request $request)
     {
         try {
+            $todayPosts = Post::where('user_id', Auth::id())
+                ->whereDate('created_at', Carbon::today())
+                ->count();
+            $max = UserHelper::MaxFromTier(Auth::user()->tier);
+
+            if ($todayPosts >= $max) {
+                return response()->json([
+                    'message' => "วันนี้คุณสร้างโพสต์ครบ $max ครั้งแล้ว ไม่สามารถสร้างเพิ่มได้",
+                    'code' => 403,
+                ], 403);
+            }
+
+
+
             $title = $request->title;
             $points = $request->points;
             $contents = $request->contents;

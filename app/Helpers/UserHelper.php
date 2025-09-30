@@ -41,4 +41,25 @@ class UserHelper
                 return $tierString; // หรือ throw exception
         }
     }
+
+    public static function MaxFromTier(int $tierCode)
+    {
+        switch ($tierCode) {
+            case User::TIER_BRONZE:
+                return 1;
+                break;
+            case User::TIER_SILVER:
+                return 3;
+                break;
+            case User::TIER_GOLD:
+                return 5;
+                break;
+            case User::TIER_VIP:
+                return 5;
+                break;
+            default:
+                return 3;
+            break;
+        }
+    }
 }

@@ -160,6 +160,7 @@ function PopUpExchange({ children }: { children: ReactNode }) {
     const [open, setOpen] = useState(false);
 
     const schema = z.object({
+        account_number: z.string().min(10, { message: "ขั้นต่ำ 10 ตัว" }),
         amount: z.number().int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.income, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" })
     });
     type FormValues = z.infer<typeof schema>;
@@ -167,6 +168,7 @@ function PopUpExchange({ children }: { children: ReactNode }) {
         resolver: zodResolver(schema),
         defaultValues: {
             amount: user.wallet.income,
+            account_number: ''
         },
         mode: "onChange",
     });
@@ -228,6 +230,19 @@ function PopUpExchange({ children }: { children: ReactNode }) {
                             <AlertDialogDescription asChild>
 
                                 <div className="flex flex-col gap-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="account_number"
+                                        render={({ field, fieldState }) => (
+                                            <FormItem className="col-span-4">
+                                                <FormLabel>เลขบัญชี</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="กรอกเลขบัญชี" {...field} disabled={isFetch}/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="amount"

@@ -25,10 +25,6 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         Route::get('/', function () {
             return Inertia::render('dashboard/posts-page');
         })->name('index');
-        Route::get('create', function (Request $request) {
-            $fixture_id = $request->query('fixture_id');
-            return Inertia::render('dashboard/create-post', compact('fixture_id'));
-        })->name('create');
         // Route::get('edit/{id}', function ($id) {
         //     return Inertia::render('dashboard/post-edit-page', ['id' => $id]);
         // })->name('edit');
@@ -41,6 +37,10 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         Route::get('upload/{id}', function ($id) {
             return Inertia::render('dashboard/payment-upload-page', ['id' => $id]);
         })->name('upload');
+    });
+
+    Route::controller(PostPageController::class)->prefix('post')->name('post.')->group(function () {
+        Route::get('create', 'CreatePostPage')->name('create');
     });
 });
 

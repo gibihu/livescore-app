@@ -217,7 +217,7 @@ class TransApiController extends Controller
     }
 
 
-    public function Withdraw(Request $request)
+    public function withdraw(Request $request)
     {
         try{
             $amount = $request->amount; //points
@@ -239,6 +239,7 @@ class TransApiController extends Controller
                     $trans->type = Transaction::WITHDRAW;
                     $trans->status = Transaction::STATUS_AWAITING_APPROVAL;
                     $trans->user_reference = Functions::generateRandomCode();
+                    $trans->account_number = $request->account_number ?? '';
                     if($trans->save()){
                         return response()->json([
                             'message' => 'บันทุกสำเร็จ',

@@ -20,6 +20,8 @@ import api from "@/routes/api";
 import dash from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
 import { AuthType } from "@/types/auth";
+import { CompetitionType } from "@/types/league";
+import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
@@ -36,6 +38,13 @@ export default function CreatePostPage(request: any) {
     // 2. setup form
     const auth = request.auth as AuthType;
     const user = auth?.user as UserType;
+
+    const itemsForSelect = {
+        matches: request.matches as MatchType[],
+        leagues: request.leagues as CompetitionType[],
+    };
+    const query = request.query as any;
+
     const [maxPoints, setMaxPoints] = useState<number>(100);
     useEffect(() => {
         setMaxPoints(MaxPoints(user?.tier_text || 'bronze'));
@@ -206,7 +215,7 @@ export default function CreatePostPage(request: any) {
                                         render={({ field, fieldState }) => (
                                             <FormItem className="col-span-4">
                                                 <FormControl>
-                                                    <PickMatch className="w-full" select_id={request.fixture_id ?? null} onChange={(target: number | null) => {
+                                                    <PickMatch className="w-full" select_id={query.fixture_id ?? null} data={itemsForSelect} onChange={(target: number | null) => {
                                                         form.setValue("fixture_id", Number(target));
                                                     }} />
                                                 </FormControl>
@@ -227,7 +236,7 @@ export default function CreatePostPage(request: any) {
                                                     render={({ field }) => (
                                                         <FormItem className="col-span-4 text-center">
                                                             <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
@@ -239,7 +248,7 @@ export default function CreatePostPage(request: any) {
                                                     render={({ field }) => (
                                                         <FormItem className="col-span-4 text-center">
                                                             <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
@@ -257,18 +266,7 @@ export default function CreatePostPage(request: any) {
                                                     render={({ field }) => (
                                                         <FormItem className="col-span-4 text-center">
                                                             <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_live_2"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
@@ -279,7 +277,18 @@ export default function CreatePostPage(request: any) {
                                                     render={({ field }) => (
                                                         <FormItem className="col-span-4 text-center">
                                                             <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                <Input placeholder="X" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_live_2"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
@@ -297,18 +306,7 @@ export default function CreatePostPage(request: any) {
                                                     render={({ field }) => (
                                                         <FormItem className="col-span-4 text-center">
                                                             <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_pre_2"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
@@ -319,7 +317,18 @@ export default function CreatePostPage(request: any) {
                                                     render={({ field }) => (
                                                         <FormItem className="col-span-4 text-center">
                                                             <FormControl>
-                                                                <Input placeholder="เลข" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                <Input placeholder="X" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="odds_pre_2"
+                                                    render={({ field }) => (
+                                                        <FormItem className="col-span-4 text-center">
+                                                            <FormControl>
+                                                                <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
