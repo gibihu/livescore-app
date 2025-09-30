@@ -138,6 +138,11 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                                     </Link>
                                                                 ))
                                                             }
+                                                            <Link href={web.match.show({match_id: match.id}).url}>
+                                                                <Button>
+                                                                    ทีเด็ด
+                                                                </Button>
+                                                            </Link>
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>

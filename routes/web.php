@@ -17,6 +17,7 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
         Route::get('fixture', function(){
             return Inertia::render('fixture');
         })->name('fixture');
+        Route::get('show/{match_id}', 'showMatch')->name('show');
     });
 
 
