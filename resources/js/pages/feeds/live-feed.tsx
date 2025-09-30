@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { truncateMessage } from "@/lib/functions";
 import api from "@/routes/api";
-import post from "@/routes/post";
+import web from "@/routes/web";
 import { PostType } from "@/types/post";
 import { Link } from "@inertiajs/react";
 import { CirclePoundSterling, Lock } from "lucide-react";
@@ -68,7 +68,7 @@ export default function FeedLive() {
                                 {truncateMessage(generateSecretMessage()+generateSecretMessage(), 150)}
                             </p>
 
-                            <Link href={post.view(item.id).url}>
+                            <Link href={web.post.view(item.id).url}>
                                 <Button className="h-auto hover:bg-accent/30  absolute inset-0 bg-accent/30 backdrop-blur-md flex items-center justify-center text-gray-600 text-lg font-semibold z-20 transition-opacity duration-300 cursor-pointer">
                                     <span className="flex items-center gap-2 text-foreground"><Lock className="size-5" />  ปลล็อก</span>
                                 </Button>
