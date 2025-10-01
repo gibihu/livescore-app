@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('seasons', function (Blueprint $table) {
-            $table->id();
+            $table->char('id', 36)->primary();
+            $table->bigInteger('seasons')->index();
             $table->string('name');
             $table->date('start')->nullable();
             $table->date('end')->nullable();

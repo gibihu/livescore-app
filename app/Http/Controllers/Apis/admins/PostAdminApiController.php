@@ -2,15 +2,9 @@
 
 namespace App\Http\Controllers\Apis\Admins;
 use App\Http\Controllers\Controller;
-
-use Exception;
+use App\Models\Post\Post;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
-use App\Models\User;
-use App\Models\Post;
 
 class PostAdminApiController extends Controller
 {

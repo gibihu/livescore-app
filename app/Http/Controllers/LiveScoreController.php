@@ -2,21 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Flag;
+use App\Models\Football\MatchEvent;
+use App\Models\Football\Matchs;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
-
-use Carbon\Carbon;
-
-use App\Models\User;
-use App\Models\Flag;
-use App\Models\MatchEvent;
-use App\Models\Matchs;
 
 class LiveScoreController extends Controller
 {

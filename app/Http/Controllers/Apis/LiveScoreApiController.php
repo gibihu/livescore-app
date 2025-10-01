@@ -2,18 +2,11 @@
 
 namespace App\Http\Controllers\Apis;
 use App\Http\Controllers\Controller;
-
+use App\Http\Controllers\LiveScoreController as LiveController;
+use App\Models\Football\Matchs;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-
-use App\Http\Controllers\LiveScoreController as LiveController;
-
-use App\Models\User;
-use App\Models\Matchs;
 
 class LiveScoreApiController extends Controller
 {

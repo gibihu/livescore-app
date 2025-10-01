@@ -2,6 +2,7 @@
 
 namespace App\Models\Football;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Football\Federation;
@@ -10,10 +11,11 @@ use App\Models\Football\Seasons;
 
 class Competition extends Model
 {
+    use HasUuids; // เพราะ id เป็น uuid
     protected $table = 'competitions';
 
     protected $fillable = [
-        'id',
+        'competition_id',
         'name',
         'is_league',
         'is_cup',
@@ -26,6 +28,13 @@ class Competition extends Model
         'federation_id',
     ];
 
+    protected $casts = [
+        'is_league' => 'boolean',
+        'is_cup' => 'boolean',
+        'has_groups' => 'boolean',
+        'active' => 'boolean',
+        'national_teams_only' => 'boolean',
+    ];
     public $timestamps = true;
 
 }

@@ -22,6 +22,7 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
 
 
     Route::prefix('post')->name('post.')->group(function(){
+        Route::get('/ ', 'showPostAll')->name('show');
         Route::get('{id}', function ($id) {
             return Inertia::render('posts/view', ['id' => $id]);
         })->name('view');

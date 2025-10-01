@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('federations', function (Blueprint $table) {
-            $table->id();
+            $table->char('id', 36)->primary();
+            $table->bigInteger('federation_id')->index();
             $table->string('name');
             $table->timestamps();
         });

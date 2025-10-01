@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('countries', function (Blueprint $table) {
+        Schema::create('match_players', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->bigInteger('country_id')->index();
+            $table->char('player_id', 36);
+            $table->char('team_id', 36)->nullable()->unique();
+            $table->foreign('team_id')->references('id')->on('teams')->nullOnDelete();
+
             $table->string('name');
-            $table->string('flag')->nullable();
-            $table->string('fifa_code')->nullable();
-            $table->string('uefa_code')->nullable();
-            $table->boolean('is_real')->default(1);
+            $table->boolean('substitution')->default(false);
+            $table->string('shirt_number')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('countries');
+        Schema::dropIfExists('match_player');
     }
 };
