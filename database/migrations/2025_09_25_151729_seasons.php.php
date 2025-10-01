@@ -15,6 +15,7 @@ return new class extends Migration
             $table->char('id', 36)->primary();
             $table->bigInteger('season_id')->index();
             $table->string('name');
+            $table->string('name_th')->nullable();
             $table->date('start')->nullable();
             $table->date('end')->nullable();
             $table->timestamps();

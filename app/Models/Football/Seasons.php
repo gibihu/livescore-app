@@ -15,6 +15,7 @@ class Seasons extends Model
     protected $fillable = [
         'season_id',
         'name',
+        'name_th',
         'start',
         'end',
     ];

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->char('id', 36)->primary();
             $table->bigInteger('competition_id')->index();
             $table->string('name');
+            $table->string('name_th')->nullable();
             $table->boolean('is_league')->default(1);
             $table->boolean('is_cup')->default(0);
             $table->integer('tier')->nullable();

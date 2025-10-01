@@ -36,7 +36,8 @@ return new class extends Migration
             $table->date('date')->nullable();
             $table->string('location')->nullable();
             $table->string('status')->nullable();
-            $table->time('time')->nullable();
+            $table->string('time')->nullable();
+            $table->time('scheduled')->nullable();
 
             // odds
             $table->text('odds')->nullable();

@@ -14,6 +14,7 @@ class Team extends Model
     protected $fillable = [
         'team_id',
         'name',
+        'name_th',
         'logo',
         'stadium',
         'country_id',

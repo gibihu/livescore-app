@@ -13,6 +13,8 @@ export default function Home(request: any) {
     const leagues = request.leagues as CompetitionType[];
     const posts = request.posts as PostType[];
 
+    console.log(request);
+
     return (
         <AppLayout>
             <Head title="Home" />

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->char('id', 36)->primary();
             $table->bigInteger('country_id')->index();
             $table->string('name');
+            $table->string('name_th')->nullable();
             $table->string('flag')->nullable();
             $table->string('fifa_code')->nullable();
             $table->string('uefa_code')->nullable();

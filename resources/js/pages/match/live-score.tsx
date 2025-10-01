@@ -24,28 +24,11 @@ export function LiveScore({match_items, leagues_items, posts_items}:{match_items
     const [restep, setRestep] = useState<number>(1);
 
     useEffect(() => {
-        // const fetchData = async () => {
-        //     setIsMatchFetch(true);
-        //     // const res = await fetch(`https://livescore-api.com/api-client/matches/live.json?&key=O9GiRG3laCyROLBr&secret=tsL0gvXuGlkKJUgx4XQVEUhPwPHlBiM5&lang=en`);
-        //     const res = await fetch(api.match.live().url);
-
-        //     const result = await res.json();
-        //     // if (result.code == 200) {
-        //     if (result.code == 200) {
-        //         const data = await result.data;
-        //         setMatches(data);
-        //     } else {
-        //         const errors = result;
-        //         toast.error(result.message);
-        //     }
-        //     setIsMatchFetch(false);
-        // };
-        // fetchData();
         setRestep(3);
-        const intervalId = setInterval(hanffleRelod, 60000);
+        // const intervalId = setInterval(hanffleRelod, 60000);
 
-        // ล้าง interval เมื่อ component ถูก unmount
-        return () => clearInterval(intervalId);
+        // // ล้าง interval เมื่อ component ถูก unmount
+        // return () => clearInterval(intervalId);
     }, []);
 
     function hanffleRelod() {
@@ -106,7 +89,7 @@ export function LiveScore({match_items, leagues_items, posts_items}:{match_items
 
     useEffect(() => {
         const fetchData = async () => {
-            const ids = matches.map((item: MatchType) => item.competition?.id).join(",");
+            const ids = matches.map((item: MatchType) => item.league?.id).join(",");
             setIsLeagueFetch(true);
             const res = await fetch(`${api.league.all().url}?filter_ids=${ids}`);
 
@@ -151,7 +134,7 @@ export function LiveScore({match_items, leagues_items, posts_items}:{match_items
             const updatedFilters = leagues.map((league: CompetitionType) => {
                 // หา matches ที่เป็นของ league นี้
                 const leagueMatches = (matches || []).filter(
-                    (match) => match.competition && match.competition.id === league.id
+                    (match) => match.league && match.league.id === league.id
                 );
                 return {
                     ...league,
@@ -159,7 +142,7 @@ export function LiveScore({match_items, leagues_items, posts_items}:{match_items
                 };
             });
 
-            // console.log(updatedFilters)
+            console.log(updatedFilters)
 
             setFilters(updatedFilters);
             setRestep(1);

@@ -15,6 +15,7 @@ class Country extends Model
     protected $fillable = [
         'country_id',
         'name',
+        'name_th',
         'flag',
         'fifa_code',
         'uefa_code',

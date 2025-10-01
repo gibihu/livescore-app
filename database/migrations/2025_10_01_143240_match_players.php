@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('match_players', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->char('player_id', 36);
+            $table->bigInteger('player_id')->index();
             $table->char('team_id', 36)->nullable()->unique();
             $table->foreign('team_id')->references('id')->on('teams')->nullOnDelete();
 
             $table->string('name');
+            $table->string('name_th')->nullable();
             $table->boolean('substitution')->default(false);
             $table->string('shirt_number')->nullable();
             $table->timestamps();

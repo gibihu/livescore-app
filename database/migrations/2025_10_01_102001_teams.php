@@ -15,6 +15,7 @@ return new class extends Migration
             $table->char('id', 36)->primary();
             $table->bigInteger('team_id')->index();
             $table->string('name');
+            $table->string('name_th')->nullable();
             $table->string('logo')->nullable();
             $table->string('stadium')->nullable();
 

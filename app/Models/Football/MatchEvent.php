@@ -15,9 +15,6 @@ class MatchEvent extends Model
         'is_updating',
     ];
 
-    protected $hidden = [
-        'id',
-    ];
 
     public $timestamps = true;
 }

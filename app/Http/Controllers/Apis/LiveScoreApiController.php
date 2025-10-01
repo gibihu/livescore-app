@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Apis;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\LiveScoreController as LiveController;
+use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Matchs;
 use Carbon\Carbon;
 use Exception;

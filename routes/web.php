@@ -1,11 +1,10 @@
 <?php
 
+use App\Http\Controllers\Football\LiveScoreController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\Pages\WebPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use App\Http\Controllers\LiveScoreController;
-use App\Http\Controllers\ImageController;
 
 Route::controller(WebPageController::class)->name('web.')->group(function () {
     Route::get('/', 'home')->name('home');

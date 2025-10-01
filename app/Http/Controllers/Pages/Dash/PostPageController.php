@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Pages\Dash;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\LiveScoreController as LiveController;
+use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Competition as league;
 use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;

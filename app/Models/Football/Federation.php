@@ -15,6 +15,7 @@ class Federation extends Model
     protected $fillable = [
         'federation_id',
         'name',
+        'name_th',
     ];
 
     public $timestamps = true;

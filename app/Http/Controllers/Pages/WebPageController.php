@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\LiveScoreController as LiveController;
+use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Competition as league;
 use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
@@ -20,8 +20,8 @@ class WebPageController extends Controller
     public function home()
     {
         try{
-            $matches = LiveController::LiveScore()->data;
-            $filtered = collect($matches)->pluck('competition.id')->unique()->values()->all();
+            $matches = LiveController::LiveScore();
+            $filtered = collect($matches)->pluck('competition_id')->unique()->values()->all();
             if (!empty($filtered)) {
                 $leagues = League::whereIn('id', $filtered)->get();
             } else {

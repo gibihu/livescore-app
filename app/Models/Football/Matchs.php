@@ -2,11 +2,13 @@
 
 namespace App\Models\Football;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Matchs extends Model
 {
+    use HasUuids; // เพราะ id เป็น uuid
     protected $table = 'matches';
     public $incrementing = false;  // UUID ไม่ใช่ auto-increment
     protected $keyType = 'string'; // เพราะ UUID เป็น string
@@ -23,15 +25,16 @@ class Matchs extends Model
         'location',
         'status',
         'time',
+        'scheduled',
+        'added',
+        'last_changed',
         'odds',
         'scores',
         'outcomes',
         'penalty_shootout',
-        'federation',
+        'federation_id',
         'group_id',
         'urls',
-        'added',
-        'last_changed',
     ];
 
     protected $casts = [
@@ -40,17 +43,10 @@ class Matchs extends Model
         'outcomes' => 'json',
         'urls' => 'json',
     ];
-    protected static function boot()
-    {
-        parent::boot();
-
-        // ก่อนบันทึก record ใหม่
-        static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
-        });
-    }
+    protected $with = ['home', 'away', 'league', 'country'];
+    protected $hidden = [
+        'urls'
+    ];
     // FK Relationships
     public function competition()
     {
@@ -62,13 +58,17 @@ class Matchs extends Model
         return $this->belongsTo(Country::class, 'country_id', 'id');
     }
 
-    public function homeTeam()
+    public function home()
     {
         return $this->belongsTo(Team::class, 'home_team_id', 'id');
     }
 
-    public function awayTeam()
+    public function away()
     {
         return $this->belongsTo(Team::class, 'away_team_id', 'id');
+    }
+    public function league()
+    {
+        return $this->belongsTo(Competition::class, 'competition_id', 'id');
     }
 }

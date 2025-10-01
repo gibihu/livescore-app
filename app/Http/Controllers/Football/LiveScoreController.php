@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Football;
 
+use App\Http\Controllers\Controller;
 use App\Models\Flag;
 use App\Models\Football\MatchEvent;
 use App\Models\Football\Matchs;
@@ -17,102 +18,25 @@ class LiveScoreController extends Controller
     public static function LiveScore()
     {
         try {
-            // ตรวจสอบข้อมูลล่าสุดในตาราง matches
-            $latestMatch = Matchs::latest('updated_at')->first();
-            if ($latestMatch) {
-                $lastUpdateTime = Carbon::parse($latestMatch->updated_at);
-                $currentTime = Carbon::now();
-                $timeDifference = abs($currentTime->diffInMinutes($lastUpdateTime));
+            $matches = Matchs::query()
+                // ต้องมี match_id (ไม่เป็น null)
+                ->whereNotNull('match_id')
+                // ต้องมี status (ไม่เป็น null)
+                ->whereNotNull('status')
+                // กรองตาม status
+                ->where(function ($query) {
+                    $query
+                        // Status ที่ดึงมาหมด (ไม่ต้องเช็คเวลา)
+                        ->whereIn('status', ['NOT STARTED', 'IN PLAY', 'HALF TIME BREAK', 'ADDED TIME'])
+                        // หรือ Status FINISHED ที่ updated_at ยังไม่เกิน 3 ชั่วโมง
+                        ->orWhere(function ($q) {
+                            $q->where('status', 'FINISHED')
+                                ->where('updated_at', '>', Carbon::now()->subHours(3));
+                        });
+                })
+                ->get();
 
-                // ถ้ายังไม่เกิน 1 นาที ให้ return ข้อมูล 3 ชั่วโมงที่ผ่านมา
-                if ($timeDifference < 1) {
-                    $threeHoursAgo = $currentTime->subHours(3);
-                    $recentMatches = Matchs::where('updated_at', '>=', $threeHoursAgo)->orderBy('updated_at', 'desc')->get();
-
-                    // แปลง json string กลับเป็น object สำหรับแต่ละ record
-                    $matchesData = $recentMatches->map(function ($match) {
-                        return json_decode($match->json);
-                    });
-
-                    return (object) [
-                        'success' => true,
-                        'data' => $matchesData,
-                        'from_cache' => true,
-                        'message' => 'Data retrieved from database (last update was less than 1 minute ago)',
-                    ];
-                }
-            }
-
-            // ถ้าเกิน 1 นาที หรือไม่มีข้อมูลเลย ให้เรียก API ใหม่
-            $API_KEY = env('LIVE_SCORE_API_KEY');
-            $API_SECRET = env('LIVE_SCORE_API_SECRET');
-            $LANG = env('APP_LOCALE');
-
-            $response = Http::get('https://livescore-api.com/api-client/matches/live.json', [
-                'key' => $API_KEY,
-                'secret' => $API_SECRET,
-                'lang' => $LANG,
-            ]);
-            if ($response->successful()) {
-                try {
-                    $data = $response->object(); // ใช้ object() แทน json_decode()
-                    if ($data && $data->success) {
-                        // ตรวจสอบว่า match มีข้อมูลหรือไม่
-                        $hasMatches = isset($data->data->match) && !empty($data->data->match) && is_array($data->data->match) && count($data->data->match) > 0;
-
-                        // if ($hasMatches) {
-                        //     self::SaveMatch($data->data);
-
-                        //     return (object) [
-                        //         'success' => true,
-                        //         'data' => $data->data->match,
-                        //         'from_cache' => false,
-                        //         'message' => 'Fresh data retrieved from API',
-                        //     ];
-                        // }
-                        return (object) [
-                            'success' => true,
-                            'data' => $data->data->match,
-                            'from_cache' => false,
-                            'message' => 'Fresh data retrieved from API',
-                        ];
-                    }
-                    return json_decode($response);
-                } catch (\Exception $e) {
-                    throw $e;
-                    return false;
-                }
-            }
-
-            // ถ้าไม่มี match หรือเป็น [] ให้ดึงข้อมูล 3 ชั่วโมงจากข้อมูลล่าสุดในฐานข้อมูล
-            $latestMatch = Matchs::orderBy('updated_at', 'desc')->first();
-
-            if ($latestMatch) {
-                // ใช้เวลาของข้อมูลล่าสุด แล้วย้อนหลังไป 3 ชั่วโมง
-                $latestTime = Carbon::parse($latestMatch->updated_at);
-                $threeHoursFromLatest = $latestTime->subHours(3);
-
-                $recentMatches = Matchs::where('updated_at', '>=', $threeHoursFromLatest)
-                    ->orderBy('updated_at', 'desc')
-                    ->get();
-            } else {
-                // ถ้าไม่มีข้อมูลเลยในฐานข้อมูล
-                $recentMatches = collect([]);
-            }
-
-            // แปลง json string กลับเป็น object สำหรับแต่ละ record
-            $matchesData = $recentMatches->map(function ($match) {
-                return json_decode($match->json);
-            });
-
-            return (object) [
-                'success' => true,
-                'data' => $matchesData,
-                'from_cache' => true,
-                'message' => $latestMatch
-                    ? 'API returned no matches, retrieved data from database (3 hours from latest record)'
-                    : 'API returned no matches, no data available in database',
-            ];
+            return $matches;
         } catch (\Exception $e) {
             throw $e;
             return false;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Football;
 
+use App\Helpers\ConJobHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Football\Competition;
 use App\Models\Football\Federation;
@@ -192,6 +193,9 @@ class CompetitionController extends Controller
                                     $team->team_id = $item->away->id;
                                     $team->logo = $item->away->logo;
                                     $team->name = $item->away->name ?? $team->name;
+                                    if(preg_match('/\p{Thai}/u', $item->away->name)){
+                                        $team->name = $item->away->name;
+                                    }
                                     $team->country_id = Country::where('country_id', $item->away->country_id)->value('id');
                                     $team->stadium = $item->away->stadium ?? $team->stadium;
                                     $team->save();
@@ -202,6 +206,10 @@ class CompetitionController extends Controller
                                     $team->team_id = $item->home->id;
                                     $team->logo = $item->home->logo;
                                     $team->name = $item->home->name ?? null;
+                                    $team->name = $item->home->name ?? $team->name;
+                                    if(preg_match('/\p{Thai}/u', $item->home->name)){
+                                        $team->name = $item->home->name;
+                                    }
                                     $team->country_id = Country::where('country_id', $item->away->country_id)->value('id');
                                     $team->stadium = $item->home->stadium ?? null;
                                     $team->save();
@@ -211,6 +219,9 @@ class CompetitionController extends Controller
                                     $feder = Federation::where('federation_id', $item->federation->id)->first() ?? new Federation;
                                     $feder->federation_id = $item->federation->id;
                                     $feder->name = $item->federation->name;
+                                    if(preg_match('/\p{Thai}/u', $feder->name)){
+                                        $feder->name_th = $feder->name;
+                                    }
                                     $feder->save();
                                     $match->federation_id = $feder->id;
                                 }
@@ -219,6 +230,9 @@ class CompetitionController extends Controller
                                     $country = Country::where('country_id', $item->country->id)->first() ?? new Country;
                                     $country->country_id = $item->country->id;
                                     $country->name = $item->country->name;
+                                    if(preg_match('/\p{Thai}/u', $country->name)){
+                                        $country->name_th = $country->name;
+                                    }
                                     $country->uefa_code = $item->country->uefa_code ?? null;
                                     $country->fifa_code = $item->country->fifa_code ?? null;
                                     $country->flag = $item->country->flag ?? null;
@@ -231,12 +245,15 @@ class CompetitionController extends Controller
                                     $league = Competition::where('competition_id', $item->competition->id)->first() ?? new Competition;
                                     $league->competition_id = $item->competition->id;
                                     $league->name = $item->competition->name;
-                                    $league->is_league = $item->federation->is_league ?? $league->is_league;
-                                    $league->is_cup = $item->federation->is_cup ?? $league->is_cup;
-                                    $league->tier = $item->federation->tier ?? $league->tier;
-                                    $league->has_groups = $item->federation->has_groups ?? $league->has_groups;
-                                    $league->national_teams_only = $item->federation->national_teams_only ?? $league->national_teams_only;
-                                    $league->active = $item->federation->active ?? $league->active;
+                                    if(preg_match('/\p{Thai}/u', $league->name)){
+                                        $league->name_th = $league->name;
+                                    }
+                                    $league->is_league = $item->competition->is_league ?? $league->is_league;
+                                    $league->is_cup = $item->competition->is_cup ?? $league->is_cup;
+                                    $league->tier = $item->competition->tier ?? $league->tier;
+                                    $league->has_groups = $item->competition->has_groups ?? $league->has_groups;
+                                    $league->national_teams_only = $item->competition->national_teams_only ?? $league->national_teams_only;
+                                    $league->active = $item->competition->active ?? $league->active;
                                     $league->save();
                                     $match->competition_id = $league->id;
                                 }
@@ -270,7 +287,107 @@ class CompetitionController extends Controller
     public function match()
     {
         try{
-            requ
+            $API_KEY = env('LIVE_SCORE_API_KEY');
+            $API_SECRET = env('LIVE_SCORE_API_SECRET');
+            $LANG = env('APP_LOCALE');
+
+// ตรวจสอบว่าควรเรียก API หรือไม่
+            $shouldCallApi = false;
+
+// เช็คข้อมูลล่าสุดจาก updated_at
+            $latestMatch = Matchs::latest('updated_at')->first();
+
+            if ($latestMatch) {
+                $lastUpdateTime = Carbon::parse($latestMatch->updated_at);
+                $now = Carbon::now();
+                $hoursDifference = $now->diffInHours($lastUpdateTime);
+
+                // ถ้าข้อมูลล่าสุดอัพเดทไม่เกิน 3 ชั่วโมง แสดงว่ายังมีแมชอยู่
+                if ($hoursDifference < 3) {
+                    $shouldCallApi = true;
+                } else {
+                    // ถ้าข้อมูลเก่าเกิน 3 ชั่วโมงแล้ว ให้เช็คว่ามีแมชที่กำลังจะมาถึงหรือไม่
+                    // หาแมชที่จะมาถึงเร็วที่สุด (status ยังไม่เสร็จ และ date/time อยู่ในอนาคต)
+                    $upcomingMatch = Matchs::where('status', '!=', 'finished')
+                        ->where(function($query) use ($now) {
+                            // เช็คว่า date มากกว่าหรือเท่ากับวันนี้
+                            $query->whereDate('date', '>=', $now->toDateString())
+                                ->orWhereNull('date');
+                        })
+                        ->orderBy('date', 'asc')
+                        ->orderBy('time', 'asc')
+                        ->first();
+
+                    if ($upcomingMatch && $upcomingMatch->date && $upcomingMatch->time) {
+                        // รวม date และ time เป็น datetime
+                        $matchDateTime = Carbon::parse($upcomingMatch->date . ' ' . $upcomingMatch->time);
+
+                        // คำนวณว่าห่างจากตอนนี้กี่นาที
+                        $minutesUntilMatch = $now->diffInMinutes($matchDateTime, false);
+
+                        // ถ้าเหลือเวลา 0-60 นาที (หรือเริ่มแล้วแต่ไม่เกิน 60 นาที) ให้เรียก API
+                        if ($minutesUntilMatch >= -60 && $minutesUntilMatch <= 60) {
+                            $shouldCallApi = true;
+                        }
+                    }
+                }
+            } else {
+                // ถ้าไม่มีข้อมูลเลย ให้เรียก API
+                $shouldCallApi = true;
+            }
+
+            // เรียก API เฉพาะเมื่อควรเรียก
+            if ($shouldCallApi) {
+                $response = Http::get('https://livescore-api.com/api-client/matches/live.json', [
+                    'key' => $API_KEY,
+                    'secret' => $API_SECRET,
+                    'lang' => $LANG,
+                ]);
+
+                if ($response->getStatusCode() === 200) {
+                    $data = $response->object();
+                    if ($data->success && !empty($data->data->match)) {
+                        $matches = collect($data->data->match);
+
+                        // บันทึกหรืออัพเดทข้อมูลแมช
+                        $matches->each(function ($item) {
+                            $match = Matchs::where('match_id', $item->id)->whereOr('fixture_id',$item->fixture_id)->first() ?? new Matchs;
+                            $match->match_id = $item->id ?? null;
+                            $match->competition_id = $item->competition ? ConJobHelper::CheckCompetitionAndInsert($item->competition)->id : null;
+                            $match->country_id = $item->country ? ConJobHelper::CheckCountryAndInsert($item->country)->id : null;
+                            $match->home_team_id = $item->home ? ConJobHelper::CheckTeamAndInsert($item->home)->id : null;
+                            $match->away_team_id = $item->away ? ConJobHelper::CheckTeamAndInsert($item->away)->id : null;
+                            $match->federation_id = $item->federation ? ConJobHelper::CheckFederationAndInsert($item->federation)->id : null;
+                            $match->status = $item->status ?? null;
+                            $match->location = $item->location ?? null;
+                            $match->odds = $item->odds ?? null;
+                            $match->scores = $item->scores ?? null;
+                            $match->outcomes = $item->outcomes ?? null;
+                            $match->added = $item->added ?? null;
+                            $match->last_changed = $item->last_changed ?? null;
+                            $match->scheduled = $item->scheduled ?? null;
+                            $match->time = $item->time ?? null;
+                            $match->urls = $item->urls ?? null;
+                            $match->save();
+                        });
+
+
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'API called and data updated',
+                            'matches_count' => $matches->count(),
+                            'data' => $matches,
+                        ], 200);
+                    }
+                }
+            } else {
+                // ไม่เรียก API เพราะไม่จำเป็น
+                return response()->json([
+                    'success' => true,
+                    'message' => 'API call skipped - no matches in progress or upcoming within 1 hour',
+                    'cached' => true
+                ], 200);
+            }
         }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
