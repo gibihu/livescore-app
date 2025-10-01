@@ -60,16 +60,22 @@ class LiveScoreController extends Controller
                         // ตรวจสอบว่า match มีข้อมูลหรือไม่
                         $hasMatches = isset($data->data->match) && !empty($data->data->match) && is_array($data->data->match) && count($data->data->match) > 0;
 
-                        if ($hasMatches) {
-                            self::SaveMatch($data->data);
+                        // if ($hasMatches) {
+                        //     self::SaveMatch($data->data);
 
-                            return (object) [
-                                'success' => true,
-                                'data' => $data->data->match,
-                                'from_cache' => false,
-                                'message' => 'Fresh data retrieved from API',
-                            ];
-                        }
+                        //     return (object) [
+                        //         'success' => true,
+                        //         'data' => $data->data->match,
+                        //         'from_cache' => false,
+                        //         'message' => 'Fresh data retrieved from API',
+                        //     ];
+                        // }
+                        return (object) [
+                            'success' => true,
+                            'data' => $data->data->match,
+                            'from_cache' => false,
+                            'message' => 'Fresh data retrieved from API',
+                        ];
                     }
                     return json_decode($response);
                 } catch (\Exception $e) {

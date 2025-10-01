@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('seasons', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->bigInteger('seasons')->index();
+            $table->bigInteger('season_id')->index();
             $table->string('name');
             $table->date('start')->nullable();
             $table->date('end')->nullable();

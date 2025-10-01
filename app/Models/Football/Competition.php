@@ -13,6 +13,8 @@ class Competition extends Model
 {
     use HasUuids; // เพราะ id เป็น uuid
     protected $table = 'competitions';
+    public $incrementing = false;  // UUID ไม่ใช่ auto-increment
+    protected $keyType = 'string'; // เพราะ UUID เป็น string
 
     protected $fillable = [
         'competition_id',

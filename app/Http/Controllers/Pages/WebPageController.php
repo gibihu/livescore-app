@@ -7,7 +7,7 @@ use App\Http\Controllers\LiveScoreController as LiveController;
 use App\Models\Football\Competition as league;
 use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
-use App\Models\Football\Match;
+use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
 use App\Models\Post\Post;
 use Exception;
@@ -58,7 +58,7 @@ class WebPageController extends Controller
 
     public function showMatch(Request $request, $match_id)
     {
-        $match = Match::where('match_id',$match_id)->first();
+        $match = Matchs::where('match_id',$match_id)->first();
         $match->json = json_decode($match->json);
 
         return Inertia::render('match/show', compact('match'));

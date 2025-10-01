@@ -46,8 +46,9 @@ return new class extends Migration
             $table->text('outcomes')->nullable();
 
             // federation / group
-            $table->unsignedBigInteger('federation_id')->nullable();
-            $table->unsignedBigInteger('group_id')->nullable();
+            $table->char('federation_id', 36)->nullable();
+            $table->foreign('federation_id')->references('id')->on('federations')->nullOnDelete();
+            $table->char('group_id', 36)->nullable();
 
             // URLs
             $table->text('urls')->nullable();

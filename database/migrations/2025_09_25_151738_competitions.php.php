@@ -21,9 +21,9 @@ return new class extends Migration
             $table->boolean('has_groups')->default(0);
             $table->boolean('active')->default(0);
             $table->boolean('national_teams_only')->default(0);
-            $table->unsignedBigInteger('country_id')->nullable();
-            $table->unsignedBigInteger('season_id')->nullable();
-            $table->unsignedBigInteger('federation_id')->nullable();
+            $table->char('country_id', 36)->nullable();
+            $table->char('season_id', 36)->nullable();
+            $table->char('federation_id', 36)->nullable();
 
             $table->timestamps();
         });

@@ -74,6 +74,9 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
 
     Route::controller(LeagueController::class)->group(function(){
         Route::get('football/setup', 'index')->name('setup');
+        Route::get('football/setup/fixture', 'fixture')->name('fixture');
+        Route::get('football/setup/match', 'match')->name('match');
+
     });
 
     Route::controller(DashPageController::class)->group(function(){

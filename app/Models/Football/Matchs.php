@@ -8,8 +8,8 @@ use Illuminate\Support\Str;
 class Matchs extends Model
 {
     protected $table = 'matches';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    public $incrementing = false;  // UUID ไม่ใช่ auto-increment
+    protected $keyType = 'string'; // เพราะ UUID เป็น string
 
     protected $fillable = [
         'match_id',
