@@ -7,6 +7,7 @@ use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Competition as league;
 use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
+use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
 use App\Models\Post\PostReport;
 use Illuminate\Http\Request;
@@ -23,8 +24,8 @@ class PostPageController extends Controller
     public function CreatePostPage(Request $request)
     {
         $query = $request->query();
-        $matches = LiveController::LiveScore()->data;
-        $filtered = collect($matches)->pluck('competition.id')->unique()->values()->all();
+        $matches = Matchs::where('status', null)->whereOr('status', 'NOT STARTED')->get();
+        $filtered = collect($matches)->pluck('competition_id')->unique()->values()->all();
         if (!empty($filtered)) {
             $leagues = League::whereIn('id', $filtered)->get();
         } else {

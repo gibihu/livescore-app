@@ -1,6 +1,7 @@
 "use client";
 
 import { PickMatch } from "@/components/dashboard/pick-match";
+import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -14,8 +15,10 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
+import { cn } from "@/lib/utils";
 import api from "@/routes/api";
 import dash from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
@@ -25,6 +28,7 @@ import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
+import { Avatar } from "@radix-ui/react-avatar";
 import { CircleQuestionMark, LoaderCircle, Minus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -45,6 +49,8 @@ export default function CreatePostPage(request: any) {
     };
     const query = request.query as any;
 
+    console.log(itemsForSelect);
+
     const [maxPoints, setMaxPoints] = useState<number>(100);
     useEffect(() => {
         setMaxPoints(MaxPoints(user?.tier_text || 'bronze'));
@@ -56,7 +62,7 @@ export default function CreatePostPage(request: any) {
         contents: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
         points: z.number({ message: "กรุณากรอกจำนวนพอยต์" }).min(0, { message: 'ต้องมากกว่า 0' }).max(maxPoints, `จำนวนพอยต์ต้องไม่มากกว่า ${maxPoints.toLocaleString()}`),
         submit: z.string(),
-        fixture_id: z.number('กรุณาเลือกทีม'),
+        match_id: z.string('กรุณาเลือกทีม'),
         home_score: z.number(),
         away_score: z.number(),
         odds_live_1: z.number(),
@@ -74,15 +80,7 @@ export default function CreatePostPage(request: any) {
             contents: "",
             points: 100,
             submit: 'private',
-            fixture_id: undefined,
-            home_score: undefined,
-            away_score: undefined,
-            odds_live_1: undefined,
-            odds_live_2: undefined,
-            odds_live_3: undefined,
-            odds_pre_1: undefined,
-            odds_pre_2: undefined,
-            odds_pre_3: undefined,
+            match_id: query.match_id ?? undefined,
         },
     });
     // mode: "onChange",
@@ -138,6 +136,23 @@ export default function CreatePostPage(request: any) {
             href: dash.wallet().url,
         },
     ];
+
+    const match_id: string = form.watch("match_id");
+    const [matchSelected, setMatchSelected] = useState<MatchType>();
+    useEffect(() => {
+        if (!match_id) {
+            setMatchSelected(undefined);
+            return;
+        }
+
+        const found = itemsForSelect.matches.find(
+            (m) => m.id === match_id
+        );
+
+        if (found) {
+            setMatchSelected(found);
+        }
+    }, [match_id]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -211,172 +226,76 @@ export default function CreatePostPage(request: any) {
                                 <div className="w-full">
                                     <FormField
                                         control={form.control}
-                                        name="fixture_id"
+                                        name="match_id"
                                         render={({ field, fieldState }) => (
                                             <FormItem className="col-span-4">
                                                 <FormControl>
-                                                    <PickMatch className="w-full" select_id={query.fixture_id ?? null} data={itemsForSelect} onChange={(target: number | null) => {
-                                                        form.setValue("fixture_id", Number(target));
-                                                    }} />
+                                                    <PickMatch className="w-full" select_id={query.match_id ?? null} data={itemsForSelect} onChange={(e) => form.setValue('match_id', e ?? '')} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-
-                                </div>
-                                <div className="w-full grid md:grid-cols-4 lg:grid-cols-8 gap-4">
-                                    <div className="col-span-2 flex flex-col gap-2 w-full">
-                                        <div className="flex flex-col gap-2 justify-center ">
-                                            <span>คะแนน</span>
-                                            <div className="flex items-center gap-2">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="home_score"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <Minus className="size-4" />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="away_score"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-3 flex flex-col gap-2 w-full">
-                                        <div className="flex flex-col gap-2 justify-center ">
-                                            <span>live</span>
-                                            <div className="flex gap-2">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_live_1"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_live_3"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="X" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_live_2"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-3 flex flex-col gap-2 w-full">
-                                        <div className="flex flex-col gap-2 justify-center ">
-                                            <span>pre</span>
-                                            <div className="flex gap-2">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_pre_1"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_pre_3"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="X" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="odds_pre_2"
-                                                    render={({ field }) => (
-                                                        <FormItem className="col-span-4 text-center">
-                                                            <FormControl>
-                                                                <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
-                            {/* Content */}
-                            <FormField
-                                control={form.control}
-                                name="contents"
-                                render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <div className="flex items-center gap-1">
-                                            <FormLabel>เนื้อหา</FormLabel>
-                                            <Dialog>
-                                                <DialogTrigger className="cursor-help px-1">
-                                                    <CircleQuestionMark className="size-3" />
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>เนื้อหาที่ถูกซ่อน</DialogTitle>
-                                                        <DialogDescription className="my-2">
-                                                            เนื้อหาส่วนนี้จะถูกซ่อนจากผู้ใช้งานกณีผู้ใช้ไม่ได้ปลดล็อกเนื้อหา
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
-                                        <FormControl>
-                                            <Textarea placeholder="Type your message here." {...field} disabled={isFetch} className="min-h-50 max-h-[50svh]" />
-                                        </FormControl>
-                                        <div className="flex justify-between">
-                                            <div>
-                                                {!fieldState.error && (
-                                                    <FormDescription>
-                                                    </FormDescription>
-                                                )}
-                                                <FormMessage />
+                            {/* space */}
+
+                            <div className=" rounded-xl p-2 md:p-4">
+
+                                <div className="flex justify-center gap-4">
+                                    <div className="flex justify-end  w-full  ">
+                                        <div className="flex flex-col gap-2 items-center">
+                                            <div className="size-12">
+                                                <Avatar>
+                                                    <AvatarImage src={matchSelected?.home.logo} />
+                                                    <AvatarFallback className="bg-input animate-pulse"></AvatarFallback>
+                                                </Avatar>
                                             </div>
-                                            <FormDescription>{field.value.length}/3000</FormDescription>
+                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input animate-pulse')}>{matchSelected?.home.name}</span>
                                         </div>
-                                    </FormItem>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 items-center justify-center  text-sm w-100">
+                                        {match_id ? (
+                                            <>
+                                                <span>{matchSelected?.time}</span>
+                                                <span>{matchSelected?.date}</span>
+                                                <Input className="w-4/5 text-center" placeholder="ราคาต่อราอง" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="h-5 w-1/2 rounded-xl bg-input animate-pulse"></span>
+                                                <span className="h-5 w-full rounded-xl bg-input animate-pulse"></span>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <div className="flex  justify-start  w-full ">
+                                        <div className="flex flex-col gap-2 items-center">
+                                            <div className="size-12">
+                                                <Avatar>
+                                                    <AvatarImage src={matchSelected?.away.logo} />
+                                                    <AvatarFallback className="bg-input animate-pulse"></AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input animate-pulse')}>{matchSelected?.away.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {match_id && (
+                                    <Tabs defaultValue="height-low" className="my-4 w-full">
+                                        <TabsList>
+                                            <TabsTrigger value="height-low">สูงต่ำ</TabsTrigger>
+                                            <TabsTrigger value="even-odd">คู่คี่</TabsTrigger>
+                                        </TabsList>
+                                        <TabsContent value="height-low">Make changes to your account here.</TabsContent>
+                                        <TabsContent value="even-odd">Change your password here.</TabsContent>
+                                    </Tabs>
                                 )}
-                            />
+
+                            </div>
 
                             <div className="flex justify-end gap-2">
                                 <Button type="submit" variant='default' onClick={() => form.setValue("submit", "private")} disabled={isFetch}>

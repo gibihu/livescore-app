@@ -25,8 +25,8 @@ import { CompetitionType } from "@/types/league"
 type Type = {
     className?: string;
     classPopover?: string;
-    onChange?: (target: number | null) => void;
-    select_id?: number;
+    onChange?: (target: string | null) => void;
+    select_id?: string;
     data: {
         matches: MatchType[],
         leagues: CompetitionType[];
@@ -37,7 +37,7 @@ type Type = {
 export function PickMatch({ select_id, className, onChange, classPopover, data }: Type) {
     const [open, setOpen] = React.useState(false);
     const [value, setValue] = React.useState("");
-    const [id, setId] = React.useState<Number>();
+    const [id, setId] = React.useState<string>(select_id ?? '');
     const [fixtures, setFixtures] = React.useState<MatchType[]>([]);
     const [isFetch, setIsFetch] = React.useState<boolean>(true);
     const [items, setItems] = React.useState<CompetitionType[]>();
@@ -81,7 +81,7 @@ export function PickMatch({ select_id, className, onChange, classPopover, data }
             const updatedFilters = sortedLeagues.map((league: CompetitionType) => {
                 // หา matches ของ league นี้
                 const leagueMatches = (data.matches || [])
-                    .filter((match) => match.competition && match.competition.id === league.id)
+                    .filter((match) => match.league && match.league.id === league.id)
                     // เรียง matches ตาม added (ใหม่ -> เก่า) ถ้าอยากเก่า -> ใหม่ ให้เปลี่ยน b - a
                     .sort((a: any, b: any) => new Date(a.added).getTime() - new Date(b.added).getTime());
 
