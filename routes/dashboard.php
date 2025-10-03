@@ -76,6 +76,7 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
         Route::get('football/setup', 'index')->name('setup');
         Route::get('football/setup/fixture', 'fixture')->name('fixture');
         Route::get('football/setup/match', 'match')->name('match');
+        Route::get('football/setup/standing', 'standing')->name('standing');
 
     });
 

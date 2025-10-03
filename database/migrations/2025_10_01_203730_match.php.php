@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->string('time')->nullable();
             $table->time('scheduled')->nullable();
+            $table->string('live_status')->default('NOT_LIVE');
 
             // odds
             $table->text('odds')->nullable();

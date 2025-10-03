@@ -18,24 +18,7 @@ class LiveScoreController extends Controller
     public static function LiveScore()
     {
         try {
-            $matches = Matchs::query()
-                // ต้องมี match_id (ไม่เป็น null)
-                ->whereNotNull('match_id')
-                // ต้องมี status (ไม่เป็น null)
-                ->whereNotNull('status')
-                // กรองตาม status
-                ->where(function ($query) {
-                    $query
-                        // Status ที่ดึงมาหมด (ไม่ต้องเช็คเวลา)
-                        ->whereIn('status', ['NOT STARTED', 'IN PLAY', 'HALF TIME BREAK', 'ADDED TIME'])
-                        // หรือ Status FINISHED ที่ updated_at ยังไม่เกิน 3 ชั่วโมง
-                        ->orWhere(function ($q) {
-                            $q->where('status', 'FINISHED')
-                                ->where('updated_at', '>', Carbon::now()->subHours(3));
-                        });
-                })
-                ->get();
-
+            $matches = Matchs::where('live_status', 'LIVE')->get();
             return $matches;
         } catch (\Exception $e) {
             throw $e;

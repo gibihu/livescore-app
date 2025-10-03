@@ -13,19 +13,27 @@ export interface MatchType {
     away_team_id: string;
     id: string;
     match_id?: number | null;
-    federation?: string | null;
+    federation?: {
+        id: string;
+        federation_id: number;
+        name: string;
+        name_th: string;
+        updated_at: string;
+        created_at: string;
+    };
     odds?: {
         live?: string[];
         pre?: {
-            '1': number;
-            '2': number;
-            'X': number;
+            '1': number | null;
+            '2': number | null;
+            'X': number | null;
         };
     };
     time: string;
     date?: string;
     added?: string;
     league?: CompetitionType;
+    competition_id: string;
     outcomes?: {
         half_time?: string;
         full_time?: string;

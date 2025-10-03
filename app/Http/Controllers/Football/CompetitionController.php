@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Football\Competition;
 use App\Models\Football\Federation;
 use App\Models\Football\Matchs;
+use App\Models\Football\Standing;
 use App\Models\Football\Team;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -182,8 +183,12 @@ class CompetitionController extends Controller
 
                                 $match->fixture_id = $item->id ?? $match->fixture_id;
                                 $match->round = $item->round ?? $match->round;
-                                $match->date = $item->date ?? $match->date;
-                                $match->time = $item->time ?? $match->time;
+
+                                $utcDateTime = Carbon::parse(($item->date) . ' ' . ($item->time), 'UTC');
+                                $bangkokDateTime = $utcDateTime->setTimezone('Asia/Bangkok');
+                                $match->date = $bangkokDateTime->format('Y-m-d');
+                                $match->time = $bangkokDateTime->format('H:i:s');
+
                                 $match->location = $item->location ?? $match->location;
                                 $match->odds = $item->odds ?? $match->odds;
                                 $match->group_id = $item->group_id ?? $match->group_id;
@@ -291,10 +296,10 @@ class CompetitionController extends Controller
             $API_SECRET = env('LIVE_SCORE_API_SECRET');
             $LANG = env('APP_LOCALE');
 
-// ตรวจสอบว่าควรเรียก API หรือไม่
+            // ตรวจสอบว่าควรเรียก API หรือไม่
             $shouldCallApi = false;
 
-// เช็คข้อมูลล่าสุดจาก updated_at
+            // เช็คข้อมูลล่าสุดจาก updated_at
             $latestMatch = Matchs::latest('updated_at')->first();
 
             if ($latestMatch) {
@@ -363,10 +368,12 @@ class CompetitionController extends Controller
                             $match->odds = $item->odds ?? null;
                             $match->scores = $item->scores ?? null;
                             $match->outcomes = $item->outcomes ?? null;
-                            $match->added = $item->added ?? null;
-                            $match->last_changed = $item->last_changed ?? null;
-                            $match->scheduled = $item->scheduled ?? null;
-                            $match->time = $item->time ?? null;
+
+                            $match->time = $item->time;
+                            $match->scheduled = Carbon::parse($item->scheduled, 'UTC')->setTimezone('Asia/Bangkok')->format('H:i:s');
+                            $match->added = Carbon::parse($item->added, 'UTC')->setTimezone('Asia/Bangkok');
+                            $match->last_changed = Carbon::parse($item->last_changed, 'UTC')->setTimezone('Asia/Bangkok');
+
                             $match->urls = $item->urls ?? null;
                             $match->save();
                         });
@@ -388,6 +395,84 @@ class CompetitionController extends Controller
                     'cached' => true
                 ], 200);
             }
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function standing()
+    {
+        try{
+            $results = [];
+            $competitions = Competition::query()
+                ->where('active', true)
+                ->where('is_league', true)
+                ->where('tier', '<', 3)
+                ->whereHas('season', function ($q) {
+                    $q->whereRaw("CAST(SUBSTRING_INDEX(name, '/', 1) AS UNSIGNED) >= 2025");
+                })
+                ->with('season')
+                ->get();
+
+//            return response()->json([$competitions],200);
+            foreach ($competitions as $competition) {
+                $exists = Standing::where('competition_id', $competition->competition_id)
+                    ->where('season_id', $competition->season->id)
+                    ->exists();
+
+                if (!$exists) {
+                    $response = Http::get('https://livescore-api.com/api-client/competitions/standings.json', [
+                        'key' => env('LIVE_SCORE_API_KEY'),
+                        'secret' => env('LIVE_SCORE_API_SECRET'),
+                        'lang' => env('APP_LOCALE'),
+                        'competition_id' => $competition->competition_id,
+                    ]);
+                    if ($response->getStatusCode() === 200) {
+                        $data = $response->object();
+                        if ($data->success && !empty($data->data->table)) {
+                            foreach ($data->data->table as $item) {
+                                $standing = Standing::firstOrNew([
+                                    'competition_id' => $item->competition_id
+                                ]);
+
+                                $standing->league_id = $item->league_id ?? $standing->league_id;
+                                $standing->season_id = Seasons::where('season_id', $item->season_id)->first()->id ?? $standing->season_id;
+                                $standing->team_id = Team::where('team_id', $item->team_id)->first()->id ?? $standing->team_id;
+                                $standing->competition_id = Competition::where('competition_id', $item->competition_id)->first()->id ?? $item->competition_id;
+                                $standing->group_id = $item->group_id ?? $standing->group_id;
+                                $standing->stage_id = $item->stage_id ?? $standing->stage_id;
+                                $standing->name = $item->name ?? $standing->name;
+                                $standing->group_name = $item->group_name ?? $standing->group_name;
+                                $standing->stage_name = $item->stage_name ?? $standing->stage_name;
+                                $standing->rank = $item->rank ?? $standing->rank;
+                                $standing->points = $item->points ?? $standing->points;
+                                $standing->matches = $item->matches ?? $standing->matches;
+                                $standing->won = $item->won ?? $standing->won;
+                                $standing->drawn = $item->drawn ?? $standing->drawn;
+                                $standing->lost = $item->lost ?? $standing->lost;
+                                $standing->goals_scored = $item->goals_scored ?? $standing->goals_scored;
+                                $standing->goals_conceded = $item->goals_conceded ?? $standing->goals_conceded;
+
+                                $standing->save();
+                            };
+                        }
+                    }
+                }
+            };
+
+
+            return response()->json([
+                'status' => true,
+            ], 200);
+
+
         }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',

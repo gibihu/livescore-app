@@ -40,4 +40,13 @@ class Competition extends Model
     ];
     public $timestamps = true;
 
+    protected $with = [
+        'season',
+    ];
+
+
+    public function season()
+    {
+        return $this->belongsTo(Seasons::class, 'season_id', 'id');
+    }
 }

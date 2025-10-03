@@ -15,6 +15,8 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
@@ -29,7 +31,7 @@ import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
 import { Avatar } from "@radix-ui/react-avatar";
-import { CircleQuestionMark, LoaderCircle, Minus } from "lucide-react";
+import { Circle, CircleQuestionMark, LoaderCircle, Minus, Triangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -49,8 +51,6 @@ export default function CreatePostPage(request: any) {
     };
     const query = request.query as any;
 
-    console.log(itemsForSelect);
-
     const [maxPoints, setMaxPoints] = useState<number>(100);
     useEffect(() => {
         setMaxPoints(MaxPoints(user?.tier_text || 'bronze'));
@@ -59,28 +59,34 @@ export default function CreatePostPage(request: any) {
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),
-        contents: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
+        // contents: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
         points: z.number({ message: "กรุณากรอกจำนวนพอยต์" }).min(0, { message: 'ต้องมากกว่า 0' }).max(maxPoints, `จำนวนพอยต์ต้องไม่มากกว่า ${maxPoints.toLocaleString()}`),
         submit: z.string(),
         match_id: z.string('กรุณาเลือกทีม'),
-        home_score: z.number(),
-        away_score: z.number(),
-        odds_live_1: z.number(),
-        odds_live_2: z.number(),
-        odds_live_3: z.number(),
-        odds_pre_1: z.number(),
-        odds_pre_2: z.number(),
-        odds_pre_3: z.number(),
+        negotiate: z.string({ message: "ต้องการราคาต่อรอง" }),
+        hl: z.string({ message: "เลือกอย่างใดอย่างหนึ่ง" }),
+        hl_negotiate: z.string({ message: "ต้องการราคาต่อรอง" }),
+        hl_description: z.string().nullable(),
+        eod: z.string({ message: "เลือกอย่างใดอย่างหนึ่ง" }),
+        // eod_negotiate: z.string({ message: "ต้องการราคาต่อรอง" }),
+        eod_description: z.string().nullable(),
+        oxt_one: z.number({ message: "กรุณากรอกจำนวนพอยต์" }),
+        oxt_x: z.number({ message: "กรุณากรอกจำนวนพอยต์" }),
+        oxt_two: z.number({ message: "กรุณากรอกจำนวนพอยต์" }),
+        oxt_description: z.string().nullable(),
     });
     type FormValues = z.infer<typeof schema>;
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
             title: "",
-            contents: "",
+            // contents: "",
             points: 100,
             submit: 'private',
-            match_id: query.match_id ?? undefined,
+            match_id: undefined,
+            hl_description: '',
+            eod_description: '',
+            oxt_description: '',
         },
     });
     // mode: "onChange",
@@ -126,7 +132,7 @@ export default function CreatePostPage(request: any) {
         }
 
         console.log(data);
-        fetchData();
+        // fetchData();
         // console.log('hendleSubmit');
     };
 
@@ -137,10 +143,10 @@ export default function CreatePostPage(request: any) {
         },
     ];
 
-    const match_id: string = form.watch("match_id");
+    const match_id = form.watch("match_id") ?? '';
     const [matchSelected, setMatchSelected] = useState<MatchType>();
     useEffect(() => {
-        if (!match_id) {
+        if (!match_id || match_id.length <= 0) {
             setMatchSelected(undefined);
             return;
         }
@@ -198,10 +204,10 @@ export default function CreatePostPage(request: any) {
                                                             <DialogTitle>การกำหนดพอยต์สูงสุดตามระดับ Tier</DialogTitle>
                                                             <DialogDescription className="my-2" asChild>
                                                                 <ul className="flex flex-col gap-2 list-disc ps-10">
-                                                                    <li>Bronze : สูงสุก {(100).toLocaleString()} พอยต์</li>
-                                                                    <li>Silver : สูงสุก {(1000).toLocaleString()}  พอยต์</li>
-                                                                    <li>Gold   : สูงสุก {(100000).toLocaleString()}  พอยต์</li>
-                                                                    <li>VIP    : สูงสุก {(10000000).toLocaleString()}  พอยต์</li>
+                                                                    <li>Bronze : สูงสุด {(100).toLocaleString()} พอยต์</li>
+                                                                    <li>Silver : สูงสุด {(1000).toLocaleString()}  พอยต์</li>
+                                                                    <li>Gold   : สูงสุด {(100000).toLocaleString()}  พอยต์</li>
+                                                                    <li>VIP    : สูงสุด {(10000000).toLocaleString()}  พอยต์</li>
                                                                 </ul>
                                                             </DialogDescription>
                                                         </DialogHeader>
@@ -242,17 +248,16 @@ export default function CreatePostPage(request: any) {
                             {/* space */}
 
                             <div className=" rounded-xl p-2 md:p-4">
-
                                 <div className="flex justify-center gap-4">
                                     <div className="flex justify-end  w-full  ">
                                         <div className="flex flex-col gap-2 items-center">
                                             <div className="size-12">
                                                 <Avatar>
                                                     <AvatarImage src={matchSelected?.home.logo} />
-                                                    <AvatarFallback className="bg-input animate-pulse"></AvatarFallback>
+                                                    <AvatarFallback className="bg-input "></AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input animate-pulse')}>{matchSelected?.home.name}</span>
+                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input ')}>{matchSelected?.home.name}</span>
                                         </div>
                                     </div>
 
@@ -261,12 +266,23 @@ export default function CreatePostPage(request: any) {
                                             <>
                                                 <span>{matchSelected?.time}</span>
                                                 <span>{matchSelected?.date}</span>
-                                                <Input className="w-4/5 text-center" placeholder="ราคาต่อราอง" />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="negotiate"
+                                                    render={({ field, fieldState }) => (
+                                                        <FormItem className="flex flex-col items-center">
+                                                            <FormControl>
+                                                                <Input className="w-4/5 text-center" placeholder="ราคาต่อรอง" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
                                             </>
                                         ) : (
                                             <>
-                                                <span className="h-5 w-1/2 rounded-xl bg-input animate-pulse"></span>
-                                                <span className="h-5 w-full rounded-xl bg-input animate-pulse"></span>
+                                                <span className="h-5 w-1/2 rounded-xl bg-input "></span>
+                                                <span className="h-5 w-full rounded-xl bg-input "></span>
                                             </>
                                         )}
                                     </div>
@@ -276,22 +292,226 @@ export default function CreatePostPage(request: any) {
                                             <div className="size-12">
                                                 <Avatar>
                                                     <AvatarImage src={matchSelected?.away.logo} />
-                                                    <AvatarFallback className="bg-input animate-pulse"></AvatarFallback>
+                                                    <AvatarFallback className="bg-input "></AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input animate-pulse')}>{matchSelected?.away.name}</span>
+                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input ')}>{matchSelected?.away.name}</span>
                                         </div>
                                     </div>
                                 </div>
 
+
+
+
+
+
+
+
+
+
+
                                 {match_id && (
                                     <Tabs defaultValue="height-low" className="my-4 w-full">
                                         <TabsList>
-                                            <TabsTrigger value="height-low">สูงต่ำ</TabsTrigger>
-                                            <TabsTrigger value="even-odd">คู่คี่</TabsTrigger>
+                                            <TabsTrigger value="height-low" className="px-4">สูงต่ำ</TabsTrigger>
+                                            <TabsTrigger value="even-odd" className="px-4">คู่คี่</TabsTrigger>
+                                            <TabsTrigger value="one-x-two" className="px-4">1 X 2</TabsTrigger>
                                         </TabsList>
-                                        <TabsContent value="height-low">Make changes to your account here.</TabsContent>
-                                        <TabsContent value="even-odd">Change your password here.</TabsContent>
+                                        <Card className="m-0 px-4">
+                                            <TabsContent value="height-low">
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex justify-center h-full">
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="hl"
+                                                            render={({ field, fieldState }) => (
+                                                                <FormItem className="flex flex-col items-center gap-4">
+                                                                    <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
+                                                                    <FormControl>
+                                                                        <RadioGroup className="flex gap-8" {...field} onValueChange={field.onChange}>
+
+                                                                            <div>
+                                                                                <RadioGroupItem
+                                                                                    value="option-two"
+                                                                                    id="option-two"
+                                                                                    className="peer sr-only"
+                                                                                />
+                                                                                <Label
+                                                                                    htmlFor="option-two"
+                                                                                    className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
+                                                                                >
+                                                                                    <Triangle className="size-2 text-red-600 rotate-180" fill="currentColor" />
+                                                                                    ต่ำ
+                                                                                </Label>
+                                                                            </div>
+                                                                            <div>
+                                                                                <RadioGroupItem
+                                                                                    value="option-one"
+                                                                                    id="option-one"
+                                                                                    className="peer sr-only"
+                                                                                />
+                                                                                <Label
+                                                                                    htmlFor="option-one"
+                                                                                    className="flex gap-1 items-center  cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
+                                                                                >
+                                                                                    สูง
+                                                                                    <Triangle className="size-2 text-green-600" fill="currentColor" />
+                                                                                </Label>
+                                                                            </div>
+                                                                        </RadioGroup>
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="hl_negotiate"
+                                                        render={({ field, fieldState }) => (
+                                                            <FormItem className="col-span-4">
+                                                                <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
+                                                                <FormControl>
+                                                                    <Input placeholder="รอคาต่อรอง" {...field} />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="hl_description"
+                                                        render={({ field, fieldState }) => (
+                                                            <FormItem className="col-span-4">
+                                                                <FormLabel className="mb-2">อธิบาย</FormLabel>
+                                                                <FormControl>
+                                                                    <Textarea placeholder="อธิบายความหมาย" rows={50} {...field} value={field.value ?? ""} />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </TabsContent>
+                                            <TabsContent value="even-odd">
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex justify-center">
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="eod"
+                                                            render={({ field, fieldState }) => (
+                                                                <FormItem className="flex flex-col gap-2 items-center">
+                                                                    <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
+                                                                    <FormControl>
+                                                                        <RadioGroup className="flex gap-2" {...field} onValueChange={field.onChange}>
+                                                                            <div>
+                                                                                <RadioGroupItem
+                                                                                    value="option-one"
+                                                                                    id="option-one"
+                                                                                    className="peer sr-only"
+                                                                                />
+                                                                                <Label
+                                                                                    htmlFor="option-one"
+                                                                                    className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                >
+                                                                                    คู่
+                                                                                    <Circle className="size-3 text-foreground" fill="currentColor" />
+                                                                                    <Circle className="size-3 text-foreground" fill="currentColor" />
+                                                                                </Label>
+                                                                            </div>
+
+                                                                            <div>
+                                                                                <RadioGroupItem
+                                                                                    value="option-two"
+                                                                                    id="option-two"
+                                                                                    className="peer sr-only"
+                                                                                />
+                                                                                <Label
+                                                                                    htmlFor="option-two"
+                                                                                    className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                >
+                                                                                    คี่
+                                                                                    <Circle className="size-3 text-foreground" fill="currentColor" />
+                                                                                </Label>
+                                                                            </div>
+                                                                        </RadioGroup>
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="eod_description"
+                                                        render={({ field, fieldState }) => (
+                                                            <FormItem className="col-span-4">
+                                                                <FormLabel className="mb-2">อธิบาย</FormLabel>
+                                                                <FormControl>
+                                                                    <Textarea placeholder="อธิบายความหมาย" rows={50} />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </TabsContent>
+                                            <TabsContent value="one-x-two">
+                                                <div className="flex flex-col gap-2 w-full">
+                                                    <div className="flex flex-col gap-2 justify-center items-center ">
+                                                        <Label>ผลคาดการณ์</Label>
+                                                        <div className="flex gap-4 justify-center">
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="oxt_one"
+                                                                render={({ field }) => (
+                                                                    <FormItem className="col-span-4 text-center">
+                                                                        <FormControl>
+                                                                            <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                        </FormControl>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="oxt_x"
+                                                                render={({ field }) => (
+                                                                    <FormItem className="col-span-4 text-center">
+                                                                        <FormControl>
+                                                                            <Input placeholder="เสมอ" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                        </FormControl>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="oxt_two"
+                                                                render={({ field }) => (
+                                                                    <FormItem className="col-span-4 text-center">
+                                                                        <FormControl>
+                                                                            <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                        </FormControl>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="oxt_description"
+                                                        render={({ field, fieldState }) => (
+                                                            <FormItem className="col-span-4">
+                                                                <FormLabel className="mb-2">อธิบาย</FormLabel>
+                                                                <FormControl>
+                                                                    <Textarea placeholder="อธิบายความหมาย" rows={50} />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </TabsContent>
+                                        </Card>
                                     </Tabs>
                                 )}
 

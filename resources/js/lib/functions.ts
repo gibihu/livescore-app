@@ -1,3 +1,5 @@
+import { MatchType } from "@/types/match";
+
 function ShortName(name: string): string {
     const parts = name.trim().split(" ").filter(Boolean);
 
@@ -208,6 +210,114 @@ function convertUTC(
     }
 }
 
+
+export interface LocationMatchType {
+    name: string;
+    logo?: string;
+}
+
+export interface FilteredMatchesType {
+    location: LocationMatchType;
+    matches: MatchType[];
+}
+
+function groupMatches(matches: MatchType[]): FilteredMatchesType[] {
+    const groups: { [key: string]: FilteredMatchesType } = {};
+
+    matches.forEach((match) => {
+        // เลือก key ตามว่าใช้ country หรือ federation
+        let key: string;
+        let location: LocationMatchType;
+
+        if (match.country) {
+            key = `${match.country.id}`;
+            location = {
+                name: match.country.name,
+                logo: `/flag?type=country&id=${match.country.country_id}`,
+            };
+        } else if (match.federation) {
+            key = `${match.federation.id}`;
+            location = {
+                name: match.federation.name,
+                logo: 'https://cdn.live-score-api.com/teams/61ad5a2e09285b2401bcaee1a2b8da0b.png', // สมมุติว่า federation ไม่มีโลโก้ ใช้ league แทนได้
+            };
+        } else {
+            // fallback ป้องกัน null/undefined
+            key = "unknown";
+            location = { name: "Unknown" };
+        }
+
+        // ถ้ายังไม่มีกลุ่ม ให้สร้าง
+        if (!groups[key]) {
+            groups[key] = { location, matches: [] };
+        }
+
+        groups[key].matches.push(match);
+    });
+    // ฟังก์ชันกำหนดลำดับความสำคัญของ status (สำหรับเรียงภายในกลุ่ม)
+    const getStatusPriority = (status: string | null | undefined): number => {
+        if (status === 'FINISHED') return 1; // อยู่บนสุด
+        if (status === 'NOT STARTED' || status === null || status === undefined) return 3; // อยู่ล่างสุด
+        return 2; // status อื่นๆ อยู่ตรงกลาง
+    };
+
+    // ฟังก์ชันตรวจสอบว่ากลุ่มมีแมตช์จบหมดทั้งหมดหรือไม่
+    const isAllFinished = (groupMatches: MatchType[]): boolean => {
+        return groupMatches.every(match => match.status === 'FINISHED');
+    };
+
+    // ฟังก์ชันกำหนดลำดับความสำคัญของกลุ่ม
+    const getGroupPriority = (group: FilteredMatchesType): number => {
+        if (isAllFinished(group.matches)) return 2; // กลุ่มที่จบหมดแล้วอยู่ตรงกลาง
+
+        const hasNotStartedOrNull = group.matches.some(match =>
+            match.status === 'NOT STARTED' || match.status === null || match.status === undefined
+        );
+
+        if (hasNotStartedOrNull) return 3; // กลุ่มที่มี NOT STARTED/null อยู่ล่างสุด
+        return 1; // กลุ่มที่มี status อื่นๆ อยู่บนสุด
+    };
+
+    // เรียงลำดับ matches ในแต่ละกลุ่ม
+    Object.values(groups).forEach(group => {
+        group.matches.sort((a, b) => {
+            const priorityA = getStatusPriority(a.status);
+            const priorityB = getStatusPriority(b.status);
+            return priorityA - priorityB;
+        });
+    });
+
+    // แปลงเป็น array และเรียงลำดับกลุ่ม
+    const groupsArray = Object.values(groups);
+    groupsArray.sort((a, b) => {
+        const priorityA = getGroupPriority(a);
+        const priorityB = getGroupPriority(b);
+        return priorityA - priorityB;
+    });
+
+    return groupsArray;
+
+
+    // ฟังก์ชันกำหนดลำดับความสำคัญของ status
+    // const getStatusPriority = (status: string | null | undefined): number => {
+    //     if (status === 'FINISHED') return 1; // อยู่บนสุด
+    //     if (status === 'NOT STARTED' || status === null || status === undefined) return 3; // อยู่ล่างสุด
+    //     return 2; // status อื่นๆ อยู่ตรงกลาง
+    // };
+
+    // // เรียงลำดับ matches ในแต่ละกลุ่ม
+    // Object.values(groups).forEach(group => {
+    //     group.matches.sort((a, b) => {
+    //         const priorityA = getStatusPriority(a.status);
+    //         const priorityB = getStatusPriority(b.status);
+    //         return priorityA - priorityB;
+    //     });
+    // });
+
+    // // แปลงเป็น array
+    // return Object.values(groups);
+}
+
 export {
     ShortName, // แปลงชื่อเป็ตัวย่อ
     EventTrans, //แปลง status เป็นภาษาไทย
@@ -219,4 +329,5 @@ export {
     truncateMessage, // ตัดข้อความ
     translateStatus, // แปลงสถานะเป็นภาษาไทย
     convertUTC,
+    groupMatches, // filter live match
 }

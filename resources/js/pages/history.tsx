@@ -6,6 +6,7 @@ import FeedLive from "./feeds/live-feed";
 import { Button } from "@/components/ui/button";
 import HistoryScore from "./match/historyMatch";
 import web from "@/routes/web";
+import MenuBar from "@/components/menu-bar";
 
 export default function History() {
 
@@ -15,18 +16,7 @@ export default function History() {
             <NavBar />
 
             <div className="flex flex-col gap-4  mt-4">
-                <div className="w-full flex justify-end gap-2">
-                    <Link href={web.match.fixture().url}>
-                        <Button asChild>
-                            <span>ตารางการแข่ง</span>
-                        </Button>
-                    </Link>
-                    <Link href={web.home().url}>
-                        <Button asChild>
-                            <span>ตารางสด</span>
-                        </Button>
-                    </Link>
-                </div>
+                <MenuBar />
                 <HistoryScore />
             </div>
         </AppLayout>

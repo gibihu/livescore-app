@@ -21,6 +21,7 @@ class Team extends Model
     ];
 
 
+    public $timestamps = true;
 
     public function country()
     {

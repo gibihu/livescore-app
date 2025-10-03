@@ -10,6 +10,7 @@ use App\Models\Football\Federation as Feder;
 use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
 use App\Models\Post\Post;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,26 +22,7 @@ class WebPageController extends Controller
     {
         try{
             $matches = LiveController::LiveScore();
-            $filtered = collect($matches)->pluck('competition_id')->unique()->values()->all();
-            if (!empty($filtered)) {
-                $leagues = League::whereIn('id', $filtered)->get();
-            } else {
-                $leagues = collect(); // หรือ []
-            }
-            $leagues->transform(function($item){
-                $item->session = Seasons::find($item->season_id);
-                $item->federations = Feder::whereIn('id', [$item->federation_id])->get();
-                $item->countries = Country::whereIn('id', [$item->country_id])->get();
-                return $item;
-            });
-
-            $posts = Post::with('user')->where('privacy', Post::PUBLIC)->orderBy('created_at', 'DESC')->get();
-            $posts->transform(function ($item) {
-                $item->content = 'hidden';
-                return $item;
-            });
-//            dd($matches, $leagues, $filtered);
-            return Inertia::render('home', compact('matches', 'leagues', 'posts'));
+            return Inertia::render('home', compact('matches'));
         }catch (Exception $e) {
             abort(404);
         }
@@ -67,5 +49,15 @@ class WebPageController extends Controller
     public function showPostAll()
     {
         return Inertia::render('posts/all');
+    }
+
+    public function fixturesMatch(Request $request)
+    {
+        $date = $request->query('date') ?? Carbon::tomorrow();
+        $matches = Matchs::whereNull('match_id')
+            ->whereDate('date', $date)
+            ->where('live_status', 'NOT_LIVE')
+            ->get();
+        return Inertia::render('fixture', compact('matches'));
     }
 }

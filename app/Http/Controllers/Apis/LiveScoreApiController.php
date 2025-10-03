@@ -17,7 +17,7 @@ class LiveScoreApiController extends Controller
             if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
             return response()->json([
                 'message' => 'สำเร็จ',
-                'data' => $data->data,
+                'data' => $data,
                 'code' => 200
             ], 200);
         }catch (Exception $e) {

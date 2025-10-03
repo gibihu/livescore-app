@@ -65,7 +65,6 @@ class WalletApiController extends Controller
             ];
             if(env('APP_DEBUG')) $response['debug'] = [
                 'message' => $e->getMessage(),
-                'request' => $request->all(),
             ];
             return response()->json($response, 200);
         }

@@ -281,110 +281,111 @@ export function BoardScore({ items, isFetch = false }: { items: MatchType[], isF
     )
 }
 
-function TableCellViewer({ item, className, children, type }: { item: MatchType, className?: string, children?: ReactNode, type?: string}) {
+function TableCellViewer({ item, className, children, matchEvent = true }: { item: MatchType, className?: string, children?: ReactNode, matchEvent?: boolean }) {
     const auth = usePage().props.auth as AuthType;
     const [selectedTab, setSelectedTab] = useState("event");
     return (
         <Dialog>
             <DialogTrigger className={cn(className)}>{children}</DialogTrigger>
-                <DialogContent className="[&>button]:hidden md:max-w-[90svw] md:max-h-[90vh] w-auto h-auto overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>
-                            <div className="w-full flex justify-end gap-2">
-                                {auth && (
-                                    <Link href={`${dash.post.create().url}?fixture_id=${item.fixture_id ?? item.id}`}>
-                                        <Button asChild>
-                                            <span>สร้างทีเด็ด</span>
-                                        </Button>
-                                    </Link>
+            <DialogContent className="[&>button]:hidden md:max-w-[90svw] md:max-h-[90vh] w-auto h-auto overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>
+                        <div className="w-full flex justify-end gap-2">
+                            {auth && (
+                                <Link href={`${dash.post.create().url}?match_id=${item.id}`}>
+                                    <Button asChild>
+                                        <span>สร้างทีเด็ด</span>
+                                    </Button>
+                                </Link>
+                            )}
+                            <Button>
+                                <Expand className="size-4" />
+                            </Button>
+                        </div>
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                {item.country?.id && (
+                                    <img
+                                        src={`/flag?type=country&id=${item.country.id}`}
+                                        className="h-3 w-5"
+                                    />
                                 )}
-                                <Button>
-                                    <Expand className="size-4" />
-                                </Button>
+
+                                <span className="text-xs text-ring">{item.location}</span>
+                                {IsPlay(item.status) && (
+                                    <span className="relative flex size-3">
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                                        <span className="relative inline-flex size-3 rounded-full bg-green-500"></span>
+                                    </span>
+                                )}
                             </div>
-                            <div className="flex flex-col items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    {item.country?.id && (
-                                        <img
-                                            src={`/flag?type=country&id=${item.country.id}`}
-                                            className="h-3 w-5"
-                                        />
-                                    )}
-
-                                    <span className="text-xs text-ring">{item.location}</span>
-                                    {IsPlay(item.status) && (
-                                        <span className="relative flex size-3">
-                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                                            <span className="relative inline-flex size-3 rounded-full bg-green-500"></span>
-                                        </span>
-                                    )}
+                            <div className="w-full flex items-center gap-4">
+                                <div className="flex-1 flex flex-col gap-2 items-end">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <img src={item.home.logo} alt={item.home.logo} className="size-12" />
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="text-xs uppercase cursor-default">{ShortName(item.home.name)}.</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="bottom">
+                                                <p>{item.home.name}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
                                 </div>
-                                <div className="w-full flex items-center gap-4">
-                                    <div className="flex-1 flex flex-col gap-2 items-end">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <img src={item.home.logo} alt={item.home.logo} className="size-12" />
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <span className="text-xs uppercase cursor-default">{ShortName(item.home.name)}.</span>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="bottom">
-                                                    <p>{item.home.name}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </div>
-                                    </div>
 
-                                    <div className="text-center">
-                                        <span>{item.scores?.score}</span>
-                                    </div>
+                                <div className="text-center">
+                                    <span>{item.scores?.score}</span>
+                                </div>
 
-                                    <div className="flex-1 flex flex-col gap-2 items-start">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <img src={item.away.logo} alt={item.away.logo} className="size-12" />
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <span className="text-xs uppercase cursor-default">{ShortName(item.away.name)}.</span>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="bottom">
-                                                    <p>{item.away.name}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </div>
+                                <div className="flex-1 flex flex-col gap-2 items-start">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <img src={item.away.logo} alt={item.away.logo} className="size-12" />
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="text-xs uppercase cursor-default">{ShortName(item.away.name)}.</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="bottom">
+                                                <p>{item.away.name}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
                                     </div>
                                 </div>
                             </div>
-                        </DialogTitle>
-                        <DialogDescription className="mt-4 w-max" asChild>
+                        </div>
+                    </DialogTitle>
+                    <DialogDescription className="mt-4 w-max" asChild>
 
-                            <div>
-                                <div className="flex flex-col gap-4">
-                                    <div className="w-full flex justify-center">
+                        <div>
+                            <div className="flex flex-col gap-4">
+                                <div className="w-full flex justify-center">
 
-                                        {IsTime(item.time) ? "เวลา: " + item.time + ` น. (${matchStatus(item.status)})` : matchStatus(item.status)}
+                                    {IsTime(item.time) ? "เวลา: " + item.time + ` น. (${matchStatus(item.status)})` : matchStatus(item.status)}
 
+                                </div>
+
+                                <div className="grid grid-cols-4 border rounded-xl p-2 py-4 divide-x  divide-border">
+
+                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                        <p className="font-bold text-sm">คะแนนครึ่งแรก</p>
+                                        <span>{item.scores?.ht_score || "-"}</span>
+                                    </div>
+                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                        <p className="font-bold text-sm">คะแนนครึ่งหลัง</p>
+                                        <span>{item.scores?.ft_score || "-"}</span>
+                                    </div>
+                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                        <p className="font-bold text-sm">คะแนนต่อเวลา</p>
+                                        <span>{item.scores?.et_score || "-"}</span>
+                                    </div>
+                                    <div className="flex flex-col justify-start text-center gap-2 px-2">
+                                        <p className="font-bold text-sm">จุดโทษ</p>
+                                        <span>{item.scores?.ps_score || "-"}</span>
                                     </div>
 
-                                    <div className="grid grid-cols-4 border rounded-xl p-2 py-4 divide-x  divide-border">
+                                </div>
 
-                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                            <p className="font-bold text-sm">คะแนนครึ่งแรก</p>
-                                            <span>{item.scores?.ht_score || "-"}</span>
-                                        </div>
-                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                            <p className="font-bold text-sm">คะแนนครึ่งหลัง</p>
-                                            <span>{item.scores?.ft_score || "-"}</span>
-                                        </div>
-                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                            <p className="font-bold text-sm">คะแนนต่อเวลา</p>
-                                            <span>{item.scores?.et_score || "-"}</span>
-                                        </div>
-                                        <div className="flex flex-col justify-start text-center gap-2 px-2">
-                                            <p className="font-bold text-sm">จุดโทษ</p>
-                                            <span>{item.scores?.ps_score || "-"}</span>
-                                        </div>
-
-                                    </div>
-
+                                {matchEvent && (
                                     <div className="flex flex-col gap-2">
                                         <Tabs defaultValue="event" className="w-full" value={selectedTab} onValueChange={setSelectedTab}>
                                             <TabsList>
@@ -403,13 +404,14 @@ function TableCellViewer({ item, className, children, type }: { item: MatchType,
                                         </Tabs>
 
                                     </div>
+                                )}
 
-                                </div>
                             </div>
+                        </div>
 
-                        </DialogDescription>
-                    </DialogHeader>
-                </DialogContent>
+                    </DialogDescription>
+                </DialogHeader>
+            </DialogContent>
         </Dialog>
     )
 }
@@ -419,7 +421,7 @@ function IsTime(time: string): boolean {
     return !["NS", "HT", "FT"].includes(time);
 }
 function IsPlay(status: string): boolean {
-    return !["FINISHED", "NOT STARTED"].includes(status);
+    return !["FINISHED", "NOT STARTED", null, undefined].includes(status);
 }
 
 function matchStatus(status: string) {

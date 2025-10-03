@@ -24,6 +24,7 @@ class Matchs extends Model
         'date',
         'location',
         'status',
+        'live_status',
         'time',
         'scheduled',
         'added',
@@ -43,7 +44,13 @@ class Matchs extends Model
         'outcomes' => 'json',
         'urls' => 'json',
     ];
-    protected $with = ['home', 'away', 'league', 'country'];
+    protected $with = [
+        'home',
+        'away',
+        'league',
+        'country',
+        'federation',
+    ];
     protected $hidden = [
         'urls'
     ];
@@ -70,5 +77,9 @@ class Matchs extends Model
     public function league()
     {
         return $this->belongsTo(Competition::class, 'competition_id', 'id');
+    }
+    public function federation()
+    {
+        return $this->belongsTo(Federation::class, 'federation_id', 'id');
     }
 }
