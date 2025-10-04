@@ -27,16 +27,6 @@ class WebPageController extends Controller
             abort(404);
         }
     }
-    public  function ReportPage($post_id)
-    {
-        try{
-            $post = Post::with('user')->find($post_id);
-            return Inertia::render('posts/resport', compact('post'));
-        }catch (Exception $e){
-            abort(404);
-        }
-
-    }
 
     public function showMatch(Request $request, $match_id)
     {
@@ -44,11 +34,6 @@ class WebPageController extends Controller
         $match->json = json_decode($match->json);
 
         return Inertia::render('match/show', compact('match'));
-    }
-
-    public function showPostAll()
-    {
-        return Inertia::render('posts/all');
     }
 
     public function fixturesMatch(Request $request)

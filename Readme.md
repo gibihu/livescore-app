@@ -54,7 +54,7 @@ php artisan queue:work --daemon
 php artisan schedule:run
 
 
-
+* * * * * cd /path/to/laravel && php artisan schedule:run >> /dev/null 2>&1
 
 ```
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Apis\Dash\PostApiDashController;
 use App\Http\Controllers\Apis\FollowApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,11 +40,13 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
         });
         Route::prefix('post')->name('post.')->group(function(){
             Route::controller(PostApisController::class)->group(function(){
-                Route::get('/', 'showAuth')->name('table');
-                Route::post('create', 'store')->name('create');
                 Route::get('{id}', 'show')->name('show');
                 Route::patch('update', 'update')->name('update');
                 Route::delete('delete/{id}', 'delete')->name('delete');
+            });
+            Route::controller(PostApiDashController::class)->group(function(){
+                Route::get('/', 'show')->name('table');
+                Route::post('create', 'store')->name('create');
             });
         });
 

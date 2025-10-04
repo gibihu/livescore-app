@@ -2,6 +2,7 @@
 
 namespace App\Models\Football;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -54,6 +55,11 @@ class Matchs extends Model
     protected $hidden = [
         'urls'
     ];
+    protected $appends = [
+        'date_th', 'date_th_short',
+        'added_th', 'added_th_short',
+        'last_change_th', 'last_change_th_short',
+    ];
     // FK Relationships
     public function competition()
     {
@@ -81,5 +87,51 @@ class Matchs extends Model
     public function federation()
     {
         return $this->belongsTo(Federation::class, 'federation_id', 'id');
+    }
+
+
+    protected function formatDateThai($value, $short = false)
+    {
+        if (!$value) return null;
+
+        $date = Carbon::parse($value);
+        $year = $date->year + 543; // แปลงเป็นพุทธศักราช
+
+        return $short
+            ? $date->format('j-n-') . substr($year, -2)
+            : $date->format('d-m-') . $year;
+    }
+
+    // ===== date =====
+    public function getDateThAttribute()
+    {
+        return $this->formatDateThai($this->date);
+    }
+
+    public function getDateThShortAttribute()
+    {
+        return $this->formatDateThai($this->date, true);
+    }
+
+    // ===== added =====
+    public function getAddedThAttribute()
+    {
+        return $this->formatDateThai($this->added);
+    }
+
+    public function getAddedThShortAttribute()
+    {
+        return $this->formatDateThai($this->added, true);
+    }
+
+    // ===== last_change =====
+    public function getLastChangeThAttribute()
+    {
+        return $this->formatDateThai($this->last_change);
+    }
+
+    public function getLastChangeThShortAttribute()
+    {
+        return $this->formatDateThai($this->last_change, true);
     }
 }

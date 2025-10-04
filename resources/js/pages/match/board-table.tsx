@@ -77,7 +77,7 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                     <div className="flex gap-2">
                                                         <span>{match.scheduled ? match.scheduled?.slice(0, 5) : tomorrow.toISOString().slice(5, 10)}</span>
                                                         <span>|</span>
-                                                        <span className={cn((match.status !== 'NOT STARTED' && match.status !== 'FINISHED') ? "text-primary" : '')}>{type == 'live' ? match.time : match.time.slice(0, 5)}</span>
+                                                        <span className={cn('font-bold',(match.status !== 'NOT STARTED' && match.status !== 'FINISHED') ? "text-primary" : '')}>{type == 'live' ? match.time : match.time.slice(0, 5)}</span>
                                                     </div>
                                                 </div>
                                             </TableCellViewer>

@@ -3,6 +3,7 @@ import { PostTable } from "@/components/dashboard/posts-table";
 import AppLayout from "@/layouts/app-layout";
 import dash from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
+import { PostType } from "@/types/post";
 import { Head } from "@inertiajs/react";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -12,12 +13,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function PostsPage() {
+export default function PostsPage(request: any) {
+    const posts = request.posts as PostType[];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={breadcrumbs[0].title} />
                 <div className="flex flex-col gap-4 p-4">
-                    <PostTable />
+                    <PostTable data={posts} />
                 </div>
         </AppLayout>
     )

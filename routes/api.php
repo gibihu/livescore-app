@@ -54,5 +54,5 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
 });
 
 
-require __DIR__.'/api/dashboard.php';
-require __DIR__.'/api/admin.php';
+require __DIR__ . '/api/dash/auth.php';
+require __DIR__.'/api/dash/admin.php';

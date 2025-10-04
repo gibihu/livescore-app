@@ -1,5 +1,6 @@
 "use client";
 
+import { description } from "@/components/dashboard/income-chart";
 import { PickMatch } from "@/components/dashboard/pick-match";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
@@ -31,7 +33,9 @@ import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
 import { Avatar } from "@radix-ui/react-avatar";
-import { Circle, CircleQuestionMark, LoaderCircle, Minus, Triangle } from "lucide-react";
+import { kMaxLength } from "buffer";
+import { hover } from "framer-motion";
+import { Car, Circle, CircleQuestionMark, LoaderCircle, Minus, Triangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -59,34 +63,106 @@ export default function CreatePostPage(request: any) {
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),
-        // contents: z.string().min(10, { message: "เนื้อหาต้องมีอย่างน้อย 10 ตัวอักษร" }).max(3000, { message: 'ความยาวต้องไม่เกิน 3000 ตัวอักษร' }),
         points: z.number({ message: "กรุณากรอกจำนวนพอยต์" }).min(0, { message: 'ต้องมากกว่า 0' }).max(maxPoints, `จำนวนพอยต์ต้องไม่มากกว่า ${maxPoints.toLocaleString()}`),
         submit: z.string(),
-        match_id: z.string('กรุณาเลือกทีม'),
-        negotiate: z.string({ message: "ต้องการราคาต่อรอง" }),
-        hl: z.string({ message: "เลือกอย่างใดอย่างหนึ่ง" }),
-        hl_negotiate: z.string({ message: "ต้องการราคาต่อรอง" }),
-        hl_description: z.string().nullable(),
-        eod: z.string({ message: "เลือกอย่างใดอย่างหนึ่ง" }),
-        // eod_negotiate: z.string({ message: "ต้องการราคาต่อรอง" }),
-        eod_description: z.string().nullable(),
-        oxt_one: z.number({ message: "กรุณากรอกจำนวนพอยต์" }),
-        oxt_x: z.number({ message: "กรุณากรอกจำนวนพอยต์" }),
-        oxt_two: z.number({ message: "กรุณากรอกจำนวนพอยต์" }),
-        oxt_description: z.string().nullable(),
+        match_id: z.string({ message: 'กรุณาเลือกทีม' }).min(1, { message: 'กรุณาเลือกทีม' }),
+        description: z.string(),
+        type: z.number({ message: 'กรุณาเลือก' }),
+
+        // ทำให้เป็น optional ก่อน แล้วค่อย validate ด้วย refine
+        value_show_1: z.string().optional(),
+        value_show_2: z.string().optional(),
+        value_show_3: z.string().optional(),
+        value_show_4: z.string().optional(),
+        value_show_5: z.string().optional(),
+        value_show_6: z.string().optional(),
+
+        value_hidden_1: z.string().optional(),
+        value_hidden_2: z.string().optional(),
+        value_hidden_3: z.string().optional(),
+        value_hidden_4: z.string().optional(),
+        value_hidden_5: z.string().optional(),
+        value_hidden_6: z.string().optional(),
+        // hl_value_1: z.string().optional(),
+        // hl_negotiate: z.string().optional(),
+        // hl_description: z.string().nullable(),
+
+        // eod: z.string().optional(),
+        // eod_description: z.string().nullable(),
+
+        // oxt_one: z.number().optional(),
+        // oxt_x: z.number().optional(),
+        // oxt_two: z.number().optional(),
+        // oxt_description: z.string().nullable(),
+    }).superRefine((data, ctx) => {
+        if (data.type === 1 && !data.value_hidden_6?.trim()) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "กรุณาเพิ่มข้อมูล",
+                path: ['value_hidden_6']
+            });
+        }
+
+        if ((data.type === 2 || data.type === 3)) {
+            if (!data.value_hidden_1?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_1']
+                });
+            }
+            if (!data.value_hidden_6?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_6']
+                });
+            }
+        }
+
+        if (data.type === 4) {
+            if (!data.value_hidden_1?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_1']
+                });
+            }
+            if (!data.value_hidden_2?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_2']
+                });
+            }
+            if (!data.value_hidden_3?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_3']
+                });
+            }
+        }
     });
     type FormValues = z.infer<typeof schema>;
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
-            title: "",
-            // contents: "",
             points: 100,
             submit: 'private',
-            match_id: undefined,
-            hl_description: '',
-            eod_description: '',
-            oxt_description: '',
+            type: 1,
+            value_show_1: '',
+            value_show_2: '',
+            value_show_3: '',
+            value_show_4: '',
+            value_show_5: '',
+            value_show_6: '',
+            value_hidden_1: '',
+            value_hidden_2: '',
+            value_hidden_3: '',
+            value_hidden_4: '',
+            value_hidden_5: '',
+            value_hidden_6: '',
         },
     });
     // mode: "onChange",
@@ -132,7 +208,7 @@ export default function CreatePostPage(request: any) {
         }
 
         console.log(data);
-        // fetchData();
+        fetchData();
         // console.log('hendleSubmit');
     };
 
@@ -159,6 +235,8 @@ export default function CreatePostPage(request: any) {
             setMatchSelected(found);
         }
     }, [match_id]);
+
+    const select_option = form.watch('type') ?? 1;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -215,7 +293,7 @@ export default function CreatePostPage(request: any) {
                                                 </Dialog>
                                             </div>
                                             <FormControl>
-                                                <Input type="number" placeholder="100-1,000,000" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                <Input type="number" placeholder="100-1,000,000" {...field} disabled={isFetch} onChange={(e) => field.onChange(Number(e.target.value))} />
                                             </FormControl>
                                             {!fieldState.error && (
                                                 <FormDescription className="capitalize">
@@ -236,7 +314,7 @@ export default function CreatePostPage(request: any) {
                                         render={({ field, fieldState }) => (
                                             <FormItem className="col-span-4">
                                                 <FormControl>
-                                                    <PickMatch className="w-full" select_id={query.match_id ?? null} data={itemsForSelect} onChange={(e) => form.setValue('match_id', e ?? '')} />
+                                                    <PickMatch className="w-full" select_id={query.match_id ?? null} data={itemsForSelect} onChange={(e) => field.onChange(e)} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -254,7 +332,7 @@ export default function CreatePostPage(request: any) {
                                             <div className="size-12">
                                                 <Avatar>
                                                     <AvatarImage src={matchSelected?.home.logo} />
-                                                    <AvatarFallback className="bg-input "></AvatarFallback>
+                                                    <AvatarFallback className="bg-input  animate-pulse"></AvatarFallback>
                                                 </Avatar>
                                             </div>
                                             <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input ')}>{matchSelected?.home.name}</span>
@@ -266,7 +344,7 @@ export default function CreatePostPage(request: any) {
                                             <>
                                                 <span>{matchSelected?.time}</span>
                                                 <span>{matchSelected?.date}</span>
-                                                <FormField
+                                                {/* <FormField
                                                     control={form.control}
                                                     name="negotiate"
                                                     render={({ field, fieldState }) => (
@@ -277,7 +355,7 @@ export default function CreatePostPage(request: any) {
                                                             <FormMessage />
                                                         </FormItem>
                                                     )}
-                                                />
+                                                /> */}
                                             </>
                                         ) : (
                                             <>
@@ -292,7 +370,7 @@ export default function CreatePostPage(request: any) {
                                             <div className="size-12">
                                                 <Avatar>
                                                     <AvatarImage src={matchSelected?.away.logo} />
-                                                    <AvatarFallback className="bg-input "></AvatarFallback>
+                                                    <AvatarFallback className="bg-input animate-pulse"></AvatarFallback>
                                                 </Avatar>
                                             </div>
                                             <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input ')}>{matchSelected?.away.name}</span>
@@ -311,208 +389,263 @@ export default function CreatePostPage(request: any) {
 
 
                                 {match_id && (
-                                    <Tabs defaultValue="height-low" className="my-4 w-full">
-                                        <TabsList>
-                                            <TabsTrigger value="height-low" className="px-4">สูงต่ำ</TabsTrigger>
-                                            <TabsTrigger value="even-odd" className="px-4">คู่คี่</TabsTrigger>
-                                            <TabsTrigger value="one-x-two" className="px-4">1 X 2</TabsTrigger>
-                                        </TabsList>
-                                        <Card className="m-0 px-4">
-                                            <TabsContent value="height-low">
-                                                <div className="flex flex-col gap-4">
-                                                    <div className="flex justify-center h-full">
+                                    <div className="flex flex-col gap-4 mt-4">
+
+                                        <FormField
+                                            control={form.control}
+                                            name="type"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Select
+                                                            onValueChange={(val) => field.onChange(Number(val))}
+                                                            value={field.value.toString()}
+                                                            defaultValue={field.value.toString()}
+                                                        >
+                                                            <SelectTrigger className="w-[180px]">
+                                                                <SelectValue placeholder="Theme" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="1">แฮนดิแคป</SelectItem>
+                                                                <SelectItem value="2">สูงต่ำ</SelectItem>
+                                                                <SelectItem value="3">คู่คี่</SelectItem>
+                                                                <SelectItem value="4">1x2</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <Card className="p-4">
+                                            {(() => {
+                                                if (select_option === 1) {
+                                                    return (
                                                         <FormField
                                                             control={form.control}
-                                                            name="hl"
+                                                            name="value_hidden_6"
                                                             render={({ field, fieldState }) => (
-                                                                <FormItem className="flex flex-col items-center gap-4">
-                                                                    <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
+                                                                <FormItem className="col-span-4">
+                                                                    <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
                                                                     <FormControl>
-                                                                        <RadioGroup className="flex gap-8" {...field} onValueChange={field.onChange}>
-
-                                                                            <div>
-                                                                                <RadioGroupItem
-                                                                                    value="option-two"
-                                                                                    id="option-two"
-                                                                                    className="peer sr-only"
-                                                                                />
-                                                                                <Label
-                                                                                    htmlFor="option-two"
-                                                                                    className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
-                                                                                >
-                                                                                    <Triangle className="size-2 text-red-600 rotate-180" fill="currentColor" />
-                                                                                    ต่ำ
-                                                                                </Label>
-                                                                            </div>
-                                                                            <div>
-                                                                                <RadioGroupItem
-                                                                                    value="option-one"
-                                                                                    id="option-one"
-                                                                                    className="peer sr-only"
-                                                                                />
-                                                                                <Label
-                                                                                    htmlFor="option-one"
-                                                                                    className="flex gap-1 items-center  cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
-                                                                                >
-                                                                                    สูง
-                                                                                    <Triangle className="size-2 text-green-600" fill="currentColor" />
-                                                                                </Label>
-                                                                            </div>
-                                                                        </RadioGroup>
+                                                                        <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
                                                                     </FormControl>
                                                                     <FormMessage />
                                                                 </FormItem>
                                                             )}
                                                         />
-                                                    </div>
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="hl_negotiate"
-                                                        render={({ field, fieldState }) => (
-                                                            <FormItem className="col-span-4">
-                                                                <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
-                                                                <FormControl>
-                                                                    <Input placeholder="รอคาต่อรอง" {...field} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="hl_description"
-                                                        render={({ field, fieldState }) => (
-                                                            <FormItem className="col-span-4">
-                                                                <FormLabel className="mb-2">อธิบาย</FormLabel>
-                                                                <FormControl>
-                                                                    <Textarea placeholder="อธิบายความหมาย" rows={50} {...field} value={field.value ?? ""} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-                                            </TabsContent>
-                                            <TabsContent value="even-odd">
-                                                <div className="flex flex-col gap-4">
-                                                    <div className="flex justify-center">
-                                                        <FormField
-                                                            control={form.control}
-                                                            name="eod"
-                                                            render={({ field, fieldState }) => (
-                                                                <FormItem className="flex flex-col gap-2 items-center">
-                                                                    <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
-                                                                    <FormControl>
-                                                                        <RadioGroup className="flex gap-2" {...field} onValueChange={field.onChange}>
-                                                                            <div>
-                                                                                <RadioGroupItem
-                                                                                    value="option-one"
-                                                                                    id="option-one"
-                                                                                    className="peer sr-only"
-                                                                                />
-                                                                                <Label
-                                                                                    htmlFor="option-one"
-                                                                                    className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary"
-                                                                                >
-                                                                                    คู่
-                                                                                    <Circle className="size-3 text-foreground" fill="currentColor" />
-                                                                                    <Circle className="size-3 text-foreground" fill="currentColor" />
-                                                                                </Label>
-                                                                            </div>
+                                                    );
+                                                } else if (select_option === 2) {
+                                                    return (
+                                                        <div className="flex flex-col gap-4">
+                                                            <div className="flex justify-center h-full">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_1"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex flex-col items-center gap-4">
+                                                                            <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
+                                                                            <FormControl>
+                                                                                <RadioGroup className="flex gap-8" {...field} onValueChange={field.onChange}>
 
-                                                                            <div>
-                                                                                <RadioGroupItem
-                                                                                    value="option-two"
-                                                                                    id="option-two"
-                                                                                    className="peer sr-only"
-                                                                                />
-                                                                                <Label
-                                                                                    htmlFor="option-two"
-                                                                                    className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary"
-                                                                                >
-                                                                                    คี่
-                                                                                    <Circle className="size-3 text-foreground" fill="currentColor" />
-                                                                                </Label>
-                                                                            </div>
-                                                                        </RadioGroup>
-                                                                    </FormControl>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    </div>
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="eod_description"
-                                                        render={({ field, fieldState }) => (
-                                                            <FormItem className="col-span-4">
-                                                                <FormLabel className="mb-2">อธิบาย</FormLabel>
-                                                                <FormControl>
-                                                                    <Textarea placeholder="อธิบายความหมาย" rows={50} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-                                            </TabsContent>
-                                            <TabsContent value="one-x-two">
-                                                <div className="flex flex-col gap-2 w-full">
-                                                    <div className="flex flex-col gap-2 justify-center items-center ">
-                                                        <Label>ผลคาดการณ์</Label>
-                                                        <div className="flex gap-4 justify-center">
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="0"
+                                                                                            id="option-two"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-two"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
+                                                                                        >
+                                                                                            <Triangle className="size-2 text-red-600 rotate-180" fill="currentColor" />
+                                                                                            ต่ำ
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="1"
+                                                                                            id="option-one"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-one"
+                                                                                            className="flex gap-1 items-center  cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
+                                                                                        >
+                                                                                            สูง
+                                                                                            <Triangle className="size-2 text-green-600" fill="currentColor" />
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                </RadioGroup>
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
                                                             <FormField
                                                                 control={form.control}
-                                                                name="oxt_one"
-                                                                render={({ field }) => (
-                                                                    <FormItem className="col-span-4 text-center">
+                                                                name="value_hidden_6"
+                                                                render={({ field, fieldState }) => (
+                                                                    <FormItem className="col-span-4">
+                                                                        <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
                                                                         <FormControl>
-                                                                            <Input placeholder="เจ้าบ้าน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                                            <Input placeholder="รอคาต่อรอง" {...field} />
                                                                         </FormControl>
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="oxt_x"
-                                                                render={({ field }) => (
-                                                                    <FormItem className="col-span-4 text-center">
-                                                                        <FormControl>
-                                                                            <Input placeholder="เสมอ" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                                        </FormControl>
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="oxt_two"
-                                                                render={({ field }) => (
-                                                                    <FormItem className="col-span-4 text-center">
-                                                                        <FormControl>
-                                                                            <Input placeholder="ทีมเยือน" type="number" className="text-center  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                                                                        </FormControl>
+                                                                        <FormMessage />
                                                                     </FormItem>
                                                                 )}
                                                             />
                                                         </div>
-                                                    </div>
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="oxt_description"
-                                                        render={({ field, fieldState }) => (
-                                                            <FormItem className="col-span-4">
-                                                                <FormLabel className="mb-2">อธิบาย</FormLabel>
-                                                                <FormControl>
-                                                                    <Textarea placeholder="อธิบายความหมาย" rows={50} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-                                            </TabsContent>
+                                                    );
+                                                } else if (select_option === 3) {
+                                                    return (
+                                                        <div className="flex flex-col gap-4">
+                                                            <div className="flex justify-center">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_1"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex flex-col gap-2 items-center">
+                                                                            <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
+                                                                            <FormControl>
+                                                                                <RadioGroup className="flex gap-2" {...field} onValueChange={field.onChange}>
+
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="0"
+                                                                                            id="option-two"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-two"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                        >
+                                                                                            คี่
+                                                                                            <Circle className="size-3 text-foreground" fill="currentColor" />
+                                                                                        </Label>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="1"
+                                                                                            id="option-one"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-one"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                        >
+                                                                                            คู่
+                                                                                            <Circle className="size-3 text-foreground" fill="currentColor" />
+                                                                                            <Circle className="size-3 text-foreground" fill="currentColor" />
+                                                                                        </Label>
+                                                                                    </div>
+
+                                                                                </RadioGroup>
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="value_hidden_6"
+                                                                render={({ field, fieldState }) => (
+                                                                    <FormItem className="col-span-4">
+                                                                        <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
+                                                                        <FormControl>
+                                                                            <Input placeholder="รอคาต่อรอง" {...field} />
+                                                                        </FormControl>
+                                                                        <FormMessage />
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    );
+                                                } else if (select_option === 4) {
+                                                    return (
+                                                        <div className="flex flex-col gap-2 w-full">
+                                                            <div className="flex flex-col gap-2 justify-center items-center ">
+                                                                <Label>ผลคาดการณ์</Label>
+                                                                <div className="flex gap-4 justify-center">
+                                                                    <FormField
+                                                                        control={form.control}
+                                                                        name="value_hidden_1"
+                                                                        render={({ field }) => (
+                                                                            <FormItem className="col-span-4 text-center">
+                                                                                <FormControl>
+                                                                                    <Input placeholder="เจ้าบ้าน" className="text-center" {...field} disabled={isFetch} onChange={field.onChange} />
+                                                                                </FormControl>
+                                                                            </FormItem>
+                                                                        )}
+                                                                    />
+                                                                    <FormField
+                                                                        control={form.control}
+                                                                        name="value_hidden_2"
+                                                                        render={({ field }) => (
+                                                                            <FormItem className="col-span-4 text-center">
+                                                                                <FormControl>
+                                                                                    <Input placeholder="เสมอ" className="text-center" {...field} disabled={isFetch} onChange={field.onChange} />
+                                                                                </FormControl>
+                                                                            </FormItem>
+                                                                        )}
+                                                                    />
+                                                                    <FormField
+                                                                        control={form.control}
+                                                                        name="value_hidden_3"
+                                                                        render={({ field }) => (
+                                                                            <FormItem className="col-span-4 text-center">
+                                                                                <FormControl>
+                                                                                    <Input placeholder="ทีมเยือน" className="text-center" {...field} disabled={isFetch} onChange={field.onChange} />
+                                                                                </FormControl>
+                                                                            </FormItem>
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                } else {
+                                                    return <></>;
+                                                }
+                                            })()}
+                                            {/* <Tabs defaultValue="height-low" className="my-4 w-full">
+                                            <TabsList>
+                                                <TabsTrigger value="height-low" className="px-4">สูงต่ำ</TabsTrigger>
+                                                <TabsTrigger value="even-odd" className="px-4">คู่คี่</TabsTrigger>
+                                                <TabsTrigger value="one-x-two" className="px-4">1 X 2</TabsTrigger>
+                                            </TabsList>
+                                            <Card className="m-0 px-4">
+                                                <TabsContent value="height-low">
+
+                                                </TabsContent>
+                                                <TabsContent value="even-odd">
+
+                                                </TabsContent>
+                                                <TabsContent value="one-x-two">
+
+                                                </TabsContent>
+                                            </Card>
+                                        </Tabs> */}
+
+                                            <FormField
+                                                control={form.control}
+                                                name="description"
+                                                render={({ field, fieldState }) => (
+                                                    <FormItem className="col-span-4">
+                                                        <FormLabel className="mb-2">อธิบาย</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="อธิบายความหมาย" rows={50} {...field} value={field.value ?? ""} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                         </Card>
-                                    </Tabs>
+                                    </div>
                                 )}
 
                             </div>

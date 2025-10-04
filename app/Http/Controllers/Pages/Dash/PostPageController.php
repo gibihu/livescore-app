@@ -9,9 +9,11 @@ use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
 use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
+use App\Models\Post\Post;
 use App\Models\Post\PostReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class PostPageController extends Controller
@@ -59,5 +61,13 @@ class PostPageController extends Controller
         });
 //        dd($matches, $leagues);
         return Inertia::render('dashboard/create-post', compact('query', 'matches', 'leagues'));
+    }
+
+    public function PostTable(Request $request)
+    {
+        $user = Auth::user();
+        $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
+
+        return Inertia::render('dashboard/posts-page', compact('posts'));
     }
 }

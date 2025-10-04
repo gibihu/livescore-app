@@ -306,12 +306,12 @@ function TableCellViewer({ item, className, children, matchEvent = true }: { ite
                             <div className="flex items-center gap-2">
                                 {item.country?.id && (
                                     <img
-                                        src={`/flag?type=country&id=${item.country.id}`}
+                                        src={`/flag?type=country&id=${item.country.country_id}`}
                                         className="h-3 w-5"
                                     />
                                 )}
 
-                                <span className="text-xs text-ring">{item.location}</span>
+                                <span className="text-xs text-ring">{item.country.name}</span>
                                 {IsPlay(item.status) && (
                                     <span className="relative flex size-3">
                                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>

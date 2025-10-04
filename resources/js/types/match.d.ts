@@ -31,6 +31,8 @@ export interface MatchType {
     };
     time: string;
     date?: string;
+    date_th?: string;
+    date_th_short?: string;
     added?: string;
     league?: CompetitionType;
     competition_id: string;

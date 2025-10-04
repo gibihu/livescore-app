@@ -1,12 +1,15 @@
+import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AppLayout from "@/layouts/layout";
-import { truncateMessage } from "@/lib/functions";
+import { ShortName, truncateMessage } from "@/lib/functions";
+import { cn } from "@/lib/utils";
 import api from "@/routes/api";
 import web from "@/routes/web";
+import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
 import { Head, Link } from "@inertiajs/react";
 import { CirclePoundSterling, LoaderCircle, Lock, Target } from "lucide-react";
@@ -14,47 +17,14 @@ import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-export default function Home(request: any) {
-    const id = request.id as string;
-    const [post, setPost] = useState<PostType>();
-    const [isLock, setIslock] = useState<boolean>(true);
+export default function View(request: any) {
+    console.log(request);
+    const [post, setPost] = useState<PostType>(request.post as PostType);
+    const [isUnLock, setIsUnLock] = useState<boolean>(request.is_unlock ?? false as boolean);
+    const [follow, setFollow] = useState<any>(request.follow as any);
 
-    const [isLOading, setIsloading] = useState<boolean>(true);
+    const [isLOading, setIsloading] = useState<boolean>(false);
     const [isFetch, setIsFetch] = useState<boolean>(false);
-
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsloading(true);
-                const res = await fetch(api.post.show({ id: id }).url);
-                const result = await res.json();
-                if (result.code == 200) {
-                    const data = result.data;
-                    setPost(data);
-                    setIslock(false);
-                } else if (result.code == 404) {
-                    const data = result.data;
-                    setPost(data);
-                    toast.error(result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                let message = "เกิดข้อผิดพลาดบางอย่าง";
-                if (error instanceof Error) {
-                    message = error.message;
-                } else if (typeof error === "string") {
-                    message = error;
-                }
-                toast.error(message);
-            } finally {
-                setIsloading(false);
-            }
-
-        };
-
-        fetchData();
-    }, []);
 
     function handleUnlock() {
         if (post) {
@@ -84,7 +54,7 @@ export default function Home(request: any) {
                         if (result.code === 201) {
                             const data = result.data;
                             setPost(data);
-                            setIslock(false);
+                            setIsUnLock(false);
                             toast.error(result.message);
                         }
                     }
@@ -113,10 +83,14 @@ export default function Home(request: any) {
             <NavBar />
 
             <div className="flex flex-col gap-4  mt-4">
+                <MenuBar />
 
                 {!isLOading ? (
                     post && (
                         <>
+                            <Card className="p-2">
+                                <MatchBoard item={post.match} raw={post} />
+                            </Card>
                             <Card className="p-2 md:p-4">
                                 <div className="w-full flex justify-between gap-2">
                                     <Link href={'#'} className="flex gap-2 items-center">
@@ -131,25 +105,26 @@ export default function Home(request: any) {
                                     </Link>
 
                                     <div className="flex gap-2">
-                                        <Link href={web.post.report.index({post_id: post.id}).url}>
-                                            <Button variant="destructive">รายงาน</Button>
-                                        </Link>
-                                        {isLock && (
-                                            <WannaPayAlert onConfirm={handleUnlock}>
-                                                <Button disabled={isFetch}>
-                                                    <CirclePoundSterling className="size-4 text-yellow-600" />
-                                                    <span>{post.points > 0 ? post.points.toLocaleString() : 'free'}</span>
-                                                </Button>
-                                            </WannaPayAlert>
+                                        {follow !== false && (
+                                            <>
+                                                <Link href={web.post.report.index({ post_id: post.id }).url}>
+                                                    <Button variant="destructive">รายงาน</Button>
+                                                </Link>
+                                                {!isUnLock && (
+                                                    <WannaPayAlert onConfirm={handleUnlock}>
+                                                        <Button disabled={isFetch}>
+                                                            <CirclePoundSterling className="size-4 text-yellow-600" />
+                                                            <span>{post.points > 0 ? post.points.toLocaleString() : 'free'}</span>
+                                                        </Button>
+                                                    </WannaPayAlert>
+                                                )}
+                                                <FollowSpace post={post} follow={request.follow} />
+                                            </>
                                         )}
-                                        <FollowSpace post={post} />
                                     </div>
 
                                 </div>
-                            </Card>
-
-                            <Card className="p-2">
-                                {!isLock ? (
+                                {isUnLock ? (
                                     <span>เนื้อหาหลังปลดล็อก</span>
                                 ) : (
                                     <div className="relative w-full h-100 rounded-xl overflow-hidden shadow-md">
@@ -205,40 +180,11 @@ function WannaPayAlert({ children, onConfirm }: { children?: ReactNode, onConfir
 }
 
 
-function FollowSpace({ post }: { post: PostType }) {
+function FollowSpace({ post, follow }: { post: PostType, follow: any }) {
     // const post = request.
-    const [item, setItem] = useState<any>();
+    const [item, setItem] = useState<any>(follow);
     const [isFollow, setIsFollow] = useState<boolean>(false);
     const [isFetch, setIsFetch] = useState<boolean>(false);
-
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsFetch(true);
-                const res = await fetch(api.follow.following.id({ id: post.user_id }).url);
-                const result = await res.json();
-
-                if (result.code == 200) {
-                    setIsFollow(true);
-                } else {
-                    setIsFollow(false);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                let message = "เกิดข้อผิดพลาดบางอย่าง";
-                if (error instanceof Error) {
-                    message = error.message;
-                } else if (typeof error === "string") {
-                    message = error;
-                }
-                toast.error(message);
-            } finally {
-                setIsFetch(false);
-            }
-        };
-        fetchData();
-    }, []);
 
 
     function handleFollow() {
@@ -261,7 +207,7 @@ function FollowSpace({ post }: { post: PostType }) {
                 } else if (result.code === 201) {
                     setIsFollow(true);
                     toast.success(result.message);
-                }else{
+                } else {
                     toast.success(result.message);
                 }
             } catch (error) {
@@ -287,5 +233,53 @@ function FollowSpace({ post }: { post: PostType }) {
                 {isFollow ? "ติดตามแล้ว" : "ติดตาม"}
             </Button>
         </>
+    );
+}
+
+
+
+
+function MatchBoard({ raw ,item }: { raw: PostType, item: MatchType }) {
+    return (
+        <div className="flex flex-col gap-4 items-center justify-center">
+
+            <div className="w-full flex gap-2 justify-between">
+                <div className="flex gap-2">
+                    <span className="text-primary">{raw.type_text}</span>
+                    <span className="text-muted-foreground">{item.country.name}</span>
+                    <span className="text-muted-foreground">{item.date_th_short?.replaceAll("-", "/")}</span>
+                    <span className="text-muted-foreground">{item.time.slice(0, 5)}</span>
+                </div>
+            </div>
+
+            <div className="flex gap-2 items-center justify-center">
+                <Avatar className=" size-4 rounded-none w-6">
+                    <AvatarImage src={`/flag?type=country&id=${item.country.country_id}`} />
+                    <AvatarFallback className="animate-pulse" />
+                </Avatar>
+                <span className="text-muted-foreground  text-sm md:text-base">{item.country.name}</span>
+            </div>
+
+            <div className="w-full flex gap-4 justify-center items-center">
+                <div className="w-full flex justify-end"><Podium item={item.home} logo_position="end" /></div>
+                <div className="flex flex-col gap-2">
+                    <span className=" text-sm md:text-xl font-bold">VS</span>
+                </div>
+                <div className="w-full flex justify-start"><Podium item={item.away} /></div>
+
+            </div>
+        </div>
+    );
+}
+
+function Podium({ item, logo_position = 'start' }: { item: any, logo_position?: string }) {
+    return (
+        <div className={cn("flex flex-col md:flex-row gap-2 items-center", logo_position == 'end' ? 'md:flex-row-reverse' : '')}>
+            <Avatar className=" size-8 md:size-10">
+                <AvatarImage src={item.logo} />
+                <AvatarFallback className="animate-pulse" />
+            </Avatar>
+            <span className="text-sm md:text-base text-end">{item.name}</span>
+        </div>
     );
 }
