@@ -56,18 +56,15 @@ class GetMatchLive extends Command
 
                     // บันทึกหรืออัพเดทข้อมูลแมช
                     $matches->each(function ($item) {
-                        $match = Matchs::query()
-                            ->when(!empty($item->fixture_id), function ($q) use ($item) {
-                                // ถ้ามี fixture_id ให้หาตาม fixture_id ก่อน
-                                $q->where('fixture_id', $item->fixture_id);
-                            }, function ($q) use ($item) {
-                                // ถ้า fixture_id ไม่มีหรือ null ให้หาตาม match_id แทน
-                                $q->where('match_id', $item->id);
-                            })
-                            ->first() ?? new Matchs;
+                        $match = Matchs::where('fixture_id', $item->fixture_id)
+                            ->orWhere('match_id', $item->id)
+                            ->first();
+
+                        if (!$match) {
+                            $match = new Matchs;
+                        }
                         $match->match_id = $item->id ?? null;
                         $match->fixture_id = $item->fixture_id ?? null;
-                        $match->live_status = 'LIVE';
                         $match->competition_id = $item->competition ? ConJobHelper::CheckCompetitionAndInsert($item->competition)->id : null;
                         $match->country_id = $item->country ? ConJobHelper::CheckCountryAndInsert($item->country)->id : null;
                         $match->home_team_id = $item->home ? ConJobHelper::CheckTeamAndInsert($item->home)->id : null;
@@ -84,18 +81,24 @@ class GetMatchLive extends Command
                         $match->added = Carbon::parse($item->added, 'UTC')->setTimezone('Asia/Bangkok');
                         $match->last_changed = Carbon::parse($item->last_changed, 'UTC')->setTimezone('Asia/Bangkok');
 
+                        $match->live_status = 'LIVE';
                         $match->urls = $item->urls ?? null;
                         if($match->save()){
                             Log::info('บันทกสำเร็จ', ['id' => $match->id]);
                         }else{
                             Log::error('บันทึไม่ผ่าน', ['api_id' => $match->id ?? $item->id]);
                         }
+                        if ($match->isDirty()) {
+                            Log::info('มีการเปลี่ยนแปลง', $match->getDirty());
+                        } else {
+                            Log::info('ไม่มีอะไรเปลี่ยน');
+                        }
                     });
 
-                    Log::info('สำเร็จหมดแล้ว', [json_encode($response->json())]);
+                    Log::info('สำเร็จหมดแล้ว');
                 }
             }else{
-                Log::error('Api Fixture error', [json_encode($response->json())]);
+                Log::error('Api Match error', [json_encode($response->json())]);
             }
         } catch (Throwable $e) {
             Log::error('Error in Match Job', [

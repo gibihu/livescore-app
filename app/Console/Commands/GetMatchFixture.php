@@ -151,13 +151,12 @@ class GetMatchFixture extends Command
                                 }
                             }
                             Log::info("สำเร็จหมดแล้ว [page: $config->page]");
-                            Log::info("Data",  [json_encode($response->json())]);
                         }
                         $config->next_page = $data->data->next_page ?? false;
                         $config->page = $data->data->next_page !== false ? $config->page + 1 : $config->page;
                     }
                 }else{
-                    Log::error('Api call failed');
+                    Log::error('Api Fixture error', [json_encode($response->json())]);
                 }
             }
         }catch (Throwable $e) {

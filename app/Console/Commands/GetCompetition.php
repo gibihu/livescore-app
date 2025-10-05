@@ -106,7 +106,6 @@ class GetCompetition extends Command
                     }
                 }
                 Log::info("สำเร็จหมดแล้ว");
-                Log::info("Data",  [json_encode($response->json())]);
             }
             Log::info("response",  [json_encode($response)]);
         } catch (Throwable $e) {
