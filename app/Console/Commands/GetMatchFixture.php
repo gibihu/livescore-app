@@ -60,7 +60,11 @@ class GetMatchFixture extends Command
                         if (!empty($data->data->fixtures)) {
                             $fixture = $data->data->fixtures;
                             foreach ($fixture as $item) {
-                                $match = Matchs::where('fixture_id', $item->id)->first() ?? new Matchs;
+                                $match = Matchs::where('fixture_id', $item->id)->first();
+
+                                if (!$match) {
+                                    $match = new Matchs;
+                                }
 
                                 $match->fixture_id = $item->id ?? $match->fixture_id;
                                 $match->round = $item->round ?? $match->round;
@@ -151,13 +155,12 @@ class GetMatchFixture extends Command
                                 }
                             }
                             Log::info("สำเร็จหมดแล้ว [page: $config->page]");
-                            Log::info("Data",  [json_encode($response->json())]);
                         }
                         $config->next_page = $data->data->next_page ?? false;
                         $config->page = $data->data->next_page !== false ? $config->page + 1 : $config->page;
                     }
                 }else{
-                    Log::error('Api call failed');
+                    Log::error('Api Fixture error', [json_encode($response->json())]);
                 }
             }
         }catch (Throwable $e) {
