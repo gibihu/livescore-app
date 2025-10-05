@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\LiveScoreController as LiveController;
+use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Competition as league;
 use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
+use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
-use App\Models\Matchs;
-use App\Models\Post;
+use App\Models\Post\Post;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,47 +21,40 @@ class WebPageController extends Controller
     public function home()
     {
         try{
-            $matches = LiveController::LiveScore()->data;
-            $filtered = collect($matches)->pluck('competition.id')->unique()->values()->all();
-            if (!empty($filtered)) {
-                $leagues = League::whereIn('id', $filtered)->get();
-            } else {
-                $leagues = collect(); // หรือ []
-            }
-            $leagues->transform(function($item){
-                $item->session = Seasons::find($item->season_id);
-                $item->federations = Feder::whereIn('id', [$item->federation_id])->get();
-                $item->countries = Country::whereIn('id', [$item->country_id])->get();
-                return $item;
-            });
-
-            $posts = Post::with('user')->where('privacy', Post::PUBLIC)->orderBy('created_at', 'DESC')->get();
-            $posts->transform(function ($item) {
-                $item->content = 'hidden';
-                return $item;
-            });
-//            dd($matches, $leagues, $filtered);
-            return Inertia::render('home', compact('matches', 'leagues', 'posts'));
+            $matches = LiveController::LiveScore();
+            return Inertia::render('home', compact('matches'));
         }catch (Exception $e) {
             abort(404);
         }
     }
-    public  function ReportPage($post_id)
-    {
-        try{
-            $post = Post::with('user')->find($post_id);
-            return Inertia::render('posts/resport', compact('post'));
-        }catch (Exception $e){
-            abort(404);
-        }
 
+    public function showMatch(Request $request, $id)
+    {
+        $match = Matchs::where('id',$id)->first();
+        $posts = Post::where('ref_id',$id)->where('privacy', Post::PUBLIC)->get();
+        $posts->map(function ($post) {
+            $post->match = Matchs::select('home_team_id', 'away_team_id')->find($post->ref_id);
+            return $post;
+        });
+        return Inertia::render('match/view', compact('match', 'posts'));
     }
 
-    public function showMatch(Request $request, $match_id)
+    public function fixturesMatch(Request $request)
     {
-        $match = Matchs::where('match_id',$match_id)->first();
-        $match->json = json_decode($match->json);
+        $date = $request->query('date') ?? Carbon::tomorrow();
+        $matches = Matchs::whereNull('match_id')
+            ->whereDate('date', $date)
+            ->where('live_status', 'NOT_LIVE')
+            ->get();
+        $fixture_date = Carbon::parse($date)->format('Y-m-d');
+        return Inertia::render('fixture', compact('matches', 'fixture_date'));
+    }
 
-        return Inertia::render('match/show', compact('match'));
+    public function historyMatch(Request $request)
+    {
+        $data = $request->query('data') ?? Carbon::yesterday();
+        $matches = Matchs::where('live_status', 'END_LIVE')->wherDate('')->get();
+
+
     }
 }

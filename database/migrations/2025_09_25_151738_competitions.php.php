@@ -12,17 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('competitions', function (Blueprint $table) {
-            $table->id();
+            $table->char('id', 36)->primary();
+            $table->bigInteger('competition_id')->index();
             $table->string('name');
+            $table->string('name_th')->nullable();
             $table->boolean('is_league')->default(1);
             $table->boolean('is_cup')->default(0);
             $table->integer('tier')->nullable();
             $table->boolean('has_groups')->default(0);
             $table->boolean('active')->default(0);
             $table->boolean('national_teams_only')->default(0);
-            $table->unsignedBigInteger('country_id')->nullable();
-            $table->unsignedBigInteger('season_id')->nullable();
-            $table->unsignedBigInteger('federation_id')->nullable();
+            $table->char('country_id', 36)->nullable();
+            $table->char('season_id', 36)->nullable();
+            $table->char('federation_id', 36)->nullable();
 
             $table->timestamps();
         });

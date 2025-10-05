@@ -21,15 +21,6 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         return Inertia::render('dashboard/point-page');
     })->name('point');
 
-    Route::prefix('post')->name('post.')->group(function(){
-        Route::get('/', function () {
-            return Inertia::render('dashboard/posts-page');
-        })->name('index');
-        // Route::get('edit/{id}', function ($id) {
-        //     return Inertia::render('dashboard/post-edit-page', ['id' => $id]);
-        // })->name('edit');
-    });
-
     Route::prefix('payment')->name('payment.')->group(function(){
         Route::get('{id}', function ($id) {
             return Inertia::render('dashboard/payment', ['id' => $id]);
@@ -40,6 +31,7 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
     });
 
     Route::controller(PostPageController::class)->prefix('post')->name('post.')->group(function () {
+        Route::get('', 'PostTable')->name('index');
         Route::get('create', 'CreatePostPage')->name('create');
     });
 });
@@ -74,6 +66,10 @@ Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.a
 
     Route::controller(LeagueController::class)->group(function(){
         Route::get('football/setup', 'index')->name('setup');
+        Route::get('football/setup/fixture', 'fixture')->name('fixture');
+        Route::get('football/setup/match', 'match')->name('match');
+        Route::get('football/setup/standing', 'standing')->name('standing');
+
     });
 
     Route::controller(DashPageController::class)->group(function(){

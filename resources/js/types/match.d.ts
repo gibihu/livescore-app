@@ -7,22 +7,37 @@ export interface MatchType {
     last_changed?: string;
     status: string;
     fixture_id?: number | null;
-    home: HomeType;
-    away: AwayType;
-    id: number;
-    federation?: string | null;
+    home_team_id: string;
+    home: TeamType;
+    away: TeamType;
+    away_team_id: string;
+    id: string;
+    match_id?: number | null;
+    federation?: {
+        id: string;
+        federation_id: number;
+        name: string;
+        name_th: string;
+        updated_at: string;
+        created_at: string;
+    };
     odds?: {
         live?: string[];
         pre?: {
-            '1': number;
-            '2': number;
-            'X': number;
+            '1': number | null;
+            '2': number | null;
+            'X': number | null;
         };
     };
     time: string;
     date?: string;
+    date_th?: string;
+    date_th_short?: string;
     added?: string;
-    competition?: CompetitionType;
+    added_th?: string;
+    added_th_short?: string;
+    league?: CompetitionType;
+    competition_id: string;
     outcomes?: {
         half_time?: string;
         full_time?: string;
@@ -37,6 +52,7 @@ export interface MatchType {
         head2head?: string;
     };
     posts?: PostType[];
+    live_status: string;
 }
 
 export interface ScoreType {
@@ -47,32 +63,31 @@ export interface ScoreType {
     ps_score?: string | null;
 }
 
-export interface HomeType {
+export interface TeamType {
     logo: string;
-    id: number;
+    id: string;
+    team_id: number;
     name: string;
     country_id: number;
     stadium: string;
+    country_id?: string
+    created_at?: string
 }
 
-export interface AwayType {
-    logo: string;
-    id: number;
-    name: string;
-    country_id: number;
-    stadium: string;
-}
 
 export interface CountryType {
     flag: string;
     name: string;
-    id: number | null;
+    id: string;
+    country_id: number | null;
     uefa_code: string;
     fifa_code: string;
     is_real: boolean;
 }
 
-export interface CompetitionType {
+interface CompetitionType {
+    id: string;
+    competition_id: number;
     is_cup: boolean;
     active: boolean;
     has_groups: boolean;
@@ -80,7 +95,6 @@ export interface CompetitionType {
     tier: number;
     name: string;
     is_league: boolean;
-    id: number;
 }
 
 export interface OddsType{

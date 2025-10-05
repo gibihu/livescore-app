@@ -25,8 +25,8 @@ import { CompetitionType } from "@/types/league"
 type Type = {
     className?: string;
     classPopover?: string;
-    onChange?: (target: number | null) => void;
-    select_id?: number;
+    onChange?: (target: string | null | undefined) => void;
+    select_id?: string;
     data: {
         matches: MatchType[],
         leagues: CompetitionType[];
@@ -34,67 +34,118 @@ type Type = {
 };
 
 
+const ITEMS_PER_PAGE = 30;
+
 export function PickMatch({ select_id, className, onChange, classPopover, data }: Type) {
     const [open, setOpen] = React.useState(false);
-    const [value, setValue] = React.useState("");
-    const [id, setId] = React.useState<Number>();
-    const [fixtures, setFixtures] = React.useState<MatchType[]>([]);
+    const initialId = React.useMemo(() => {
+        if (!select_id) return '';
+
+        // ตรวจสอบว่า select_id มีอยู่ใน matches หรือไม่
+        const exists = data.matches.some(match => match.id === select_id);
+        return exists ? select_id : '';
+    }, [select_id, data]);
+    const [id, setId] = React.useState<string>(initialId);
     const [isFetch, setIsFetch] = React.useState<boolean>(true);
-    const [items, setItems] = React.useState<CompetitionType[]>();
-
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsFetch(true);
-                const res = await fetch(api.match.fixture().url);
-                const result = await res.json();
-                if (result.code == 200) {
-                    const data = result.data;
-                    setFixtures(data);
-                } else {
-                    toast.error(result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                let message = "เกิดข้อผิดพลาดบางอย่าง";
-
-                if (error instanceof Error) {
-                    message = error.message;
-                } else if (typeof error === "string") {
-                    message = error;
-                }
-
-                toast.error(message);
-            } finally {
-                setIsFetch(false);
-            }
-        };
-        fetchData();
-    }, []);
+    const [items, setItems] = React.useState<CompetitionType[]>([]);
+    const [searchValue, setSearchValue] = React.useState('');
+    const [displayCount, setDisplayCount] = React.useState(ITEMS_PER_PAGE);
+    const scrollRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (data.leagues && data.leagues.length > 0) {
-            // เรียง leagues ตาม tier จากน้อยไปมาก
             const sortedLeagues = [...data.leagues].sort((a, b) => a.tier - b.tier);
 
             const updatedFilters = sortedLeagues.map((league: CompetitionType) => {
-                // หา matches ของ league นี้
                 const leagueMatches = (data.matches || [])
-                    .filter((match) => match.competition && match.competition.id === league.id)
-                    // เรียง matches ตาม added (ใหม่ -> เก่า) ถ้าอยากเก่า -> ใหม่ ให้เปลี่ยน b - a
+                    .filter((match) => match.league && match.league.id === league.id)
                     .sort((a: any, b: any) => new Date(a.added).getTime() - new Date(b.added).getTime());
 
                 return {
                     ...league,
-                    matches: leagueMatches, // จะเป็น array ว่างถ้าไม่มี matches
+                    matches: leagueMatches,
                 };
             });
 
             setItems(updatedFilters);
-            // console.log(updatedFilters);
+            setTimeout(() => {
+                setIsFetch(false);
+            }, 1000);
         }
-    }, [fixtures]);
+    }, [data]);
+
+    React.useEffect(()=>{
+        const exists = data.matches.some(match => match.id === select_id);
+        onChange?.(exists ? select_id : null);
+    }, []);
+
+    // Reset display count when search changes
+    React.useEffect(() => {
+        setDisplayCount(ITEMS_PER_PAGE);
+    }, [searchValue]);
+
+    // Get all matches flattened
+    const allMatches = React.useMemo(() => {
+        return items.flatMap(league =>
+            (league.matches || []).map(match => ({
+                ...match,
+                leagueName: league.name
+            }))
+        );
+    }, [items]);
+
+    // Filter matches based on search
+    const filteredMatches = React.useMemo(() => {
+        if (!searchValue) return allMatches;
+
+        const search = searchValue.toLowerCase();
+        return allMatches.filter(match =>
+            match.home.name.toLowerCase().includes(search) ||
+            match.away.name.toLowerCase().includes(search) ||
+            match.leagueName.toLowerCase().includes(search)
+        );
+    }, [allMatches, searchValue]);
+
+    // Get matches to display
+    const displayedMatches = React.useMemo(() => {
+        // If searching, show all filtered results
+        if (searchValue) return filteredMatches;
+
+        // Otherwise, show limited results
+        return allMatches.slice(0, displayCount);
+    }, [allMatches, filteredMatches, displayCount, searchValue]);
+
+    // Group displayed matches by league
+    const groupedMatches = React.useMemo(() => {
+        const groups: { [key: string]: { name: string; matches: any[] } } = {};
+
+        displayedMatches.forEach((match: any) => {
+            if (!groups[match.league.id]) {
+                groups[match.league.id] = {
+                    name: match.leagueName,
+                    matches: []
+                };
+            }
+            groups[match.league.id].matches.push(match);
+        });
+
+        return Object.values(groups);
+    }, [displayedMatches]);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        // Don't paginate when searching
+        if (searchValue) return;
+
+        const target = e.currentTarget;
+        const bottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 50;
+
+        if (bottom && displayCount < allMatches.length) {
+            setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, allMatches.length));
+        }
+    };
+
+    const selectedMatch = data.matches.find(item => item.id === id);
+    const hasMore = !searchValue && displayCount < allMatches.length;
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -106,68 +157,94 @@ export function PickMatch({ select_id, className, onChange, classPopover, data }
                     className={cn('w-full justify-between', className)}
                     disabled={isFetch}
                 >
-                    {id ? (() => {
-                        const item = data.matches.find(item => item.id === id);
-                        return item ? (
+                    {id && id.length > 0 ? (
+                        selectedMatch ? (
                             <div className="w-full flex justify-center gap-2">
                                 <div className="flex gap-2 w-full justify-end">
-                                    <span className="text-end">{item.home.name}</span>
-                                    <img src={item.home.logo} alt={item.home.logo} className="size-4" />
+                                    <span className="text-end">{selectedMatch.home.name}</span>
+                                    <img src={selectedMatch.home.logo} alt={selectedMatch.home.name} className="size-4" />
                                 </div>
                                 <span>vs</span>
                                 <div className="flex gap-2 w-full">
-                                    <img src={item.away.logo} alt={item.away.logo} className="size-4" />
-                                    <span>{item.away.name}</span>
+                                    <img src={selectedMatch.away.logo} alt={selectedMatch.away.name} className="size-4" />
+                                    <span>{selectedMatch.away.name}</span>
                                 </div>
                             </div>
-                        ) : <span className="w-full text-center">รอสักครู่...</span>;
-                    })()
-                        : isFetch ? <LoaderCircle className="size-3 animate-spin" /> : <span className="w-full text-center">Select Team...</span>}
+                        ) : (
+                            <span className="w-full text-center">รอสักครู่...</span>
+                        )
+                    ) : isFetch ? (
+                        <LoaderCircle className="size-3 animate-spin" />
+                    ) : (
+                        <span className="w-full text-center">Select Team...</span>
+                    )}
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="center" className={cn(" w-full sm:w-md md:w-lg lg:w-xl xl:w-2xl p-0", classPopover)}>
-                <Command>
-                    <CommandInput placeholder="Search framework..." className="h-9" />
-                    <CommandList>
-                        {items?.map((league: CompetitionType) => (
-                            <CommandGroup heading={<div className="w-full text-center pe-6">{league.name}</div>} key={league.id}>
-                                {league.matches?.map((item: MatchType) => (
-                                    <CommandItem
-                                        key={item.id}
-                                        value={item.home.name + ' vs ' + item.away.name}
-                                        onSelect={() => {
-                                            setId(item.id);
-                                            onChange?.(item.id);
-                                            setOpen(false);
-                                            // console.log(item.id);
-                                        }}
+            <PopoverContent align="center" className={cn("w-full sm:w-md md:w-lg lg:w-xl xl:w-2xl p-0", classPopover)}>
+                <Command shouldFilter={false}>
+                    <CommandInput
+                        placeholder="Search match..."
+                        className="h-9"
+                        value={searchValue}
+                        onValueChange={setSearchValue}
+                    />
+                    <CommandList onScroll={handleScroll} ref={scrollRef}>
+                        {groupedMatches.length > 0 ? (
+                            <>
+                                {groupedMatches.map((group, index) => (
+                                    <CommandGroup
+                                        heading={<div className="w-full text-center pe-6">{group.name}</div>}
+                                        key={index}
                                     >
-                                        <div className="w-full flex justify-center gap-2">
-                                            <div className="flex gap-2 w-full justify-end">
-                                                <span className="text-end">{item.home.name}</span>
-                                                <img src={item.home.logo} alt={item.home.logo} className="size-4" />
-                                            </div>
-                                            <span>vs</span>
-                                            <div className="flex gap-2 w-full">
-                                                <img src={item.away.logo} alt={item.away.logo} className="size-4" />
-                                                <span>{item.away.name}</span>
-                                            </div>
-                                        </div>
-                                        <Check
-                                            className={cn(
-                                                "ml-auto",
-                                                id === item.id ? "opacity-100" : "opacity-0"
-                                            )}
-                                        />
-                                    </CommandItem>
+                                        {group.matches.map((match: any) => (
+                                            <CommandItem
+                                                key={match.id}
+                                                value={match.home.name + ' vs ' + match.away.name}
+                                                onSelect={() => {
+                                                    setId(match.id);
+                                                    onChange?.(match.id);
+                                                    setOpen(false);
+                                                }}
+                                            >
+                                                <div className="w-full flex justify-center gap-2">
+                                                    <div className="flex gap-2 w-full justify-end">
+                                                        <span className="text-end">{match.home.name}</span>
+                                                        <img src={match.home.logo} alt={match.home.name} className="size-4" />
+                                                    </div>
+                                                    <span>vs</span>
+                                                    <div className="flex gap-2 w-full">
+                                                        <img src={match.away.logo} alt={match.away.name} className="size-4" />
+                                                        <span>{match.away.name}</span>
+                                                    </div>
+                                                </div>
+                                                <Check
+                                                    className={cn(
+                                                        "ml-auto",
+                                                        id === match.id ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
                                 ))}
-                            </CommandGroup>
-                        ))}
-                        <CommandEmpty >No framework found.</CommandEmpty>
+                                {hasMore && (
+                                    <div className="py-6 text-center text-sm text-muted-foreground">
+                                        <LoaderCircle className="size-4 animate-spin mx-auto" />
+                                    </div>
+                                )}
+                                {!hasMore && !searchValue && allMatches.length > ITEMS_PER_PAGE && (
+                                    <div className="py-2 text-center text-sm text-muted-foreground">
+                                        แสดงครบทั้งหมดแล้ว ({allMatches.length} รายการ)
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <CommandEmpty>ไม่พบรายการที่ค้นหา</CommandEmpty>
+                        )}
                     </CommandList>
                 </Command>
             </PopoverContent>
         </Popover>
-    )
+    );
 }

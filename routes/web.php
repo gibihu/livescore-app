@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Football\LiveScoreController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\Pages\WebPageController;
+use App\Http\Controllers\Pages\Webs\PostWebPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use App\Http\Controllers\LiveScoreController;
-use App\Http\Controllers\ImageController;
 
 Route::controller(WebPageController::class)->name('web.')->group(function () {
     Route::get('/', 'home')->name('home');
@@ -14,19 +14,15 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
         Route::get('history', function () {
             return Inertia::render('history');
         })->name('history');
-        Route::get('fixture', function(){
-            return Inertia::render('fixture');
-        })->name('fixture');
-        Route::get('show/{match_id}', 'showMatch')->name('show');
+        Route::get('fixture', 'fixturesMatch')->name('fixture');
+        Route::get('show/{id}', 'showMatch')->name('view');
     });
 
 
-    Route::prefix('post')->name('post.')->group(function(){
-        Route::get('{id}', function ($id) {
-            return Inertia::render('posts/view', ['id' => $id]);
-        })->name('view');
-
-        Route::controller(WebPageController::class)->prefix('report')->name('report.')->group(function(){
+    Route::prefix('post')->controller(PostWebPageController::class)->name('post.')->group(function(){
+        Route::get('', 'PostShowAll')->name('all');
+        Route::get('{id}', 'PostShowOne')->name('view');
+        Route::prefix('report')->name('report.')->group(function(){
             Route::get('{post_id}', 'ReportPage')->name('index');
         });
     });

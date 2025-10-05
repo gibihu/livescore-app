@@ -2,18 +2,11 @@
 
 namespace App\Http\Controllers\Apis;
 use App\Http\Controllers\Controller;
-
+use App\Http\Controllers\Football\LiveScoreController as LiveController;
+use App\Models\Football\Matchs;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-
-use App\Http\Controllers\LiveScoreController as LiveController;
-
-use App\Models\User;
-use App\Models\Matchs;
 
 class LiveScoreApiController extends Controller
 {
@@ -24,7 +17,7 @@ class LiveScoreApiController extends Controller
             if (!$data) throw new Exception("ไม่สามารถดำเนินการได้!");
             return response()->json([
                 'message' => 'สำเร็จ',
-                'data' => $data->data,
+                'data' => $data,
                 'code' => 200
             ], 200);
         }catch (Exception $e) {

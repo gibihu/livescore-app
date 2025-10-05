@@ -26,7 +26,8 @@ export interface FederationsType {
 }
 
 export interface CompetitionType {
-    id: number;
+    id: string;
+    competition_id: number;
     name: string;
     is_league: number;
     is_cup: number;

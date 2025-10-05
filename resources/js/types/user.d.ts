@@ -16,6 +16,8 @@ export interface UserType {
 
 export interface UserGuast {
     id: string;
+    avatar?: string
     name: string;
     username: string;
+    tier_text: string;
 }

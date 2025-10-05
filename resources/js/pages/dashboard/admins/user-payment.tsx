@@ -1,4 +1,5 @@
 
+import UserHistoryPaymentTable from "@/components/dashboard/admins/history-trans-table";
 import UserPaymentTable from "@/components/dashboard/admins/transaction-table";
 import WalletTable from "@/components/dashboard/admins/wallet-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +32,9 @@ export default function UserPaymentPage() {
 
                     <TabsContent value="transaction">
                         <UserPaymentTable />
+                    </TabsContent>
+                    <TabsContent value="transaction_history">
+                        <UserHistoryPaymentTable />
                     </TabsContent>
 
                     <TabsContent value="history">

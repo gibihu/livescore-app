@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Apis\Post;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
+use App\Models\Post\Post;
 use App\Models\Post\PostReport;
 use Exception;
 use Illuminate\Http\Request;

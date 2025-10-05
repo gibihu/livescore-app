@@ -26,8 +26,35 @@ php artisan migrate --path=/database/migrations/2025_09_24_112233_create_posts_t
 php artisan migrate:reset --path=/database/migrations/2025_09_27_123456_create_users_table.php
 
 php artisan migrate:rollback --path=/database/migrations/2025_09_21_144028_posts.php.php
+php artisan migrate:fresh
+php artisan migrate:refresh
+
+
 
 dashboard/admin/football/setup
+
+
+
+php artisan queue:work
+# background
+php artisan queue:work --daemon &
+php artisan schedule:run
+
+
+# เช็ค
+php artisan queue:failed
+# ลบ
+php artisan queue:flush
+
+php artisan schedule:work
+
+php artisan queue:work
+php artisan queue:work --daemon
+
+php artisan schedule:run
+
+
+* * * * * cd /path/to/laravel && php artisan schedule:run >> /dev/null 2>&1
 
 ```
 

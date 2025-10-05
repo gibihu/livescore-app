@@ -1,142 +1,23 @@
 <?php
 
 namespace App\Http\Controllers\Apis;
+use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
-
-use App\Models\Wallet;
+use App\Http\Controllers\WalletController;
+use App\Models\Football\Matchs;
+use App\Models\Inventory;
+use App\Models\Post\Post;
+use App\Models\User;
 use App\Models\WalletHistory;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 
-use App\Models\User;
-use App\Models\Post;
-use App\Models\Inventory;
-
-use App\Http\Controllers\WalletController;
-
-use App\Helpers\UserHelper;
-
-
 class PostApisController extends Controller
 {
-    public function store(Request $request)
-    {
-        try {
-            $todayPosts = Post::where('user_id', Auth::id())
-                ->whereDate('created_at', Carbon::today())
-                ->count();
-            $max = UserHelper::MaxFromTier(Auth::user()->tier);
-
-            if ($todayPosts >= $max) {
-                return response()->json([
-                    'message' => "วันนี้คุณสร้างโพสต์ครบ $max ครั้งแล้ว ไม่สามารถสร้างเพิ่มได้",
-                    'code' => 403,
-                ], 403);
-            }
-
-
-
-            $title = $request->title;
-            $points = $request->points;
-            $contents = $request->contents;
-            $submit = $request->submit;
-            $fixture_id = $request->fixture_id;
-            $score = "$request->home_score - $request->away_score";
-            $odds = [
-                'live' => [
-                    1 => $request->odds_live_1,
-                    2 => $request->odds_live_2,
-                    'X' => $request->odds_live_2,
-                ],
-                'pre' => [
-                    1 => $request->odds_pre_1,
-                    2 => $request->odds_pre_2,
-                    'X' => $request->odds_pre_2,
-                ]
-            ];
-
-            $user_id = Auth::id();
-//            dd($request->all());
-
-            $post = new Post();
-            $post->user_id = $user_id;
-            $post->ref_id = (int) $fixture_id;
-            $post->title = $title ?? '';
-            $post->contents = $contents ?? '';
-            $post->points = $points ?? 100;
-            $post->odds = $odds;
-            $post->score = $score;
-            $post->privacy = $submit ? Post::PUBLIC : Post::PRIVATE;
-
-            if ($post->save()) {
-                return response()->json([
-                    'message' => 'สำเร็จ',
-                    'data' => $post,
-                    'code' => 201,
-                ], 201);
-            }
-            throw new Exception('ไม่สามารถดำเนินการได้!');
-        } catch (Exception $e) {
-            $response = [
-                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
-                'code' => 500,
-            ];
-            if (env('APP_DEBUG')) {
-                $response['debug'] = [
-                    'message' => $e->getMessage(),
-                    'request' => $request->all(),
-                ];
-            }
-            return response()->json($response, 500);
-        }
-    }
-
-    public function showAuth(Request $request)
-    {
-        try {
-            $type = $request->type;
-            $user = Auth::user();
-            $posts = Post::where('user_id', $user->id)->orderBy('created_at', 'DESC')->get();
-
-            $posts->transform(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'user_id' => $item->user_id,
-                    'title' => Str::limit($item->title, 50, '...'),
-                    'contents' => !empty($type) && $type === 'hidden' ? 'hidden' : $item->contents, // แทนค่าตรงนี้
-                    'points' => $item->points,
-                    'privacy' => $item->privacy,
-                    'privacy_text' => $item->privacy_text,
-                    'created_at' => $item->created_at,
-                    'updated_at' => $item->updated_at,
-                ];
-            });
-
-            return response()->json([
-                'message' => 'สำเร็จ',
-                'data' => $posts,
-                'code' => 200,
-            ], 200);
-        } catch (Exception $e) {
-            $response = [
-                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
-                'code' => 500,
-            ];
-            if (env('APP_DEBUG')) {
-                $response['debug'] = [
-                    'message' => $e->getMessage(),
-                    'request' => $request->all(),
-                ];
-            }
-            return response()->json($response, 500);
-        }
-    }
-
     public function feed(Request $request)
     {
         try {
@@ -221,6 +102,7 @@ class PostApisController extends Controller
                     $inventory->source_type = Inventory::TYPE_POST;
                     $inventory->source_id = $id;
                     $inventory->save();
+                    $post->match = Matchs::find($post->ref_id);
                     if($inventory->save()){
                         return response()->json([
                             'message' => 'ปลดล็อกโพสต์แล้ว',

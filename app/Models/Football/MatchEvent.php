@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Football;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Matchs extends Model
+class MatchEvent extends Model
 {
-    protected $table = 'matches';
+    protected $table = 'match_events';
 
     protected $fillable = [
         'match_id',
@@ -14,6 +14,7 @@ class Matchs extends Model
         'status',
         'is_updating',
     ];
+
 
     public $timestamps = true;
 }

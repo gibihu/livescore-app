@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 
 
-export default function MatchEvent({ match_id, main_item }: { match_id: number, main_item: MatchType}) {
+export default function MatchEvent({ match_id, main_item }: { match_id: string, main_item: MatchType}) {
     const [data, setData] = useState<any[]>([]);
     const [events, setEvents] = useState<EventType[]>([]);
     const [match, setMatch] = useState<any[]>([]);

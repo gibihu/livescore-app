@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('match_events', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('match_id')->unique();
+            $table->char('match_id', 36)->nullable()->unique();
+            $table->foreign('match_id')->references('id')->on('matches')->nullOnDelete();
+
+
             $table->json('json')->nullable();
             $table->enum('status', [
                 'NOT STARTED',

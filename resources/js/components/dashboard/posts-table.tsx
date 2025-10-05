@@ -41,12 +41,13 @@ import { Link } from "@inertiajs/react"
 import dash from "@/routes/dash"
 import api from "@/routes/api"
 import { PostType } from "@/types/post"
+import web from "@/routes/web"
 
 
 
 
-const API_URL: string = import.meta.env.VITE_API_URL;
-export function PostTable() {
+const APP_URL: string = import.meta.env.VITE_APP_URL;
+export function PostTable({ data }: { data: PostType[] }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -54,37 +55,8 @@ export function PostTable() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const [items, setItems] = React.useState<PostType[]>([]);
+    const [items, setItems] = React.useState<PostType[]>(data);
     const [isFetch, setIsFetch] = React.useState<boolean>(true);
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch(api.dash.post.table().url);
-                const result = await res.json();
-                if (result.code == 200) {
-                    const data = result.data;
-                    setItems(data);
-                } else {
-                    toast.error(result.message + ` #${result.code}`);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                let message = "เกิดข้อผิดพลาดบางอย่าง";
-
-                if (error instanceof Error) {
-                    message = error.message;
-                } else if (typeof error === "string") {
-                    message = error;
-                }
-
-                toast.error(message);
-            } finally {
-                setIsFetch(false);
-            }
-        }
-        fetchData();
-    }, []);
 
 
     const createColumns = (): ColumnDef<PostType>[] => [
@@ -157,7 +129,7 @@ export function PostTable() {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
-                const payment = row.original
+                const post = row.original
 
                 return (
                     <DropdownMenu>
@@ -170,15 +142,18 @@ export function PostTable() {
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(payment.id)}
+                                className="cursor-pointer"
+                                onClick={() => {
+                                    toast.success('คัดลอกแล้ว');
+                                    navigator.clipboard.writeText(`${APP_URL}${web.post.view({ id: post.id }).url}`)
+                                }}
                             >
-                                Copy payment ID
+                                คัดลอกลิ้งค์
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>View customer</DropdownMenuItem>
-                            <DropdownMenuItem>View payment details</DropdownMenuItem>
+                            <DropdownMenuItem asChild className="cursor-pointer">
+                                <Link href={web.post.view({ id: post.id }).url} prefetch>ดูโพสต์</Link>
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )

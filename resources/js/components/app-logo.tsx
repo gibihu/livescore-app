@@ -1,5 +1,6 @@
 import AppLogoIcon from './app-logo-icon';
 
+const API_NAME: string = import.meta.env.VITE_APP_NAME;
 export default function AppLogo() {
     return (
         <>
@@ -8,7 +9,7 @@ export default function AppLogo() {
             </div>
             <div className="ml-1 grid flex-1 text-left text-sm">
                 <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Laravel Starter Kit
+                    {API_NAME}
                 </span>
             </div>
         </>

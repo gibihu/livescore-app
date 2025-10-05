@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
+    use HasUuids; // เพราะ id เป็น uuid
     use SoftDeletes;
     protected $table = 'users';
     protected $keyType = 'string';
@@ -58,17 +60,6 @@ class User extends Authenticatable
         ];
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        // ก่อนบันทึก record ใหม่
-        static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
-        });
-    }
     // join transaction
     public function transactions()
     {

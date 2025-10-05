@@ -1,7 +1,7 @@
 <?php
 namespace App\Helpers;
 
-use App\Models\Post;
+use App\Models\Post\Post;
 
 class PostHelper
 {
