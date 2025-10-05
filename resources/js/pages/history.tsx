@@ -1,14 +1,10 @@
+import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
 import AppLayout from "@/layouts/layout";
-import { Head, Link, usePage } from "@inertiajs/react";
-import { LiveScore } from "./match/live-score";
-import FeedLive from "./feeds/live-feed";
-import { Button } from "@/components/ui/button";
+import { Head } from "@inertiajs/react";
 import HistoryScore from "./match/historyMatch";
-import web from "@/routes/web";
-import MenuBar from "@/components/menu-bar";
 
-export default function History() {
+export default function History(request: any) {
 
     return (
         <AppLayout>
@@ -17,7 +13,7 @@ export default function History() {
 
             <div className="flex flex-col gap-4  mt-4">
                 <MenuBar />
-                <HistoryScore />
+                <HistoryScore request={request} />
             </div>
         </AppLayout>
     );

@@ -12,12 +12,9 @@ import { FilteredMatchesType, groupMatches } from "@/lib/functions";
 export default function FixtureScore({request}:{request: any}) {
     console.log(request);
     const [matches, setMatches] = useState<MatchType[]>(request.matches as MatchType[]);
-    const [leagues, setLeagues] = useState<CompetitionType[]>(request.leagues as CompetitionType[]);
     const [filters, setFilters] = useState<FilteredMatchesType[]>([]);
 
     const [isFetchBoard, setIsFetchBoard] = useState(false);
-    const [isMatchFetch, setIsMatchFetch] = useState<boolean>(true);
-    const [isPostfetch, setPostFetch] = useState<boolean>(false);
 
 
 
