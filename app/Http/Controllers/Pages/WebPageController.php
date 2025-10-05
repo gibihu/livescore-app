@@ -52,9 +52,13 @@ class WebPageController extends Controller
 
     public function historyMatch(Request $request)
     {
-        $data = $request->query('data') ?? Carbon::yesterday();
-        $matches = Matchs::where('live_status', 'END_LIVE')->wherDate('')->get();
+        $date = $request->query('date') ?? Carbon::yesterday();
+        $matches = Matchs::whereNull('match_id')
+            ->whereDate('date', $date)
+            ->where('live_status', 'END_LIVE')
+            ->get();
+        $fixture_date = Carbon::parse($date)->format('Y-m-d');
 
-
+        return Inertia::render('history', compact('matches', 'fixture_date'));
     }
 }

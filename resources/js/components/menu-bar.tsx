@@ -30,11 +30,11 @@ export default function MenuBar() {
                     <span>ตารางการแข่ง</span>
                 </Button>
             </Link>
-            <Link href={web.match.history().url} prefetch>
+            {/* <Link href={web.match.history().url} prefetch>
                 <Button asChild>
                     <span>ประวัติ</span>
                 </Button>
-            </Link>
+            </Link> */}
         </div>
     );
 }

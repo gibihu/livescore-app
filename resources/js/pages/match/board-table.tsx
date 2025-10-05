@@ -42,9 +42,15 @@ export function BoardTable({ items, isFetch = false, type = 'live', fixture_date
     const fixtureDate2 = new Date(fixtureDate1);
     const fixtureDate3 = new Date(fixtureDate2);
 
+    const fixtureDate_2 = new Date(fixtureDate1);
+    const fixtureDate_3 = new Date(fixtureDate1);
+
     fixtureDate1.setDate(fixtureDate1.getDate() + 1);
     fixtureDate2.setDate(fixtureDate1.getDate() + 1);
     fixtureDate3.setDate(fixtureDate2.getDate() + 1);
+
+    fixtureDate_2.setDate(fixtureDate1.getDate() - 2);
+    fixtureDate_3.setDate(fixtureDate_2.getDate() - 1);
 
     return (
         <Card className="py-0">
@@ -53,10 +59,25 @@ export function BoardTable({ items, isFetch = false, type = 'live', fixture_date
                 <TableHeader>
                     <TableRow className="h-12">
                         <TableHead className="text-start">
-                            {type == 'live' ? 'ไลฟ์สด' : `การแข่งขันล่วงหน้า`}
+                            {type == 'live' ? 'ไลฟ์สด' : `ตารางการแข่งขัน`}
                         </TableHead>
                         <TableHead className="w-full">{type == 'fixture' ? (
                             <div className="flex gap-2">
+                                <Link href={`${web.match.fixture().url}?date=${fixtureDate_3.toISOString().slice(0, 10)}`}>
+                                    <Button asChild variant="ghost" className="text-muted-foreground">
+                                        <span>{fixtureDate_3.toISOString().slice(5, 10)}</span>
+                                    </Button>
+                                </Link>
+                                <Link href={`${web.match.fixture().url}?date=${fixtureDate_2.toISOString().slice(0, 10)}`}>
+                                    <Button asChild variant="ghost" className="text-muted-foreground">
+                                        <span>{fixtureDate_2.toISOString().slice(5, 10)}</span>
+                                    </Button>
+                                </Link>
+                                <Link href={`${web.match.fixture().url}?date=${date.toISOString().slice(0, 10)}`}>
+                                    <Button asChild variant="ghost">
+                                        <span>วันนี้</span>
+                                    </Button>
+                                </Link>
                                 <Link href={`${web.match.fixture().url}?date=${fixtureDate1.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost">
                                         <span>{fixtureDate1.toISOString().slice(5, 10)}</span>
