@@ -60,7 +60,7 @@ class GetMatchFixture extends Command
                         if (!empty($data->data->fixtures)) {
                             $fixture = $data->data->fixtures;
                             foreach ($fixture as $item) {
-                                $match = Matchs::where('fixture_id', $item->id)->first();
+                                $match = Matchs::where('fixture_id', (int) $item->id)->first();
 
                                 if (!$match) {
                                     $match = new Matchs;
