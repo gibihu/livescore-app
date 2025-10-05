@@ -1,4 +1,5 @@
 import { MatchType } from "@/types/match";
+import { useEffect, useState } from "react";
 
 function ShortName(name: string): string {
     const parts = name.trim().split(" ").filter(Boolean);
@@ -317,6 +318,7 @@ function groupMatches(matches: MatchType[]): FilteredMatchesType[] {
     // // แปลงเป็น array
     // return Object.values(groups);
 }
+
 
 export {
     ShortName, // แปลงชื่อเป็ตัวย่อ

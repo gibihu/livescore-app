@@ -9,14 +9,19 @@ export interface PostType {
     ref_type_text: string;
     title: string;
     points: number;
-    negotiate: string;
-    hl_expected: boolean;
-    hl_negotiate: string;
-    hl_description: string;
-    eod_expected: boolean;
-    eod_description: string;
-    oxt_expected: [number, number, number]; // 1 x 2
-    oxt_description: string;
+    description: string;
+
+    // negotiate: string;
+    // hl_expected: boolean;
+    // hl_negotiate: string;
+    // hl_description: string;
+    // eod_expected: boolean;
+    // eod_description: string;
+    // oxt_expected: [number, number, number]; // 1 x 2
+    // oxt_description: string;
+    show: ValueType;
+    hidden: ValueType;
+
     type: number;
     type_text: string;
     privacy: number;
@@ -25,4 +30,14 @@ export interface PostType {
     status_text: string;
     user: UserGuast;
     match: MatchType;
+}
+
+
+interface ValueType {
+    value_1: string;
+    value_2: string;
+    value_3: string;
+    value_4: string;
+    value_5: string;
+    value_6: string;
 }

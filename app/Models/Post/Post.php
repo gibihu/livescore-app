@@ -66,7 +66,7 @@ class Post extends Model
     const TYPE_HANDICAP = 1;
     const TYPE_HIGHLOW = 2;
     const TYPE_EVENODD = 3;
-    const TYPE_1X2 = 3;
+    const TYPE_1X2 = 4;
 
     public static $typeLabels = [
         self::TYPE_HANDICAP => 'แฮนดิแคป',

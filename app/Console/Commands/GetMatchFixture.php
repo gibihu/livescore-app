@@ -41,7 +41,7 @@ class GetMatchFixture extends Command
             $API_KEY = env('LIVE_SCORE_API_KEY');
             $API_SECRET = env('LIVE_SCORE_API_SECRET');
             $LANG = env('APP_LOCALE');
-            $date = Carbon::tomorrow()->format('Y-m-d');
+            $date = Carbon::now()->addDays(3)->format('Y-m-d');
 
             $config = new stdClass();
             $config->next_page = 'have next';

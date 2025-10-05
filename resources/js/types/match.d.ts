@@ -34,6 +34,8 @@ export interface MatchType {
     date_th?: string;
     date_th_short?: string;
     added?: string;
+    added_th?: string;
+    added_th_short?: string;
     league?: CompetitionType;
     competition_id: string;
     outcomes?: {
@@ -50,6 +52,7 @@ export interface MatchType {
         head2head?: string;
     };
     posts?: PostType[];
+    live_status: string;
 }
 
 export interface ScoreType {

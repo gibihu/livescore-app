@@ -46,6 +46,26 @@ class TransAdminApiController extends Controller
             return response()->json($response, 500);
         }
     }
+    public function userPaymentHistory(Request $request){
+        try{
+            $trans = Transaction::with('user')->whereIn('status', [Transaction::STATUS_APPROVED])->orderBy('updated_at', 'DESC')->get();
+            return response()->json([
+                'message' => 'สำเร็จ',
+                'data' => $trans,
+                'code' => 200
+            ], 200);
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+                'request' => $request->all(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
 
     public function update(Request $request){
         try{

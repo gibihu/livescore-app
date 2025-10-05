@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Apis;
 use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\WalletController;
+use App\Models\Football\Matchs;
 use App\Models\Inventory;
 use App\Models\Post\Post;
 use App\Models\User;
@@ -101,6 +102,7 @@ class PostApisController extends Controller
                     $inventory->source_type = Inventory::TYPE_POST;
                     $inventory->source_id = $id;
                     $inventory->save();
+                    $post->match = Matchs::find($post->ref_id);
                     if($inventory->save()){
                         return response()->json([
                             'message' => 'ปลดล็อกโพสต์แล้ว',

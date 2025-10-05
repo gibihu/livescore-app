@@ -56,7 +56,15 @@ class GetMatchLive extends Command
 
                     // บันทึกหรืออัพเดทข้อมูลแมช
                     $matches->each(function ($item) {
-                        $match = Matchs::where('match_id', $item->id)->whereOr('fixture_id',$item->fixture_id)->first() ?? new Matchs;
+                        $match = Matchs::query()
+                            ->when(!empty($item->fixture_id), function ($q) use ($item) {
+                                // ถ้ามี fixture_id ให้หาตาม fixture_id ก่อน
+                                $q->where('fixture_id', $item->fixture_id);
+                            }, function ($q) use ($item) {
+                                // ถ้า fixture_id ไม่มีหรือ null ให้หาตาม match_id แทน
+                                $q->where('match_id', $item->id);
+                            })
+                            ->first() ?? new Matchs;
                         $match->match_id = $item->id ?? null;
                         $match->fixture_id = $item->fixture_id ?? null;
                         $match->live_status = 'LIVE';

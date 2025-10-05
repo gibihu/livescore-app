@@ -37,22 +37,6 @@ Route::prefix('api')->name('api.')->group(function(){
 
 });
 
-Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
-    Route::controller(PostApisController::class)->prefix('post')->name('post.')->group(function(){
-        Route::patch('{id}', 'unlock')->name('unlock');
-
-        Route::controller(PostReportApiController::class)->prefix('report')->name('report.')->group(function(){
-            Route::post('{post_id}', 'create')->name('create');
-        });
-    });
-
-    Route::controller(FollowApiController::class)->prefix('follow')->name('follow.')->group(function(){
-        Route::get('following', 'following_list')->name('following');
-        Route::get('following/{id}', 'following')->name('following.id');
-        Route::post('{user_id}', 'update')->name('update');
-    });
-});
-
 
 require __DIR__ . '/api/dash/auth.php';
 require __DIR__.'/api/dash/admin.php';

@@ -24,6 +24,7 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
         Route::controller(TransAdminApiController::class)->group(function(){
             Route::prefix('trans')->name('trans.')->group(function(){
                 Route::get('/', 'userPayment')->name('users.payment');
+                Route::get('history', 'userPaymentHistory')->name('users.history');
                 Route::patch('update', 'update')->name('update');
                 Route::post('exchange', 'UpdateExchange')->name('exchange');
             });

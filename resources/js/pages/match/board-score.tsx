@@ -20,44 +20,36 @@
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Expand } from "lucide-react"
 import * as React from "react"
 
+import { Badge } from "@/components/customs/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { ShortName } from "@/lib/functions"
+import { cn } from "@/lib/utils"
+import dash from "@/routes/dash"
+import web from "@/routes/web"
+import { AuthType } from "@/types/auth"
+import { MatchType } from "@/types/match"
+import { UserType } from "@/types/user"
+import { Link, usePage } from "@inertiajs/react"
 import {
     ColumnDef,
     ColumnFiltersState,
-    flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
     SortingState,
     useReactTable,
-    VisibilityState,
-} from '@tanstack/react-table';
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { ShortName } from "@/lib/functions"
-import { cn } from "@/lib/utils"
+    VisibilityState
+} from '@tanstack/react-table'
 import { useEffect, useState, type ReactNode } from "react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MatchType, ScoreType } from "@/types/match"
-import { Link, usePage } from "@inertiajs/react"
 import MatchEvent from "./event"
-import { Badge } from "@/components/customs/badge"
 import TableMatch from "./table"
-import dash from "@/routes/dash"
-import { AuthType } from "@/types/auth"
-import { UserType } from "@/types/user"
 
 export function BoardScore({ items, isFetch = false }: { items: MatchType[], isFetch?: boolean }) {
     const auth = usePage().props.auth as AuthType;
@@ -281,7 +273,7 @@ export function BoardScore({ items, isFetch = false }: { items: MatchType[], isF
     )
 }
 
-function TableCellViewer({ item, className, children, matchEvent = true }: { item: MatchType, className?: string, children?: ReactNode, matchEvent?: boolean }) {
+function TableCellViewer({ item, className, children, matchEvent = true, type = 'live' }: { item: MatchType, className?: string, children?: ReactNode, matchEvent?: boolean, type?: string }) {
     const auth = usePage().props.auth as AuthType;
     const [selectedTab, setSelectedTab] = useState("event");
     return (
@@ -291,16 +283,18 @@ function TableCellViewer({ item, className, children, matchEvent = true }: { ite
                 <DialogHeader>
                     <DialogTitle>
                         <div className="w-full flex justify-end gap-2">
-                            {auth && (
+                            {auth && type == 'fixture' && (
                                 <Link href={`${dash.post.create().url}?match_id=${item.id}`}>
                                     <Button asChild>
                                         <span>สร้างทีเด็ด</span>
                                     </Button>
                                 </Link>
                             )}
-                            <Button>
-                                <Expand className="size-4" />
-                            </Button>
+                            <Link href={web.match.view({id: item.id}).url} >
+                                <Button asChild>
+                                    <span><Expand className="size-4" /></span>
+                                </Button>
+                            </Link>
                         </div>
                         <div className="flex flex-col items-center gap-4">
                             <div className="flex items-center gap-2">
@@ -311,7 +305,7 @@ function TableCellViewer({ item, className, children, matchEvent = true }: { ite
                                     />
                                 )}
 
-                                <span className="text-xs text-ring">{item.country.name}</span>
+                                <span className="text-xs text-ring">{item.country?.name}</span>
                                 {IsPlay(item.status) && (
                                     <span className="relative flex size-3">
                                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
@@ -505,6 +499,6 @@ function MatcTimehBadge({ item }: { item: MatchType }) {
 
 export {
     IsPlay,
-    IsTime, MatchBadge, matchStatus, TableCellViewer, whoWon, MatcTimehBadge
+    IsTime, MatchBadge, matchStatus, MatcTimehBadge, TableCellViewer, whoWon
 }
 

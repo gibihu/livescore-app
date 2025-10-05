@@ -7,7 +7,7 @@ import { AuthType } from "@/types/auth";
 export default function MenuBar() {
     const auth = usePage().props.auth as AuthType;
     return (
-        <div className="w-full flex justify-end gap-2">
+        <div className="w-full flex justify-end gap-2 flex-wrap">
             {auth.user && (
                 <Link href={dash.post.create().url} prefetch>
                     <Button asChild>

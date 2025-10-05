@@ -31,6 +31,6 @@ export default function FixtureScore({request}:{request: any}) {
 
     return (
         // <BoardScore items={matches} isFetch={isFetchBoard} />
-        <BoardTable items={filters} isFetch={isFetchBoard} type="fixture" />
+        <BoardTable items={filters} isFetch={isFetchBoard} type="fixture" fixture_date={request.fixture_date} />
     );
 }

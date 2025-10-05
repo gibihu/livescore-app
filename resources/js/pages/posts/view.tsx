@@ -5,20 +5,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AppLayout from "@/layouts/layout";
-import { ShortName, truncateMessage } from "@/lib/functions";
+import { truncateMessage } from "@/lib/functions";
 import { cn } from "@/lib/utils";
 import api from "@/routes/api";
 import web from "@/routes/web";
+import { AuthType } from "@/types/auth";
 import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
 import { Head, Link } from "@inertiajs/react";
-import { CirclePoundSterling, LoaderCircle, Lock, Target } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
+import { Circle, CirclePoundSterling, LoaderCircle, Lock, Triangle } from "lucide-react";
+import { ReactNode, useState } from "react";
 import { toast } from "sonner";
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 export default function View(request: any) {
     console.log(request);
+    const auth = request.auth as AuthType;
     const [post, setPost] = useState<PostType>(request.post as PostType);
     const [isUnLock, setIsUnLock] = useState<boolean>(request.is_unlock ?? false as boolean);
     const [follow, setFollow] = useState<any>(request.follow as any);
@@ -54,7 +56,7 @@ export default function View(request: any) {
                         if (result.code === 201) {
                             const data = result.data;
                             setPost(data);
-                            setIsUnLock(false);
+                            setIsUnLock(true);
                             toast.error(result.message);
                         }
                     }
@@ -90,6 +92,15 @@ export default function View(request: any) {
                         <>
                             <Card className="p-2">
                                 <MatchBoard item={post.match} raw={post} />
+                                <div className="flex justify-center">
+                                    <div className="w-md">
+                                        {isUnLock ? (
+                                            <ContentForSale item={post} />
+                                        ) : (
+                                            <ContentForSaleLock item={post} />
+                                        )}
+                                    </div>
+                                </div>
                             </Card>
                             <Card className="p-2 md:p-4">
                                 <div className="w-full flex justify-between gap-2">
@@ -105,7 +116,7 @@ export default function View(request: any) {
                                     </Link>
 
                                     <div className="flex gap-2">
-                                        {follow !== false && (
+                                        {auth.user && (
                                             <>
                                                 <Link href={web.post.report.index({ post_id: post.id }).url}>
                                                     <Button variant="destructive">รายงาน</Button>
@@ -118,14 +129,14 @@ export default function View(request: any) {
                                                         </Button>
                                                     </WannaPayAlert>
                                                 )}
-                                                <FollowSpace post={post} follow={request.follow} />
+                                                <FollowSpace post={post} follow={follow} />
                                             </>
                                         )}
                                     </div>
 
                                 </div>
                                 {isUnLock ? (
-                                    <span>เนื้อหาหลังปลดล็อก</span>
+                                    <span>{post.description}</span>
                                 ) : (
                                     <div className="relative w-full h-100 rounded-xl overflow-hidden shadow-md">
                                         <p className="absolute inset-0 flex items-start justify-center text-start font-semibold z-10 px-2">
@@ -239,40 +250,48 @@ function FollowSpace({ post, follow }: { post: PostType, follow: any }) {
 
 
 
-function MatchBoard({ raw ,item }: { raw: PostType, item: MatchType }) {
+function MatchBoard({ raw, item }: { raw: PostType, item: MatchType }) {
     return (
         <div className="flex flex-col gap-4 items-center justify-center">
 
             <div className="w-full flex gap-2 justify-between">
                 <div className="flex gap-2">
                     <span className="text-primary">{raw.type_text}</span>
-                    <span className="text-muted-foreground">{item.country.name}</span>
+                    {item.country && (<span className="text-muted-foreground">{item.country?.name}</span>)}
                     <span className="text-muted-foreground">{item.date_th_short?.replaceAll("-", "/")}</span>
                     <span className="text-muted-foreground">{item.time.slice(0, 5)}</span>
                 </div>
             </div>
 
-            <div className="flex gap-2 items-center justify-center">
-                <Avatar className=" size-4 rounded-none w-6">
-                    <AvatarImage src={`/flag?type=country&id=${item.country.country_id}`} />
-                    <AvatarFallback className="animate-pulse" />
-                </Avatar>
-                <span className="text-muted-foreground  text-sm md:text-base">{item.country.name}</span>
-            </div>
-
-            <div className="w-full flex gap-4 justify-center items-center">
-                <div className="w-full flex justify-end"><Podium item={item.home} logo_position="end" /></div>
-                <div className="flex flex-col gap-2">
-                    <span className=" text-sm md:text-xl font-bold">VS</span>
+            {item.country ? (
+                <div className="flex gap-2 items-center justify-center text-sm">
+                    <Avatar className=" size-4 rounded-none w-6">
+                        <AvatarImage src={`/flag?type=country&id=${item.country?.country_id}`} />
+                        <AvatarFallback className="animate-pulse" />
+                    </Avatar>
+                    <span className="text-muted-foreground  text-sm md:text-base">{item.country?.name}</span>
                 </div>
-                <div className="w-full flex justify-start"><Podium item={item.away} /></div>
+            ) : (item.federation && (
+                <div className="texet-center  text-sm">
+                    {item.federation.name_th ?? item.federation.name}
+                </div>
+            ))}
 
-            </div>
+            <Link href={web.match.view({id: item.id}).url}>
+                <div className="w-full flex gap-4 justify-center items-center">
+                    <div className="w-full flex justify-end"><Podium item={item.home} logo_position="end" /></div>
+                    <div className="flex flex-col gap-2">
+                        <span className=" text-sm md:text-xl font-bold">VS</span>
+                    </div>
+                    <div className="w-full flex justify-start"><Podium item={item.away} /></div>
+
+                </div>
+            </Link>
         </div>
     );
 }
 
-function Podium({ item, logo_position = 'start' }: { item: any, logo_position?: string }) {
+export function Podium({ item, logo_position = 'start' }: { item: any, logo_position?: string }) {
     return (
         <div className={cn("flex flex-col md:flex-row gap-2 items-center", logo_position == 'end' ? 'md:flex-row-reverse' : '')}>
             <Avatar className=" size-8 md:size-10">
@@ -282,4 +301,132 @@ function Podium({ item, logo_position = 'start' }: { item: any, logo_position?: 
             <span className="text-sm md:text-base text-end">{item.name}</span>
         </div>
     );
+}
+
+
+function ContentForSale({ item }: { item: PostType }) {
+    const match = item.match;
+    const show = item.show;
+    const hidden = item.hidden;
+    if (item.type === 1) {
+        return (
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+                <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
+                <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+
+                <div className="text-center text-primary  py-2">{hidden.value_5}</div>
+                <div className="text-center text-primary  py-2">{hidden.value_6}</div>
+            </div>
+        );
+    } else if (item.type === 2) {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="flex gap-6 justify-center">
+                    <div className={cn("w-xs py-4 px-8 flex items-center justify-center gap-2 border rounded-xl bg-primary text-white")}>
+                        {hidden.value_1 == '0' ? 'ต่ำ' : 'สูง'}
+                        <Triangle className={cn("size-2", hidden.value_1 == '0' ? 'text-red-600 rotate-180' : 'text-green-600')} fill="currentColor" />
+                    </div>
+                </div>
+                <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+                    <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
+                    <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+
+                    <div className="text-center text-primary  py-2">{hidden.value_5}</div>
+                    <div className="text-center text-primary  py-2">{hidden.value_6}</div>
+                </div>
+            </div>
+        );
+    } else if (item.type === 3) {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="flex gap-6 justify-center">
+                    <div className={cn("w-xs py-4 px-8 flex items-center justify-center gap-2 border rounded-xl bg-primary text-white")}>
+                        {hidden.value_1 == '0' ? 'คี่' : 'คู่'}
+                        {hidden.value_1 == '0' ? (
+                            <>
+                                <Circle className="size-3 text-white" fill="currentColor" />
+                            </>
+                        ) : (
+                            <>
+                                <Circle className="size-3 text-white" fill="currentColor" />
+                                <Circle className="size-3 text-white" fill="currentColor" />
+                            </>
+                        )}
+                    </div>
+                </div>
+                <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+                    <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
+                    <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+
+                    <div className="text-center text-primary  py-2">{hidden.value_5}</div>
+                    <div className="text-center text-primary  py-2">{hidden.value_6}</div>
+                </div>
+            </div>
+        );
+    } else if (item.type === 4) {
+        return (
+            <div className="grid grid-cols-3  rounded-xl border  overflow-hidden  divide-x-1">
+                <div className="text-center text-sm  bg-input  py-2">1</div>
+                <div className="text-center text-sm  bg-input  py-2">X</div>
+                <div className="text-center text-sm  bg-input  py-2">2</div>
+
+                <div className="text-center text-primary  py-2">{hidden.value_1}</div>
+                <div className="text-center text-primary  py-2">{hidden.value_2}</div>
+                <div className="text-center text-primary  py-2">{hidden.value_3}</div>
+            </div>
+        );
+    } else {
+        return (<></>);
+    }
+}
+
+
+function ContentForSaleLock({ item }: { item: PostType }) {
+    const match = item.match;
+    const show = item.show;
+    if (item.type === 1) {
+        return (
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+                <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
+                <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+
+                <div className="text-center text-primary  py-2 blur-sm">00/00</div>
+                <div className="text-center text-primary  py-2 blur-sm">00/00</div>
+            </div>
+        );
+    } else if (item.type === 2 || item.type === 3) {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="flex gap-6 justify-center">
+                    <div className={cn("w-xs py-4 px-8 flex items-center justify-center gap-2 border rounded-xl bg-primary text-white")}>
+                        <span className="flex gap-2  items-center blur-sm">
+                            สูงต่ำ
+                            <Triangle className={cn("size-2 text-white rotate-90")} fill="currentColor" />
+                        </span>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+                    <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
+                    <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+
+                    <div className="text-center text-primary  py-2 blur-sm">00/00</div>
+                    <div className="text-center text-primary  py-2 blur-sm">00/00</div>
+                </div>
+            </div>
+        );
+    } else if (item.type === 4) {
+        return (
+            <div className="grid grid-cols-3  rounded-xl border  overflow-hidden  divide-x-1">
+                <div className="text-center text-sm  bg-input  py-2">1</div>
+                <div className="text-center text-sm  bg-input  py-2">X</div>
+                <div className="text-center text-sm  bg-input  py-2">2</div>
+
+                <div className="text-center text-primary  py-2 blur-sm">+00</div>
+                <div className="text-center text-primary  py-2 blur-sm">+00</div>
+                <div className="text-center text-primary  py-2 blur-sm">+00</div>
+            </div>
+        );
+    } else {
+        return (<></>);
+    }
 }

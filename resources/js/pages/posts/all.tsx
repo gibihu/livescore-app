@@ -2,7 +2,7 @@ import { AppCoins } from "@/components/app-icon";
 import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/layout";
 import web from "@/routes/web";
 import { MatchType } from "@/types/match";

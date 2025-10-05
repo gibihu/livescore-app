@@ -28,12 +28,15 @@ class WebPageController extends Controller
         }
     }
 
-    public function showMatch(Request $request, $match_id)
+    public function showMatch(Request $request, $id)
     {
-        $match = Matchs::where('match_id',$match_id)->first();
-        $match->json = json_decode($match->json);
-
-        return Inertia::render('match/show', compact('match'));
+        $match = Matchs::where('id',$id)->first();
+        $posts = Post::where('ref_id',$id)->where('privacy', Post::PUBLIC)->get();
+        $posts->map(function ($post) {
+            $post->match = Matchs::select('home_team_id', 'away_team_id')->find($post->ref_id);
+            return $post;
+        });
+        return Inertia::render('match/view', compact('match', 'posts'));
     }
 
     public function fixturesMatch(Request $request)
@@ -43,6 +46,15 @@ class WebPageController extends Controller
             ->whereDate('date', $date)
             ->where('live_status', 'NOT_LIVE')
             ->get();
-        return Inertia::render('fixture', compact('matches'));
+        $fixture_date = Carbon::parse($date)->format('Y-m-d');
+        return Inertia::render('fixture', compact('matches', 'fixture_date'));
+    }
+
+    public function historyMatch(Request $request)
+    {
+        $data = $request->query('data') ?? Carbon::yesterday();
+        $matches = Matchs::where('live_status', 'END_LIVE')->wherDate('')->get();
+
+
     }
 }

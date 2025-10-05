@@ -1,6 +1,5 @@
 "use client";
 
-import { description } from "@/components/dashboard/income-chart";
 import { PickMatch } from "@/components/dashboard/pick-match";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
@@ -33,9 +31,7 @@ import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Head, router } from "@inertiajs/react";
 import { Avatar } from "@radix-ui/react-avatar";
-import { kMaxLength } from "buffer";
-import { hover } from "framer-motion";
-import { Car, Circle, CircleQuestionMark, LoaderCircle, Minus, Triangle } from "lucide-react";
+import { Circle, CircleQuestionMark, LoaderCircle, Triangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -95,12 +91,21 @@ export default function CreatePostPage(request: any) {
         // oxt_two: z.number().optional(),
         // oxt_description: z.string().nullable(),
     }).superRefine((data, ctx) => {
-        if (data.type === 1 && !data.value_hidden_6?.trim()) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "กรุณาเพิ่มข้อมูล",
-                path: ['value_hidden_6']
-            });
+        if (data.type === 1) {
+            if (!data.value_hidden_6?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_5']
+                });
+            }
+            if (!data.value_hidden_6?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_6']
+                });
+            }
         }
 
         if ((data.type === 2 || data.type === 3)) {
@@ -109,6 +114,13 @@ export default function CreatePostPage(request: any) {
                     code: z.ZodIssueCode.custom,
                     message: "กรุณาเพิ่มข้อมูล",
                     path: ['value_hidden_1']
+                });
+            }
+            if (!data.value_hidden_6?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_5']
                 });
             }
             if (!data.value_hidden_6?.trim()) {
@@ -332,10 +344,10 @@ export default function CreatePostPage(request: any) {
                                             <div className="size-12">
                                                 <Avatar>
                                                     <AvatarImage src={matchSelected?.home.logo} />
-                                                    <AvatarFallback className="bg-input  animate-pulse"></AvatarFallback>
+                                                    <AvatarFallback className="bg-accent"></AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input ')}>{matchSelected?.home.name}</span>
+                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-accent ')}>{matchSelected?.home.name}</span>
                                         </div>
                                     </div>
 
@@ -359,8 +371,8 @@ export default function CreatePostPage(request: any) {
                                             </>
                                         ) : (
                                             <>
-                                                <span className="h-5 w-1/2 rounded-xl bg-input "></span>
-                                                <span className="h-5 w-full rounded-xl bg-input "></span>
+                                                <span className="h-5 w-1/2 rounded-xl bg-accent "></span>
+                                                <span className="h-5 w-full rounded-xl bg-accent "></span>
                                             </>
                                         )}
                                     </div>
@@ -370,10 +382,10 @@ export default function CreatePostPage(request: any) {
                                             <div className="size-12">
                                                 <Avatar>
                                                     <AvatarImage src={matchSelected?.away.logo} />
-                                                    <AvatarFallback className="bg-input animate-pulse"></AvatarFallback>
+                                                    <AvatarFallback className="bg-accent"></AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-input ')}>{matchSelected?.away.name}</span>
+                                            <span className={cn("text-muted-foreground text-sm rounded-xl", match_id ? '' : 'w-full h-5 bg-accent ')}>{matchSelected?.away.name}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -422,19 +434,34 @@ export default function CreatePostPage(request: any) {
                                             {(() => {
                                                 if (select_option === 1) {
                                                     return (
-                                                        <FormField
-                                                            control={form.control}
-                                                            name="value_hidden_6"
-                                                            render={({ field, fieldState }) => (
-                                                                <FormItem className="col-span-4">
-                                                                    <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
-                                                                    <FormControl>
-                                                                        <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
-                                                                    </FormControl>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
+                                                        <div className="flex gap-4 w-full">
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="value_hidden_5"
+                                                                render={({ field, fieldState }) => (
+                                                                    <FormItem className="flex-1">
+                                                                        <FormLabel className="mb-2">{matchSelected?.home.name}</FormLabel>
+                                                                        <FormControl>
+                                                                            <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                        </FormControl>
+                                                                        <FormMessage />
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="value_hidden_6"
+                                                                render={({ field, fieldState }) => (
+                                                                    <FormItem className="flex-1">
+                                                                        <FormLabel className="mb-2">{matchSelected?.away.name}</FormLabel>
+                                                                        <FormControl>
+                                                                            <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                        </FormControl>
+                                                                        <FormMessage />
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        </div>
                                                     );
                                                 } else if (select_option === 2) {
                                                     return (
@@ -484,19 +511,35 @@ export default function CreatePostPage(request: any) {
                                                                     )}
                                                                 />
                                                             </div>
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="value_hidden_6"
-                                                                render={({ field, fieldState }) => (
-                                                                    <FormItem className="col-span-4">
-                                                                        <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
-                                                                        <FormControl>
-                                                                            <Input placeholder="รอคาต่อรอง" {...field} />
-                                                                        </FormControl>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
+
+                                                            <div className="flex gap-4 w-full">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_5"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex-1">
+                                                                            <FormLabel className="mb-2">{matchSelected?.home.name}</FormLabel>
+                                                                            <FormControl>
+                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_6"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex-1">
+                                                                            <FormLabel className="mb-2">{matchSelected?.away.name}</FormLabel>
+                                                                            <FormControl>
+                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     );
                                                 } else if (select_option === 3) {
@@ -550,19 +593,35 @@ export default function CreatePostPage(request: any) {
                                                                     )}
                                                                 />
                                                             </div>
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="value_hidden_6"
-                                                                render={({ field, fieldState }) => (
-                                                                    <FormItem className="col-span-4">
-                                                                        <FormLabel className="mb-2">ราคาต่อรอง</FormLabel>
-                                                                        <FormControl>
-                                                                            <Input placeholder="รอคาต่อรอง" {...field} />
-                                                                        </FormControl>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
+
+                                                            <div className="flex gap-4 w-full">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_5"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex-1">
+                                                                            <FormLabel className="mb-2">{matchSelected?.home.name}</FormLabel>
+                                                                            <FormControl>
+                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_6"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex-1">
+                                                                            <FormLabel className="mb-2">{matchSelected?.away.name}</FormLabel>
+                                                                            <FormControl>
+                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     );
                                                 } else if (select_option === 4) {

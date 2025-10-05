@@ -54,9 +54,12 @@ class PostWebPageController extends Controller
 
             // กรณีมีสิทธิ์เข้าถึง (ไม่ต้อง query $post ใหม่)
             $canAccess = $inventory || $user->role == User::ROLE_ADMIN || $user->id == $post->user_id;
-            $is_unlock = true;
             if (!$canAccess) {
-                abort(403, 'Unauthorized');
+                $post = Post::select('id', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
+                    ->with('user')
+                    ->find($id);
+            }else{
+                $is_unlock = true;
             }
         } else {
             // guest -> ดึงเฉพาะข้อมูลจำเป็น
