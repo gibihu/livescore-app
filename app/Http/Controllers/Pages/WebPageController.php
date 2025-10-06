@@ -41,11 +41,27 @@ class WebPageController extends Controller
 
     public function fixturesMatch(Request $request)
     {
-        $date = $request->query('date') ?? Carbon::tomorrow();
-        $matches = Matchs::whereNull('match_id')
-            ->whereDate('date', $date)
-            ->where('live_status', 'NOT_LIVE')
-            ->get();
+        $date = $request->query('date')
+            ? Carbon::parse($request->query('date'))
+            : Carbon::now();
+
+        $status = $date->lt(Carbon::today()) ? 'END_LIVE' : 'NOT_LIVE';
+        if ($date->isBefore(Carbon::today())) {
+            // ถ้าวันที่น้อยกว่าวันนี้ → ใช้ฟิลด์ added (timestamp)
+            $matches = Matchs::whereNotNull('match_id')
+                ->whereBetween('added', [
+                    $date->copy()->startOfDay(),
+                    $date->copy()->endOfDay()
+                ])
+                ->where('live_status', $status)
+                ->get();
+        } else {
+            // ถ้าวันนี้หรือหลังจากนี้ → ใช้ตาราง Matchs
+            $matches = Matchs::whereNull('match_id')
+                ->whereDate('date', $date)
+                ->where('live_status', $status)
+                ->get();
+        }
         $fixture_date = Carbon::parse($date)->format('Y-m-d');
         return Inertia::render('fixture', compact('matches', 'fixture_date'));
     }
