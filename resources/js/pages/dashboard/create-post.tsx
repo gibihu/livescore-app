@@ -1,5 +1,6 @@
 "use client";
 
+import { description } from "@/components/dashboard/income-chart";
 import { PickMatch } from "@/components/dashboard/pick-match";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,16 +23,17 @@ import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
 import api from "@/routes/api";
-import dash from "@/routes/dash";
+import dash, { index } from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
 import { AuthType } from "@/types/auth";
 import { CompetitionType } from "@/types/league";
 import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import { Avatar } from "@radix-ui/react-avatar";
 import { Circle, CircleQuestionMark, LoaderCircle, Triangle } from "lucide-react";
+import { title } from "process";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -62,10 +64,9 @@ export default function CreatePostPage(request: any) {
         points: z.number({ message: "กรุณากรอกจำนวนพอยต์" }).min(0, { message: 'ต้องมากกว่า 0' }).max(maxPoints, `จำนวนพอยต์ต้องไม่มากกว่า ${maxPoints.toLocaleString()}`),
         submit: z.string(),
         match_id: z.string({ message: 'กรุณาเลือกทีม' }).min(1, { message: 'กรุณาเลือกทีม' }),
-        description: z.string(),
+        description: z.string().min(1, { message: 'กรุณาเขียนคำอธิบาย' }),
         type: z.number({ message: 'กรุณาเลือก' }),
 
-        // ทำให้เป็น optional ก่อน แล้วค่อย validate ด้วย refine
         value_show_1: z.string().optional(),
         value_show_2: z.string().optional(),
         value_show_3: z.string().optional(),
@@ -79,26 +80,8 @@ export default function CreatePostPage(request: any) {
         value_hidden_4: z.string().optional(),
         value_hidden_5: z.string().optional(),
         value_hidden_6: z.string().optional(),
-        // hl_value_1: z.string().optional(),
-        // hl_negotiate: z.string().optional(),
-        // hl_description: z.string().nullable(),
-
-        // eod: z.string().optional(),
-        // eod_description: z.string().nullable(),
-
-        // oxt_one: z.number().optional(),
-        // oxt_x: z.number().optional(),
-        // oxt_two: z.number().optional(),
-        // oxt_description: z.string().nullable(),
     }).superRefine((data, ctx) => {
         if (data.type === 1) {
-            if (!data.value_hidden_6?.trim()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "กรุณาเพิ่มข้อมูล",
-                    path: ['value_hidden_5']
-                });
-            }
             if (!data.value_hidden_6?.trim()) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -108,7 +91,7 @@ export default function CreatePostPage(request: any) {
             }
         }
 
-        if ((data.type === 2 || data.type === 3)) {
+        if ((data.type === 2)) {
             if (!data.value_hidden_1?.trim()) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -120,14 +103,16 @@ export default function CreatePostPage(request: any) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: "กรุณาเพิ่มข้อมูล",
-                    path: ['value_hidden_5']
+                    path: ['value_hidden_2']
                 });
             }
-            if (!data.value_hidden_6?.trim()) {
+        }
+        if ((data.type === 3)) {
+            if (!data.value_hidden_1?.trim()) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: "กรุณาเพิ่มข้อมูล",
-                    path: ['value_hidden_6']
+                    path: ['value_hidden_1']
                 });
             }
         }
@@ -140,26 +125,14 @@ export default function CreatePostPage(request: any) {
                     path: ['value_hidden_1']
                 });
             }
-            if (!data.value_hidden_2?.trim()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "กรุณาเพิ่มข้อมูล",
-                    path: ['value_hidden_2']
-                });
-            }
-            if (!data.value_hidden_3?.trim()) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "กรุณาเพิ่มข้อมูล",
-                    path: ['value_hidden_3']
-                });
-            }
         }
     });
     type FormValues = z.infer<typeof schema>;
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
+            title: '',
+            description: '',
             points: 100,
             submit: 'private',
             type: 1,
@@ -356,18 +329,6 @@ export default function CreatePostPage(request: any) {
                                             <>
                                                 <span>{matchSelected?.time}</span>
                                                 <span>{matchSelected?.date}</span>
-                                                {/* <FormField
-                                                    control={form.control}
-                                                    name="negotiate"
-                                                    render={({ field, fieldState }) => (
-                                                        <FormItem className="flex flex-col items-center">
-                                                            <FormControl>
-                                                                <Input className="w-4/5 text-center" placeholder="ราคาต่อรอง" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                /> */}
                                             </>
                                         ) : (
                                             <>
@@ -437,25 +398,12 @@ export default function CreatePostPage(request: any) {
                                                         <div className="flex gap-4 w-full">
                                                             <FormField
                                                                 control={form.control}
-                                                                name="value_hidden_5"
-                                                                render={({ field, fieldState }) => (
-                                                                    <FormItem className="flex-1">
-                                                                        <FormLabel className="mb-2">{matchSelected?.home.name}</FormLabel>
-                                                                        <FormControl>
-                                                                            <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
-                                                                        </FormControl>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                            <FormField
-                                                                control={form.control}
                                                                 name="value_hidden_6"
                                                                 render={({ field, fieldState }) => (
                                                                     <FormItem className="flex-1">
-                                                                        <FormLabel className="mb-2">{matchSelected?.away.name}</FormLabel>
+                                                                        <FormLabel className="mb-2">รอคาต่อรอง</FormLabel>
                                                                         <FormControl>
-                                                                            <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                            <SelectNegotiable value={field.value} onChange={field.onChange} />
                                                                         </FormControl>
                                                                         <FormMessage />
                                                                     </FormItem>
@@ -515,25 +463,12 @@ export default function CreatePostPage(request: any) {
                                                             <div className="flex gap-4 w-full">
                                                                 <FormField
                                                                     control={form.control}
-                                                                    name="value_hidden_5"
+                                                                    name="value_hidden_2"
                                                                     render={({ field, fieldState }) => (
                                                                         <FormItem className="flex-1">
-                                                                            <FormLabel className="mb-2">{matchSelected?.home.name}</FormLabel>
+                                                                            <FormLabel className="mb-2">ค่า</FormLabel>
                                                                             <FormControl>
-                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
-                                                                            </FormControl>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                    )}
-                                                                />
-                                                                <FormField
-                                                                    control={form.control}
-                                                                    name="value_hidden_6"
-                                                                    render={({ field, fieldState }) => (
-                                                                        <FormItem className="flex-1">
-                                                                            <FormLabel className="mb-2">{matchSelected?.away.name}</FormLabel>
-                                                                            <FormControl>
-                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
+                                                                                <Input placeholder="เพิ่มคะแนน" type="number" {...field} disabled={isFetch} />
                                                                             </FormControl>
                                                                             <FormMessage />
                                                                         </FormItem>
@@ -593,41 +528,12 @@ export default function CreatePostPage(request: any) {
                                                                     )}
                                                                 />
                                                             </div>
-
-                                                            <div className="flex gap-4 w-full">
-                                                                <FormField
-                                                                    control={form.control}
-                                                                    name="value_hidden_5"
-                                                                    render={({ field, fieldState }) => (
-                                                                        <FormItem className="flex-1">
-                                                                            <FormLabel className="mb-2">{matchSelected?.home.name}</FormLabel>
-                                                                            <FormControl>
-                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
-                                                                            </FormControl>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                    )}
-                                                                />
-                                                                <FormField
-                                                                    control={form.control}
-                                                                    name="value_hidden_6"
-                                                                    render={({ field, fieldState }) => (
-                                                                        <FormItem className="flex-1">
-                                                                            <FormLabel className="mb-2">{matchSelected?.away.name}</FormLabel>
-                                                                            <FormControl>
-                                                                                <Input placeholder="รอคาต่อรอง" {...field} value={field.value} onChange={field.onChange} />
-                                                                            </FormControl>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                    )}
-                                                                />
-                                                            </div>
                                                         </div>
                                                     );
                                                 } else if (select_option === 4) {
                                                     return (
                                                         <div className="flex flex-col gap-2 w-full">
-                                                            <div className="flex flex-col gap-2 justify-center items-center ">
+                                                            <div className="flex flex-col gap-4 justify-center items-center ">
                                                                 <Label>ผลคาดการณ์</Label>
                                                                 <div className="flex gap-4 justify-center">
                                                                     <FormField
@@ -636,29 +542,50 @@ export default function CreatePostPage(request: any) {
                                                                         render={({ field }) => (
                                                                             <FormItem className="col-span-4 text-center">
                                                                                 <FormControl>
-                                                                                    <Input placeholder="เจ้าบ้าน" className="text-center" {...field} disabled={isFetch} onChange={field.onChange} />
-                                                                                </FormControl>
-                                                                            </FormItem>
-                                                                        )}
-                                                                    />
-                                                                    <FormField
-                                                                        control={form.control}
-                                                                        name="value_hidden_2"
-                                                                        render={({ field }) => (
-                                                                            <FormItem className="col-span-4 text-center">
-                                                                                <FormControl>
-                                                                                    <Input placeholder="เสมอ" className="text-center" {...field} disabled={isFetch} onChange={field.onChange} />
-                                                                                </FormControl>
-                                                                            </FormItem>
-                                                                        )}
-                                                                    />
-                                                                    <FormField
-                                                                        control={form.control}
-                                                                        name="value_hidden_3"
-                                                                        render={({ field }) => (
-                                                                            <FormItem className="col-span-4 text-center">
-                                                                                <FormControl>
-                                                                                    <Input placeholder="ทีมเยือน" className="text-center" {...field} disabled={isFetch} onChange={field.onChange} />
+                                                                                    <RadioGroup className="flex gap-4" {...field} onValueChange={field.onChange}>
+
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="1"
+                                                                                            id="option-one"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-one"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                        >
+                                                                                            เจ้าบ้าน
+                                                                                        </Label>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="x"
+                                                                                            id="option-x"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-x"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                        >
+                                                                                            เสมอ
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="2"
+                                                                                            id="option-two"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-two"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                        >
+                                                                                            ทีมเยือน
+                                                                                        </Label>
+                                                                                    </div>
+
+                                                                                </RadioGroup>
                                                                                 </FormControl>
                                                                             </FormItem>
                                                                         )}
@@ -671,24 +598,6 @@ export default function CreatePostPage(request: any) {
                                                     return <></>;
                                                 }
                                             })()}
-                                            {/* <Tabs defaultValue="height-low" className="my-4 w-full">
-                                            <TabsList>
-                                                <TabsTrigger value="height-low" className="px-4">สูงต่ำ</TabsTrigger>
-                                                <TabsTrigger value="even-odd" className="px-4">คู่คี่</TabsTrigger>
-                                                <TabsTrigger value="one-x-two" className="px-4">1 X 2</TabsTrigger>
-                                            </TabsList>
-                                            <Card className="m-0 px-4">
-                                                <TabsContent value="height-low">
-
-                                                </TabsContent>
-                                                <TabsContent value="even-odd">
-
-                                                </TabsContent>
-                                                <TabsContent value="one-x-two">
-
-                                                </TabsContent>
-                                            </Card>
-                                        </Tabs> */}
 
                                             <FormField
                                                 control={form.control}
@@ -750,4 +659,46 @@ export function MaxPoints(i: string) {
     }
 
     return max;
+}
+
+
+interface RateType {
+    title: string;
+    value: number;
+};
+function SelectNegotiable(
+    {
+        onChange,
+        className,
+        value,
+        defaultVal,
+    }: {
+        onChange?: (e: string) => void,
+        className?: string,
+        value?: string,
+        defaultVal?: string,
+    }
+) {
+
+    const request = usePage().props;
+    const rateDate = request.rateData as RateType[];
+
+
+    return (
+        <Select
+            value={value?.toString() || defaultVal?.toString() || '0'}
+            onValueChange={(val) => onChange?.(val)}
+        >
+            <SelectTrigger className={cn('w-full', className)}>
+                <SelectValue placeholder="ราคาต่อรอง" />
+            </SelectTrigger>
+            <SelectContent>
+                {
+                    rateDate.map((item, index) => (
+                        <SelectItem value={item.value.toString()} key={index}>{item.title}</SelectItem>
+                    ))
+                }
+            </SelectContent>
+        </Select>
+    );
 }

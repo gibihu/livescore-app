@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Apis\Dash;
 
 use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Post\Post;
+use App\Http\Controllers\Users\SeasonController;
+use App\Models\Football\Matchs;
+use App\Models\Posts\Post;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +25,13 @@ class PostApiDashController extends Controller
             if ($todayPosts >= $max) {
                 return response()->json([
                     'message' => "วันนี้คุณสร้างโพสต์ครบ $max ครั้งแล้ว ไม่สามารถสร้างเพิ่มได้",
+                    'code' => 403,
+                ], 403);
+            }
+            $match = Matchs::where('id', $request->get('match_id'))->first();
+            if(!$match->exists() || $match->live_status !== 'NOT_LIVE'){
+                return response()->json([
+                    'message' => "แมตช์กำลังเล่นหรือจบไปแล้ว",
                     'code' => 403,
                 ], 403);
             }
@@ -58,6 +67,8 @@ class PostApiDashController extends Controller
 
             $post->type = $request->type;
             $post->privacy = $request->submit ? Post::PUBLIC : Post::PRIVATE;
+
+            $post->ss_id = SeasonController::GetSeason()->id;
 
             if ($post->save()) {
                 return response()->json([

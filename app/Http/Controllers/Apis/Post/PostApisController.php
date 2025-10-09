@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Apis;
-use App\Helpers\UserHelper;
+namespace App\Http\Controllers\Apis\Post;
+use App\Helpers\RateHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\WalletController;
+use App\Http\Controllers\Users\WalletController;
 use App\Models\Football\Matchs;
-use App\Models\Inventory;
-use App\Models\Post\Post;
-use App\Models\User;
-use App\Models\WalletHistory;
-use Carbon\Carbon;
+use App\Models\Posts\Post;
+use App\Models\Users\Inventory;
+use App\Models\Users\User;
+use App\Models\Users\WalletHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 
 class PostApisController extends Controller
@@ -103,6 +101,9 @@ class PostApisController extends Controller
                     $inventory->source_id = $id;
                     $inventory->save();
                     $post->match = Matchs::find($post->ref_id);
+                    $post->hiddens = (object) [
+                        'value_6' => RateHelper::getItem($post->hidden["value_6"]),
+                    ];
                     if($inventory->save()){
                         return response()->json([
                             'message' => 'ปลดล็อกโพสต์แล้ว',

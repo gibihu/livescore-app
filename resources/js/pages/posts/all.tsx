@@ -1,4 +1,5 @@
 import { AppCoins } from "@/components/app-icon";
+import { ExpertBadge } from "@/components/expert-badge";
 import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,7 +8,7 @@ import AppLayout from "@/layouts/layout";
 import web from "@/routes/web";
 import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
-import { UserGuast } from "@/types/user";
+import { UserGuast, UserRankType, UserSeasonType } from "@/types/user";
 import { Head, Link } from "@inertiajs/react";
 import { useState } from "react";
 
@@ -39,6 +40,8 @@ export default function Home(request: any) {
 function PostCard({item}:{item: any}) {
     const user = item.user as UserGuast;
     const match = item.match as MatchType;
+    const ss = item.season as UserSeasonType;
+    const rank = user.rank as UserRankType;
     return (
         <Card className="gap-1 py-4">
             <CardHeader>
@@ -48,13 +51,10 @@ function PostCard({item}:{item: any}) {
                         <AvatarFallback className="capitalize">{user.username.charAt(1)}</AvatarFallback>
                     </Avatar>
                     <span className="font-normal">{user.name}</span>
+                    {rank.level !== 0 && (
+                        <ExpertBadge level={rank.level} type={rank.type_text} />
+                    )}
                 </CardTitle>
-                {/* <CardAction>
-                    <Button>
-                        <CirclePoundSterling className="size-4 text-yellow-600" />
-                        <span>{item.points > 0 ? item.points.toLocaleString() : 'free'}</span>
-                    </Button>
-                </CardAction> */}
             </CardHeader>
             <CardContent className="flex gap-2">
                     <div className="flex gap-2">

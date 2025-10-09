@@ -23,7 +23,7 @@ export default function Home(request: any) {
 
             <div className="flex flex-col gap-4  mt-4">
                 <MenuBar />
-                <LiveScore match_items={matches} leagues_items={leagues} posts_items={posts} />
+                <LiveScore match_items={matches} />
                 {/* <span>{route('api.match.live')}</span> */}
                 {/* <MatchDashboard /> */}
                 {/* <FeedLive /> */}

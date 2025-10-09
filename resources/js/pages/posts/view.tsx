@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AppLayout from "@/layouts/layout";
-import { truncateMessage } from "@/lib/functions";
+import { Trans1X2ToString, truncateMessage } from "@/lib/functions";
 import { cn } from "@/lib/utils";
 import api from "@/routes/api";
 import web from "@/routes/web";
@@ -102,7 +102,7 @@ export default function View(request: any) {
                                     </div>
                                 </div>
                             </Card>
-                            <Card className="p-2 md:p-4">
+                            <Card className="p-2 md:p-4 gap-4">
                                 <div className="w-full flex justify-between gap-2">
                                     <Link href={'#'} className="flex gap-2 items-center">
                                         <Avatar className="size-9">
@@ -129,24 +129,29 @@ export default function View(request: any) {
                                                         </Button>
                                                     </WannaPayAlert>
                                                 )}
-                                                <FollowSpace post={post} follow={follow} />
+                                                {auth.user.id !== post.user_id && (
+                                                    <FollowSpace post={post} follow={follow} />
+                                                )}
                                             </>
                                         )}
                                     </div>
 
                                 </div>
-                                {isUnLock ? (
-                                    <span>{post.description}</span>
-                                ) : (
-                                    <div className="relative w-full h-100 rounded-xl overflow-hidden shadow-md">
-                                        <p className="absolute inset-0 flex items-start justify-center text-start font-semibold z-10 px-2">
-                                            {truncateMessage(generateSecretMessage() + generateSecretMessage(), 1200)}
-                                        </p>
-                                        <div className="h-auto hover:bg-accent/30  absolute inset-0 bg-accent/30 backdrop-blur-md flex items-center justify-center text-gray-600 text-lg font-semibold z-20 transition-opacity duration-300">
-                                            <span className="flex items-center gap-2 text-foreground"><Lock className="size-5" />  ปลล็อก</span>
+                                <div className="flex flex-col gap-1">
+                                    <span className="font-bold">{post.title}</span>
+                                    {isUnLock ? (
+                                        <span className="ps-2">{post.description}</span>
+                                    ) : (
+                                        <div className="relative w-full h-100 rounded-xl overflow-hidden shadow-md">
+                                            <p className="absolute inset-0 flex items-start justify-center text-start font-semibold z-10 px-2">
+                                                {truncateMessage(generateSecretMessage() + generateSecretMessage(), 1200)}
+                                            </p>
+                                            <div className="h-auto hover:bg-accent/30  absolute inset-0 bg-accent/30 backdrop-blur-md flex items-center justify-center text-gray-600 text-lg font-semibold z-20 transition-opacity duration-300">
+                                                <span className="flex items-center gap-2 text-foreground"><Lock className="size-5" />  ปลล็อก</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </Card>
                         </>
                     )
@@ -255,11 +260,14 @@ function MatchBoard({ raw, item }: { raw: PostType, item: MatchType }) {
         <div className="flex flex-col gap-4 items-center justify-center">
 
             <div className="w-full flex gap-2 justify-between">
-                <div className="flex gap-2">
+                <div className="flex gap-2 text-muted-foreground">
                     <span className="text-primary">{raw.type_text}</span>
-                    {item.country && (<span className="text-muted-foreground">{item.country?.name}</span>)}
-                    <span className="text-muted-foreground">{item.date_th_short?.replaceAll("-", "/")}</span>
-                    <span className="text-muted-foreground">{item.time.slice(0, 5)}</span>
+                    {item.country && (<span>{item.country?.name}</span>)}
+                    <span>{item.date_th_short?.replaceAll("-", "/")}</span>
+                    <span>{item.time.slice(0, 5)}</span>
+                    {item.status === "FINISHED" && (
+                        <span>กำลังสรุปลผล...</span>
+                    )}
                 </div>
             </div>
 
@@ -277,16 +285,20 @@ function MatchBoard({ raw, item }: { raw: PostType, item: MatchType }) {
                 </div>
             ))}
 
-            <Link href={web.match.view({id: item.id}).url}>
-                <div className="w-full flex gap-4 justify-center items-center">
-                    <div className="w-full flex justify-end"><Podium item={item.home} logo_position="end" /></div>
-                    <div className="flex flex-col gap-2">
-                        <span className=" text-sm md:text-xl font-bold">VS</span>
+            <div className="flex flex-col gap-4  items-center w-full">
+                <Link href={web.match.view({ id: item.id }).url} className="w-full">
+                    <div className="w-full flex gap-4 justify-center items-center">
+                        <div className="w-full flex justify-end"><Podium item={item.home} logo_position="end" /></div>
+                        <div className="flex flex-col gap-2">
+                            <span className=" text-sm md:text-xl font-bold">VS</span>
+                        </div>
+                        <div className="w-full flex justify-start"><Podium item={item.away} /></div>
                     </div>
-                    <div className="w-full flex justify-start"><Podium item={item.away} /></div>
-
-                </div>
-            </Link>
+                </Link>
+                {item.status === "FINISHED" && item.scores?.score && (
+                    <span className="font-bold">{item.scores?.score}</span>
+                )}
+            </div>
         </div>
     );
 }
@@ -304,75 +316,61 @@ export function Podium({ item, logo_position = 'start' }: { item: any, logo_posi
 }
 
 
-function ContentForSale({ item }: { item: PostType }) {
+export function ContentForSale({ item }: { item: PostType }) {
     const match = item.match;
     const show = item.show;
     const hidden = item.hidden;
+    const hiddens = item.hiddens;
     if (item.type === 1) {
         return (
             <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
-                <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
-                <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+                <div className="text-center text-sm  bg-input  py-2">แฮนดิแคป</div>
 
-                <div className="text-center text-primary  py-2">{hidden.value_5}</div>
-                <div className="text-center text-primary  py-2">{hidden.value_6}</div>
+                <div className="text-center text-primary  py-2">{hiddens.value_6.title}</div>
             </div>
         );
     } else if (item.type === 2) {
         return (
-            <div className="flex flex-col gap-4">
-                <div className="flex gap-6 justify-center">
-                    <div className={cn("w-xs py-4 px-8 flex items-center justify-center gap-2 border rounded-xl bg-primary text-white")}>
-                        {hidden.value_1 == '0' ? 'ต่ำ' : 'สูง'}
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
+                <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
+                <div className="flex justify-center items-center text-primary  py-2">
+                    <div className="flex items-center gap-2">
+                        {hidden.value_6 == '0' ? 'ต่ำ' : 'สูง'}
                         <Triangle className={cn("size-2", hidden.value_1 == '0' ? 'text-red-600 rotate-180' : 'text-green-600')} fill="currentColor" />
                     </div>
                 </div>
-                <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
-                    <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
-                    <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
 
-                    <div className="text-center text-primary  py-2">{hidden.value_5}</div>
-                    <div className="text-center text-primary  py-2">{hidden.value_6}</div>
-                </div>
+                <div className="text-center text-sm  bg-input  py-2">คะแนน</div>
+                <div className="text-center text-primary  py-2">{hidden.value_2}</div>
             </div>
         );
     } else if (item.type === 3) {
         return (
-            <div className="flex flex-col gap-4">
-                <div className="flex gap-6 justify-center">
-                    <div className={cn("w-xs py-4 px-8 flex items-center justify-center gap-2 border rounded-xl bg-primary text-white")}>
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
+                <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
+                <div className="flex justify-center items-center text-primary  py-2">
+                    <div className="flex items-center gap-2">
                         {hidden.value_1 == '0' ? 'คี่' : 'คู่'}
                         {hidden.value_1 == '0' ? (
-                            <>
-                                <Circle className="size-3 text-white" fill="currentColor" />
-                            </>
+
+                            <Circle className="size-3 text-foreground" fill="currentColor" />
                         ) : (
                             <>
-                                <Circle className="size-3 text-white" fill="currentColor" />
-                                <Circle className="size-3 text-white" fill="currentColor" />
+
+                                <Circle className="size-3 text-foreground" fill="currentColor" />
+                                <Circle className="size-3 text-foreground" fill="currentColor" />
                             </>
                         )}
                     </div>
-                </div>
-                <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
-                    <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
-                    <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
-
-                    <div className="text-center text-primary  py-2">{hidden.value_5}</div>
-                    <div className="text-center text-primary  py-2">{hidden.value_6}</div>
                 </div>
             </div>
         );
     } else if (item.type === 4) {
         return (
-            <div className="grid grid-cols-3  rounded-xl border  overflow-hidden  divide-x-1">
-                <div className="text-center text-sm  bg-input  py-2">1</div>
-                <div className="text-center text-sm  bg-input  py-2">X</div>
-                <div className="text-center text-sm  bg-input  py-2">2</div>
+            <div className="grid grid-cols-1  rounded-xl border  overflow-hidden  divide-x-1">
+                <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
 
-                <div className="text-center text-primary  py-2">{hidden.value_1}</div>
-                <div className="text-center text-primary  py-2">{hidden.value_2}</div>
-                <div className="text-center text-primary  py-2">{hidden.value_3}</div>
+                <div className="text-center text-primary  py-2">{Trans1X2ToString(hidden.value_1)}</div>
             </div>
         );
     } else {
@@ -381,48 +379,50 @@ function ContentForSale({ item }: { item: PostType }) {
 }
 
 
-function ContentForSaleLock({ item }: { item: PostType }) {
+export function ContentForSaleLock({ item }: { item: PostType }) {
     const match = item.match;
     const show = item.show;
     if (item.type === 1) {
         return (
             <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
-                <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
-                <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
+                <div className="text-center text-sm  bg-input  py-2">แฮนดิแคป</div>
 
-                <div className="text-center text-primary  py-2 blur-sm">00/00</div>
                 <div className="text-center text-primary  py-2 blur-sm">00/00</div>
             </div>
         );
-    } else if (item.type === 2 || item.type === 3) {
+    } else if (item.type === 2) {
         return (
-            <div className="flex flex-col gap-4">
-                <div className="flex gap-6 justify-center">
-                    <div className={cn("w-xs py-4 px-8 flex items-center justify-center gap-2 border rounded-xl bg-primary text-white")}>
-                        <span className="flex gap-2  items-center blur-sm">
-                            สูงต่ำ
-                            <Triangle className={cn("size-2 text-white rotate-90")} fill="currentColor" />
-                        </span>
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
+                <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
+                <div className="flex justify-center items-center text-primary  py-2">
+                    <div className="flex items-center gap-2 blur-sm">
+                        สูงต่ำ
+                        <Triangle className={cn("size-2 text-foreground")} fill="currentColor" />
                     </div>
                 </div>
-                <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
-                    <div className="text-center text-sm  bg-input  py-2">{match.home.name}</div>
-                    <div className="text-center text-sm  bg-input  py-2">{match.away.name}</div>
 
-                    <div className="text-center text-primary  py-2 blur-sm">00/00</div>
-                    <div className="text-center text-primary  py-2 blur-sm">00/00</div>
+                <div className="text-center text-sm  bg-input  py-2">คะแนน</div>
+                <div className="text-center text-primary  py-2 blur-sm">00/00</div>
+            </div>
+        );
+    } else if (item.type === 3) {
+        return (
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
+                <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
+                <div className="flex justify-center items-center text-primary  py-2">
+                    <div className="flex items-center gap-2  blur-sm">
+                        <Circle className="size-3 text-foreground" fill="currentColor" />
+                        คู่คี่
+                        <Circle className="size-3 text-foreground" fill="currentColor" />
+                    </div>
                 </div>
             </div>
         );
     } else if (item.type === 4) {
         return (
-            <div className="grid grid-cols-3  rounded-xl border  overflow-hidden  divide-x-1">
-                <div className="text-center text-sm  bg-input  py-2">1</div>
-                <div className="text-center text-sm  bg-input  py-2">X</div>
-                <div className="text-center text-sm  bg-input  py-2">2</div>
+            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+                <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
 
-                <div className="text-center text-primary  py-2 blur-sm">+00</div>
-                <div className="text-center text-primary  py-2 blur-sm">+00</div>
                 <div className="text-center text-primary  py-2 blur-sm">+00</div>
             </div>
         );

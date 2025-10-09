@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\Post;
+namespace App\Models\Posts;
 
-use App\Models\User;
+use App\Models\Football\Matchs;
+use App\Models\Users\User;
 use App\Traits\StatusTypeOneTrait;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Post extends Model
 {
@@ -29,6 +29,11 @@ class Post extends Model
         'description',
         'privacy',
         'status',
+        'result',
+        'exp',
+        'ss_id',
+        'view',
+        'summary_at',
     ];
 
     public $timestamps = true;
@@ -42,14 +47,26 @@ class Post extends Model
         'privacy_text',
         'status_text',
         'type_text',
+        'result_text',
     ];
     protected $with = [
         'user',
+        'season',
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id')->select('id', 'name', 'username', 'tier');
+        return $this->belongsTo(User::class, 'user_id', 'id')->select('id', 'name', 'username', 'tier', 'rank_id');
+    }
+    public function season()
+    {
+        return $this->belongsTo(Season::class, 'ss_id', 'id');
+    }
+
+    public function match()
+    {
+        // ใช้ hasOne ปลอม ๆ ก็ได้ แต่เรา override query เอง
+        return $this->hasOne(Matchs::class, 'id', 'ref_id');
     }
 
     const PUBLIC = 1;
@@ -88,5 +105,24 @@ class Post extends Model
     public function getRefTypeTextAttribute()
     {
         return self::$refTypeLabels[$this->ref_type] ?? 'unknown';
+    }
+
+
+
+    const RESULT_BROK_FULL = -2;
+    const RESULT_BROK_HALF = -1;
+    const RESULT_BASE = 0;
+    const RESULT_GOT_HALF = 1;
+    const RESULT_GOT_FULL = 2;
+    public static $resultLabels = [
+        self::RESULT_BROK_FULL => 'เสียเต็ม',
+        self::RESULT_BROK_HALF => 'เสียครึ่ง',
+        self::RESULT_BASE => 'เสมอ',
+        self::RESULT_GOT_HALF => 'ได้ครึ่ง',
+        self::RESULT_GOT_FULL => 'ได้เต็ม',
+    ];
+    public function getResultTextAttribute()
+    {
+        return self::$resultLabels[$this->result] ?? 'unknown';
     }
 }

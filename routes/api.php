@@ -1,16 +1,9 @@
 <?php
 
-use App\Http\Controllers\Apis\FollowApiController;
-use App\Http\Controllers\Apis\Post\PostReportApiController;
-use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\Apis\UserApiController;
-use App\Http\Controllers\Apis\LiveScoreApiController;
-use App\Http\Controllers\Apis\PointsApiController;
-use App\Http\Controllers\Apis\TransApiController;
-use App\Http\Controllers\Apis\WalletApiController;
-use App\Http\Controllers\Apis\PostApisController;
 use App\Http\Controllers\Apis\Football\CompetitionApiController as LeagueApiController;
+use App\Http\Controllers\Apis\Football\LiveScoreApiController;
+use App\Http\Controllers\Apis\Post\PostApisController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('api')->name('api.')->group(function(){
     Route::controller(PostApisController::class)->group(function(){

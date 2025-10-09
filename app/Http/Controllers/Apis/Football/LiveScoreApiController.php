@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Apis;
+namespace App\Http\Controllers\Apis\Football;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Matchs;

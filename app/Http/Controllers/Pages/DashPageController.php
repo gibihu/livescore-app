@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
-use App\Models\Transaction;
+use App\Models\Users\Transaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

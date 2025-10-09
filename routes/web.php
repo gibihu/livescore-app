@@ -5,7 +5,6 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\Pages\WebPageController;
 use App\Http\Controllers\Pages\Webs\PostWebPageController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::controller(WebPageController::class)->name('web.')->group(function () {
     Route::get('/', 'home')->name('home');
@@ -35,6 +34,9 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
 Route::get('flag', [LiveScoreController:: class, 'showFlag'])->name('flag');
 Route::get('image/{name}', [ImageController:: class, 'show'])->name('image.show');
 
+Route::prefix('test')->name('test.')->group(function(){
+    Route::get('/', [\App\Http\Controllers\Users\SeasonController::class, 'GetRank'])->name('index');
+});
 
 
 require __DIR__.'/api.php';

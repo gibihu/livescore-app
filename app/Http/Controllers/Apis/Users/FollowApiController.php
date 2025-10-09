@@ -1,15 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Apis;
+namespace App\Http\Controllers\Apis\Users;
 use App\Http\Controllers\Controller;
-use App\Models\Follow;
+use App\Models\Users\Follow;
+use App\Models\Users\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-
-use App\Models\User;
 
 class FollowApiController extends Controller
 {

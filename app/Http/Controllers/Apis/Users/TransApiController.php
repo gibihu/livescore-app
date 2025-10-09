@@ -1,26 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Apis;
-use App\Http\Controllers\Controller;
-
-use App\Models\WalletHistory;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\WalletController;
-
-use App\Models\User;
-use App\Models\PackPoints;
-use App\Models\Transaction;
-use App\Models\Wallet;
-
+namespace App\Http\Controllers\Apis\Users;
 use App\Helpers\Functions;
 use App\Helpers\Transaction as TransHelper;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\Users\WalletController;
+use App\Models\PackPoints;
+use App\Models\Users\Transaction;
+use App\Models\Users\WalletHistory;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TransApiController extends Controller
 {

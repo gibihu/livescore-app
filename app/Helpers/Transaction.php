@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Models\Transaction as Trans;
+use App\Models\Users\Transaction as Trans;
 
 class Transaction
 {

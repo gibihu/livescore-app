@@ -319,6 +319,19 @@ function groupMatches(matches: MatchType[]): FilteredMatchesType[] {
     // return Object.values(groups);
 }
 
+function Trans1X2ToString(value: string){
+    switch(value){
+        case '1':
+            return 'เจ้าบ้าน';
+        case 'x':
+            return 'เสมอ';
+        case '2':
+            return 'ทีมเยือน';
+        default:
+            return 'ไม่รู้จักค่า หากผิดพลากติดต่อผู้ดูแล';
+    }
+}
+
 
 export {
     ShortName, // แปลงชื่อเป็ตัวย่อ
@@ -332,4 +345,5 @@ export {
     translateStatus, // แปลงสถานะเป็นภาษาไทย
     convertUTC,
     groupMatches, // filter live match
+    Trans1X2ToString,
 }

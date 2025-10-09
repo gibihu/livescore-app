@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Pages\Webs;
 
+use App\Helpers\RateHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Follow;
 use App\Models\Football\Matchs;
-use App\Models\Inventory;
-use App\Models\Post\Post;
-use App\Models\User;
+use App\Models\Posts\Post;
+use App\Models\Users\Follow;
+use App\Models\Users\Inventory;
+use App\Models\Users\User;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -17,7 +17,7 @@ class PostWebPageController extends Controller
 {
     public function PostShowAll()
     {
-        $posts = Post::where('privacy', Post::PUBLIC)->where('ref_type', Post::REFTYPE_MATCH)->select('id','points','title', 'privacy', 'status', 'user_id', 'ref_id', 'ref_type', 'type')->orderBy('created_at', 'DESC')->get();
+        $posts = Post::where('privacy', Post::PUBLIC)->where('ref_type', Post::REFTYPE_MATCH)->select('id','points','title', 'privacy', 'status', 'user_id', 'ref_id', 'ref_type', 'type', 'ss_id')->orderBy('created_at', 'DESC')->get();
         $posts->map(function ($post) {
             $post->match = Matchs::select('home_team_id', 'away_team_id')->find($post->ref_id);
             return $post;
@@ -33,6 +33,9 @@ class PostWebPageController extends Controller
 
             // ดึงโพสต์ครั้งเดียว
             $post = Post::with('user')->find($id);
+            $post->hiddens = (object) [
+                'value_6' => RateHelper::getItem($post->hidden["value_6"]),
+            ];
             if (!$post) {
                 abort(404);
             }
@@ -55,7 +58,7 @@ class PostWebPageController extends Controller
             // กรณีมีสิทธิ์เข้าถึง (ไม่ต้อง query $post ใหม่)
             $canAccess = $inventory || $user->role == User::ROLE_ADMIN || $user->id == $post->user_id;
             if (!$canAccess) {
-                $post = Post::select('id', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
+                $post = Post::select('id', 'title', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
                     ->with('user')
                     ->find($id);
             }else{
@@ -63,7 +66,7 @@ class PostWebPageController extends Controller
             }
         } else {
             // guest -> ดึงเฉพาะข้อมูลจำเป็น
-            $post = Post::select('id', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
+            $post = Post::select('id', 'title', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
                 ->with('user')
                 ->find($id);
 
