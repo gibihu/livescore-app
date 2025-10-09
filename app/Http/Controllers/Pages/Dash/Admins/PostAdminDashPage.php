@@ -36,9 +36,11 @@ class PostAdminDashPage extends Controller
     {
         try{
             $post = Post::with('user', 'match')->where('ref_type', Post::REFTYPE_MATCH)->findOrFail($id);
-            $post->hiddens = (object) [
-                'value_6' => RateHelper::getItem($post->hidden["value_6"]),
-            ];
+            if($post->type == Post::TYPE_HANDICAP){
+                $post->hiddens = (object) [
+                    'value_1' => RateHelper::getItem($post->hidden["value_1"]),
+                ];
+            }
             if(!$post->summary_at){
                 $post = PostHelper::SummaryOfType($post);
                 $post->summary_at = Carbon::now();

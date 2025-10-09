@@ -75,6 +75,7 @@ export default function PostSummaryPage(request: any) {
                                 {rank.level !== 0 && (
                                     <ExpertBadge level={rank.level} type={rank.type_text} />
                                 )}
+                                <span>{post.result_text}</span>
                             </div>
                         </div>
                     </Card>

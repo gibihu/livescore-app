@@ -86,7 +86,7 @@ export default function CreatePostPage(request: any) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: "กรุณาเพิ่มข้อมูล",
-                    path: ['value_hidden_6']
+                    path: ['value_hidden_1']
                 });
             }
         }
@@ -398,7 +398,7 @@ export default function CreatePostPage(request: any) {
                                                         <div className="flex gap-4 w-full">
                                                             <FormField
                                                                 control={form.control}
-                                                                name="value_hidden_6"
+                                                                name="value_hidden_1"
                                                                 render={({ field, fieldState }) => (
                                                                     <FormItem className="flex-1">
                                                                         <FormLabel className="mb-2">รอคาต่อรอง</FormLabel>

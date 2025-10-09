@@ -49,7 +49,7 @@ class PostHelper
 
     private static function CalHandicap($post, $h_score, $a_score)
     {
-        $value = $post->hiddens->value_6->value;
+        $value = $post->hiddens->value_1->value;
         $sum_score = $h_score - $a_score;
         $sum = $sum_score + $value;
         $decimal = $sum - floor($sum);

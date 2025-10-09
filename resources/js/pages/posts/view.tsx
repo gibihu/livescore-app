@@ -326,7 +326,7 @@ export function ContentForSale({ item }: { item: PostType }) {
             <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
                 <div className="text-center text-sm  bg-input  py-2">แฮนดิแคป</div>
 
-                <div className="text-center text-primary  py-2">{hiddens.value_6.title}</div>
+                <div className="text-center text-primary  py-2">{hiddens.value_1.title}</div>
             </div>
         );
     } else if (item.type === 2) {

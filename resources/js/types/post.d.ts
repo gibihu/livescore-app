@@ -32,6 +32,8 @@ export interface PostType {
     status_text: string;
     user: UserGuast;
     match: MatchType;
+    result: number;
+    result_text: string;
 }
 
 

@@ -33,9 +33,11 @@ class PostWebPageController extends Controller
 
             // ดึงโพสต์ครั้งเดียว
             $post = Post::with('user')->find($id);
-            $post->hiddens = (object) [
-                'value_6' => RateHelper::getItem($post->hidden["value_6"]),
-            ];
+            if($post->type == Post::TYPE_HANDICAP){
+                $post->hiddens = (object) [
+                    'value_1' => RateHelper::getItem($post->hidden["value_1"]),
+                ];
+            }
             if (!$post) {
                 abort(404);
             }
