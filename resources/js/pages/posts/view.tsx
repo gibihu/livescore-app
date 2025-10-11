@@ -1,3 +1,4 @@
+import { ExpertBadge } from "@/components/expert-badge";
 import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -13,7 +14,7 @@ import { AuthType } from "@/types/auth";
 import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
 import { Head, Link } from "@inertiajs/react";
-import { Circle, CirclePoundSterling, LoaderCircle, Lock, Triangle } from "lucide-react";
+import { Circle, CirclePoundSterling, CircleStar, LoaderCircle, Lock, Triangle } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { toast } from "sonner";
 
@@ -95,7 +96,14 @@ export default function View(request: any) {
                                 <div className="flex justify-center">
                                     <div className="w-md">
                                         {isUnLock ? (
-                                            <ContentForSale item={post} />
+                                            <div className="relative">
+                                                <ContentForSale item={post} />
+                                                {post.summary_at && (
+                                                    <div className="absolute -top-4 -right-4 rotate-12">
+                                                        <TagResult item={post} />
+                                                    </div>
+                                                )}
+                                            </div>
                                         ) : (
                                             <ContentForSaleLock item={post} />
                                         )}
@@ -104,13 +112,18 @@ export default function View(request: any) {
                             </Card>
                             <Card className="p-2 md:p-4 gap-4">
                                 <div className="w-full flex justify-between gap-2">
-                                    <Link href={'#'} className="flex gap-2 items-center">
+                                    <Link href={web.user.view({id: post.user_id})} className="flex gap-2 items-center">
                                         <Avatar className="size-9">
                                             <AvatarImage src="https://github.com/shadcn.png" />
                                             <AvatarFallback>CN</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
-                                            <span className=" capitalize texte-sm">{post.user.name}</span>
+                                            <div className="flex gap-2">
+                                                <span className=" capitalize texte-sm">{post.user.name}</span>
+                                                {post.user.rank.level !== 0 && (
+                                                    <ExpertBadge level={post.user.rank.level} type={post.user.rank.type_text} />
+                                                )}
+                                            </div>
                                             <span className=" uppercase text-xs  text-muted-foreground">{post.user.tier_text}</span>
                                         </div>
                                     </Link>
@@ -428,5 +441,32 @@ export function ContentForSaleLock({ item }: { item: PostType }) {
         );
     } else {
         return (<></>);
+    }
+}
+
+
+export function TagResult({ item }: { item: PostType }) {
+    const result = item.result;
+    switch (result) {
+        case 2:
+            return (
+                <CircleStar className="size-8 text-green-600" />
+            );
+        case 1:
+            return (
+                <CircleStar className="size-8 text-green-800" />
+            );
+        case 0:
+            return (
+                <CircleStar className="size-8 text-foreground" />
+            );
+        case -1:
+            return (
+                <CircleStar className="size-8 text-red-800" />
+            );
+        case -2:
+            return (
+                <CircleStar className="size-8 text-red-600" />
+            );
     }
 }

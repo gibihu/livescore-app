@@ -17,8 +17,8 @@ class PostAdminDashPage extends Controller
 {
     public function ReportList(Request $request)
     {
-        $table = PostReport::all();
-        return Inertia::render('dashboard/admins/posts/report', compact('table'));
+        $report = PostReport::all();
+        return Inertia::render('dashboard/admins/posts/report', compact('report'));
     }
 
     public function PostTable(Request $request)
@@ -36,6 +36,7 @@ class PostAdminDashPage extends Controller
     {
         try{
             $post = Post::with('user', 'match')->where('ref_type', Post::REFTYPE_MATCH)->findOrFail($id);
+
             if($post->type == Post::TYPE_HANDICAP){
                 $post->hiddens = (object) [
                     'value_1' => RateHelper::getItem($post->hidden["value_1"]),
@@ -44,7 +45,16 @@ class PostAdminDashPage extends Controller
             if(!$post->summary_at){
                 $post = PostHelper::SummaryOfType($post);
                 $post->summary_at = Carbon::now();
+                unset($post->hiddens);
+                $post->save();
+
+                if($post->type == Post::TYPE_HANDICAP){
+                    $post->hiddens = (object) [
+                        'value_1' => RateHelper::getItem($post->hidden["value_1"]),
+                    ];
+                }
             }
+
 
             return Inertia::render('dashboard/admins/posts/summary', compact('post'));
         }catch (ModelNotFoundException $e){

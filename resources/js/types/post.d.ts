@@ -34,6 +34,7 @@ export interface PostType {
     match: MatchType;
     result: number;
     result_text: string;
+    summary_at: string;
 }
 
 

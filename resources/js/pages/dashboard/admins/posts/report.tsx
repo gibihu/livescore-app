@@ -13,7 +13,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Posts(request: any) {
-    const reports = request.table as any;
+    const reports = request.report as any;
+    console.log(request);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

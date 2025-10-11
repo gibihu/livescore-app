@@ -2,7 +2,7 @@ import { ExpertBadge } from "@/components/expert-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
-import { ContentForSale, Podium } from "@/pages/posts/view";
+import { ContentForSale, Podium, TagResult } from "@/pages/posts/view";
 import dash from "@/routes/dash";
 import web from "@/routes/web";
 import { BreadcrumbItem } from "@/types";
@@ -59,7 +59,14 @@ export default function PostSummaryPage(request: any) {
                 </div>
                 <div className="flex justify-center">
                     <div className="w-sm">
-                        <ContentForSale item={post} />
+                        <div className="relative">
+                            <ContentForSale item={post} />
+                            {post.summary_at && (
+                                <div className="absolute -top-4 -right-4 rotate-12">
+                                    <TagResult item={post} />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
