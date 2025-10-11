@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 

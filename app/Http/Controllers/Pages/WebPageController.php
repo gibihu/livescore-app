@@ -9,7 +9,7 @@ use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
 use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
-use App\Models\Post\Post;
+use App\Models\Posts\Post;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;

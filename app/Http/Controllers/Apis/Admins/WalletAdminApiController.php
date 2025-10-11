@@ -2,16 +2,8 @@
 
 namespace App\Http\Controllers\Apis\Admins;
 use App\Http\Controllers\Controller;
-
-use Exception;
+use App\Models\Users\WalletHistory;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-
-use App\Models\User;
-use App\Models\Wallet;
-use App\Models\WalletHistory;
 
 class WalletAdminApiController extends Controller
 {

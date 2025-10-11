@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Carbon\Carbon;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user()
-                ? \App\Models\User::with('wallet')->find($request->user()->id)
+                ? \App\Models\Users\User::with('wallet')->find($request->user()->id)
                 : null,
                 'retrieval_at' => Carbon::now(),
             ],

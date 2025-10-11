@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Apis\Post;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post\Post;
-use App\Models\Post\PostReport;
+use App\Models\Posts\Post;
+use App\Models\Posts\PostReport;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

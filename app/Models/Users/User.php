@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Http\Controllers\Users\SeasonController;
+use App\Models\Posts\Rank;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\Support\Str;;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+;
 
 class User extends Authenticatable
 {
@@ -28,6 +28,7 @@ class User extends Authenticatable
         'tier',
         'exp',
         'role',
+        'rank_id',
     ];
 
     /**
@@ -45,6 +46,10 @@ class User extends Authenticatable
     protected $appends = [
         'role_text',
         'tier_text',
+    ];
+
+    protected $with = [
+        'rank'
     ];
 
     /**
@@ -68,6 +73,30 @@ class User extends Authenticatable
     public function wallet()
     {
         return $this->hasOne(Wallet::class, 'user_id');
+    }
+    public function rank()
+    {
+        return $this->belongsTo(Rank::class, 'rank_id', 'id')
+            ->withDefault([
+                'name' => 'ไม่มีอันดับ',
+                'level' => 0,
+                'score' => 0,
+                'type' => 0,
+            ]);
+    }
+    public function getActiveRankAttribute()
+    {
+        // ถ้ามี rank_id อยู่แล้ว ใช้อันนี้เลย
+        if ($this->rank_id && $this->rank) {
+            return $this->rank;
+        }
+
+        // ถ้าไม่มี rank_id ให้ไปดึงจาก GetRank() (อย่าลืม Auth::user() ต้องเป็น user เดียวกัน)
+        $rank = SeasonController::GetRank();
+        $this->rank_id = $rank->id;
+        $this->save();
+
+        return $rank;
     }
 
 

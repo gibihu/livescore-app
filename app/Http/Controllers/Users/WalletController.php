@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Users;
 
+use App\Http\Controllers\Controller;
+use App\Models\Users\Wallet;
+use App\Models\Users\WalletHistory;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
-use App\Models\Wallet;
-use App\Models\WalletHistory;
 
 class WalletController extends Controller
 {

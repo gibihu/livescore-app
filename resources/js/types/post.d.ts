@@ -8,6 +8,7 @@ export interface PostType {
     ref_type: number;
     ref_type_text: string;
     title: string;
+    title_short: string;
     points: number;
     description: string;
 
@@ -21,6 +22,7 @@ export interface PostType {
     // oxt_description: string;
     show: ValueType;
     hidden: ValueType;
+    hiddens: MainValueObjectType;
 
     type: number;
     type_text: string;
@@ -30,6 +32,9 @@ export interface PostType {
     status_text: string;
     user: UserGuast;
     match: MatchType;
+    result: number;
+    result_text: string;
+    summary_at: string;
 }
 
 
@@ -40,4 +45,19 @@ interface ValueType {
     value_4: string;
     value_5: string;
     value_6: string;
+}
+interface MainValueObjectType {
+    value_1: ValueObjectType;
+    value_2: ValueObjectType;
+    value_3: ValueObjectType;
+    value_4: ValueObjectType;
+    value_5: ValueObjectType;
+    value_6: ValueObjectType;
+}
+
+interface ValueObjectType{
+    error: string;
+    message?: string;
+    title: string;
+    value: number;
 }

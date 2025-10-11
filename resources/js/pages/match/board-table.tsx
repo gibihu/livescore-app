@@ -132,30 +132,59 @@ export function BoardTable({ items, isFetch = false, type = 'live', fixture_date
                                         </TableCell>
                                         <TableCell className="flex items-center space-x-4">
                                             <div className="w-1 h-12 rounded-full bg-input"></div>
-                                            <TableCellViewer item={match} className="w-full h-14" matchEvent={type == 'fixture' ? false : true} type={type}>
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex gap-2  items-center justify-between w-full">
-                                                        <div className="flex gap-2 items-center">
-                                                            <img src={match.home.logo} alt={match.home.logo} className="size-4" />
-                                                            <span className={cn("line-clamp-1 hidden md:block")}>{match.home.name}</span>
-                                                            <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.home.name)}.</span>
+                                            {type == 'fixture' ? (
+                                                <TableCellViewer item={match} className="w-full h-14" matchEvent={type == 'fixture' ? false : true} type={type}>
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex gap-2  items-center justify-between w-full">
+                                                            <div className="flex gap-2 items-center">
+                                                                <img src={match.home.logo} alt={match.home.logo} className="size-4" />
+                                                                <span className={cn("line-clamp-1 hidden md:block")}>{match.home.name}</span>
+                                                                <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.home.name)}.</span>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <span>{homeScoreStr}</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex gap-2">
-                                                            <span>{homeScoreStr}</span>
+                                                        <div className="flex gap-2  items-center justify-between w-full">
+                                                            <div className="flex gap-2 items-center">
+                                                                <img src={match.away.logo} alt={match.away.logo} className="size-4" />
+                                                                <span className={cn("line-clamp-1 hidden md:block")}>{match.away.name}</span>
+                                                                <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.away.name)}.</span>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <span>{awayScoreStr}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-2  items-center justify-between w-full">
-                                                        <div className="flex gap-2 items-center">
-                                                            <img src={match.away.logo} alt={match.away.logo} className="size-4" />
-                                                            <span className={cn("line-clamp-1 hidden md:block")}>{match.away.name}</span>
-                                                            <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.away.name)}.</span>
+                                                </TableCellViewer>
+                                            ) : (
+                                                <div className="w-full">
+                                                    <Link href={web.match.view({ id: match.id }).url}>
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex gap-2  items-center justify-between w-full">
+                                                                <div className="flex gap-2 items-center">
+                                                                    <img src={match.home.logo} alt={match.home.logo} className="size-4" />
+                                                                    <span className={cn("line-clamp-1 hidden md:block")}>{match.home.name}</span>
+                                                                    <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.home.name)}.</span>
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <span>{homeScoreStr}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-2  items-center justify-between w-full">
+                                                                <div className="flex gap-2 items-center">
+                                                                    <img src={match.away.logo} alt={match.away.logo} className="size-4" />
+                                                                    <span className={cn("line-clamp-1 hidden md:block")}>{match.away.name}</span>
+                                                                    <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.away.name)}.</span>
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <span>{awayScoreStr}</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex gap-2">
-                                                            <span>{awayScoreStr}</span>
-                                                        </div>
-                                                    </div>
+                                                    </Link>
                                                 </div>
-                                            </TableCellViewer>
+                                            )}
                                             <div className="w-1 h-12 rounded-full bg-input"></div>
                                         </TableCell>
                                         <TableCell className="min-w-15">

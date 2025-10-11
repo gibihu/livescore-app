@@ -1,17 +1,14 @@
 <?php
 
 use App\Http\Controllers\Apis\Dash\PostApiDashController;
-use App\Http\Controllers\Apis\FollowApiController;
-use App\Http\Controllers\Apis\Post\PostReportApiController;
-use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\Apis\UserApiController;
-use App\Http\Controllers\Apis\LiveScoreApiController;
+use App\Http\Controllers\Apis\Football\LiveScoreApiController;
 use App\Http\Controllers\Apis\PointsApiController;
-use App\Http\Controllers\Apis\TransApiController;
-use App\Http\Controllers\Apis\WalletApiController;
-use App\Http\Controllers\Apis\PostApisController;
-
+use App\Http\Controllers\Apis\Post\PostApisController;
+use App\Http\Controllers\Apis\Post\PostReportApiController;
+use App\Http\Controllers\Apis\Users\FollowApiController;
+use App\Http\Controllers\Apis\Users\TransApiController;
+use App\Http\Controllers\Apis\Users\WalletApiController;
+use Illuminate\Support\Facades\Route;
 
 
 Route::middleware('auth')->prefix('api')->name('api.')->group(function () {

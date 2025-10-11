@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models\Post;
+namespace App\Models\Posts;
 
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;

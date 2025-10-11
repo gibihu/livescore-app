@@ -10,7 +10,7 @@ function Countdown({ date, time }: { date: string; time: string }) {
         // UTC+7 = ต้องลบ 7 ชั่วโมงเพื่อแปลงเป็น UTC
         const [hours, minutes, seconds] = time.split(":").map(Number);
         const target = new Date(date);
-        target.setHours(hours - 7, minutes, seconds, 0); // แปลงเป็น UTC
+        target.setHours(hours, minutes, seconds, 0); // แปลงเป็น UTC
 
         const interval = setInterval(() => {
             const now = new Date();

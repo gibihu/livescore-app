@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import web from "@/routes/web";
 import { MoreHorizontal } from "lucide-react";
 
-export default function ReportTable({ items }: { items: any }) {
+export default function ReportTable({ items }: { items: any[] }) {
     return (
         <Card className="p-0 overflow-hidden">
             <Table>
@@ -17,7 +17,7 @@ export default function ReportTable({ items }: { items: any }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {items.leght > 0 ? items.map((item: any, index: number) => (
+                    {(items && items.length > 0) ? items.map((item: any, index: number) => (
                         <TableRow key={index}>
                             <TableCell className="flex flex-col">
                                 <span><span className="text-muted-foreground">เรื่อง:</span> {item.title}</span>

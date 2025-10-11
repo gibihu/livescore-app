@@ -4,8 +4,8 @@ use App\Http\Controllers\Football\LiveScoreController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\Pages\WebPageController;
 use App\Http\Controllers\Pages\Webs\PostWebPageController;
+use App\Http\Controllers\Pages\Webs\UserWebPageController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::controller(WebPageController::class)->name('web.')->group(function () {
     Route::get('/', 'home')->name('home');
@@ -24,6 +24,9 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
             Route::get('{post_id}', 'ReportPage')->name('index');
         });
     });
+    Route::controller(UserWebPageController::class)->prefix('user')->name('user.')->group(function(){
+        Route::get('{id}', 'view')->name('view');
+    });
 });
 
 //Route::get('/', function () {
@@ -35,6 +38,10 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
 Route::get('flag', [LiveScoreController:: class, 'showFlag'])->name('flag');
 Route::get('image/{name}', [ImageController:: class, 'show'])->name('image.show');
 
+Route::prefix('test')->name('test.')->group(function(){
+    Route::get('/', [\App\Http\Controllers\Users\SeasonController::class, 'GetRank'])->name('index');
+    Route::get('standing', [\App\Http\Controllers\Football\CompetitionStandingController::class, 'index'])->name('standing');
+});
 
 
 require __DIR__.'/api.php';
