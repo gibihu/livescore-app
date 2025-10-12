@@ -133,13 +133,13 @@ export function PostTable({ request, data }: { request?: any, data: PostType[] }
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
-                const payment = row.original
+                const item = row.original;
 
                 return (
                     <div className="w-full flex justify-end items-center gap-1">
-                        {!row.original.summary_at && (
+                        {!item.summary_at  && item.match.live_status == 'END_LIVE' && (
                             <Button asChild className="gap-1">
-                                <Link href={dash.admin.post.summary({ id: row.original.id }).url}>
+                                <Link href={dash.admin.post.summary({ id: item.id }).url}>
                                     อัพเดท <span><ChevronsUp /></span>
                                 </Link>
                             </Button>
@@ -152,12 +152,12 @@ export function PostTable({ request, data }: { request?: any, data: PostType[] }
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                {row.original.summary_at && (
-                                    <Link href={dash.admin.post.summary({ id: row.original.id }).url}>
+                                {item.summary_at && (
+                                    <Link href={dash.admin.post.summary({ id: item.id }).url}>
                                         <DropdownMenuItem>ดูสรุป</DropdownMenuItem>
                                     </Link>
                                 )}
-                                <a href={web.post.view({ id: row.original.id }).url} target="_blank">
+                                <a href={web.post.view({ id: item.id }).url} target="_blank">
                                     <DropdownMenuItem>เส้นทาง</DropdownMenuItem>
                                 </a>
                                 <Link href={dash.admin.post.report.list().url}>

@@ -8,11 +8,11 @@ use App\Http\Controllers\Pages\Webs\UserWebPageController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(WebPageController::class)->name('web.')->group(function () {
-    Route::get('/', 'home')->name('home');
+    Route::get('/', 'fixturesMatch')->name('home');
 
     route::prefix('match')->name('match.')->group(function(){
         Route::get('history', 'historyMatch')->name('history');
-        Route::get('fixture', 'fixturesMatch')->name('fixture');
+        Route::get('live', 'liveMatches')->name('live');
         Route::get('show/{id}', 'showMatch')->name('view');
     });
 

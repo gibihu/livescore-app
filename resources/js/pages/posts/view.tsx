@@ -13,7 +13,7 @@ import web from "@/routes/web";
 import { AuthType } from "@/types/auth";
 import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import { Circle, CirclePoundSterling, CircleStar, LoaderCircle, Lock, Triangle } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { toast } from "sonner";
@@ -49,7 +49,10 @@ export default function View(request: any) {
                             const result = await res.json();
                             toast.error(result.message);
                         } else {
-                            toast.error('เกิดข้อผิดพลาดจาก server');
+                            toast.error('เกิดข้อผิดพลาดจาก server', { description: 'กรุณาลองอีกครั่งหลังรีโหลด' });
+                            setTimeout(()=>{
+                                window.location.reload();
+                            }, 1000);
                         }
                         return; // ไม่ไป setPost
                     } else {
@@ -58,7 +61,7 @@ export default function View(request: any) {
                             const data = result.data;
                             setPost(data);
                             setIsUnLock(true);
-                            toast.error(result.message);
+                            toast.success(result.message);
                         }
                     }
                 } catch (error) {
@@ -335,17 +338,18 @@ export function ContentForSale({ item }: { item: PostType }) {
     const hidden = item.hidden;
     const hiddens = item.hiddens;
     if (item.type === 1) {
+        const name = hidden.value_1 = 1 ? match.home.name : match.away.name;
         return (
-            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+            <div className="grid grid-cols-1  rounded-xl border  overflow-hidden  divide-x-1">
                 <div className="text-center text-sm  bg-input  py-2">แฮนดิแคป</div>
-
-                <div className="text-center text-primary  py-2">{hiddens.value_1.title}</div>
+                <div className="text-center text-primary  py-2">{name} {hiddens.value_2.title}</div>
             </div>
         );
     } else if (item.type === 2) {
         return (
             <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
                 <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
+                <div className="text-center text-sm  bg-input  py-2">สคอร์</div>
                 <div className="flex justify-center items-center text-primary  py-2">
                     <div className="flex items-center gap-2">
                         {hidden.value_6 == '0' ? 'ต่ำ' : 'สูง'}
@@ -353,13 +357,12 @@ export function ContentForSale({ item }: { item: PostType }) {
                     </div>
                 </div>
 
-                <div className="text-center text-sm  bg-input  py-2">คะแนน</div>
                 <div className="text-center text-primary  py-2">{hidden.value_2}</div>
             </div>
         );
     } else if (item.type === 3) {
         return (
-            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
+            <div className="grid grid-cols-1  rounded-xl border  overflow-hidden  divide-y-1">
                 <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
                 <div className="flex justify-center items-center text-primary  py-2">
                     <div className="flex items-center gap-2">
@@ -397,7 +400,7 @@ export function ContentForSaleLock({ item }: { item: PostType }) {
     const show = item.show;
     if (item.type === 1) {
         return (
-            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-x-1">
+            <div className="grid grid-cols-1  rounded-xl border  overflow-hidden  divide-x-1">
                 <div className="text-center text-sm  bg-input  py-2">แฮนดิแคป</div>
 
                 <div className="text-center text-primary  py-2 blur-sm">00/00</div>
@@ -407,6 +410,7 @@ export function ContentForSaleLock({ item }: { item: PostType }) {
         return (
             <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
                 <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
+                <div className="text-center text-sm  bg-input  py-2">คะแนน</div>
                 <div className="flex justify-center items-center text-primary  py-2">
                     <div className="flex items-center gap-2 blur-sm">
                         สูงต่ำ
@@ -414,13 +418,12 @@ export function ContentForSaleLock({ item }: { item: PostType }) {
                     </div>
                 </div>
 
-                <div className="text-center text-sm  bg-input  py-2">คะแนน</div>
                 <div className="text-center text-primary  py-2 blur-sm">00/00</div>
             </div>
         );
     } else if (item.type === 3) {
         return (
-            <div className="grid grid-cols-2  rounded-xl border  overflow-hidden  divide-y-1">
+            <div className="grid grid-cols-1  rounded-xl border  overflow-hidden  divide-y-1">
                 <div className="text-center text-sm  bg-input  py-2">ผลที่คาดว่าจะได้รับ</div>
                 <div className="flex justify-center items-center text-primary  py-2">
                     <div className="flex items-center gap-2  blur-sm">

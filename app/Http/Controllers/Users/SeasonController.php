@@ -13,10 +13,10 @@ class SeasonController extends Controller
     {
         $season_index = env('SEASON_INDEX');
         $user = User::find($user_id);
-
+        $ss = self::GetSeason();
         $rank = Rank::where('user_id', $user->id)->orderBy('created_at', 'desc')->first();
 
-        if($rank && $rank->season->season_index == $season_index){
+        if($rank && $ss->season_index == $season_index){
             return $rank;
         }
 

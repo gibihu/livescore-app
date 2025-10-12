@@ -2,6 +2,7 @@
 import { PostTable } from "@/components/dashboard/admins/posts/posts-table";
 import AppLayout from "@/layouts/app-layout";
 import dash from "@/routes/dash";
+import post from "@/routes/dash/post";
 import { BreadcrumbItem } from "@/types";
 import { PostType } from "@/types/post";
 import { Head } from "@inertiajs/react";
@@ -16,6 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Posts(request: any) {
 
     const posts = request.posts as PostType[];
+    console.log(posts);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

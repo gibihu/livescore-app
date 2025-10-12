@@ -2,9 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Users\SeasonController;
+use App\Models\Users\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -39,13 +42,21 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        if(Auth::check()){
+            $user = User::find(Auth::id());
+            if(!$user->rank_id){
+                $user->rank_id = SeasonController::GetRank($user->id)->id ?? null;
+                $user->save();
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user()
-                ? \App\Models\Users\User::with('wallet')->find($request->user()->id)
+                ? User::with('wallet')->find($request->user()->id)
                 : null,
                 'retrieval_at' => Carbon::now(),
             ],

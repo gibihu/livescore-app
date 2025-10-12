@@ -29,8 +29,8 @@ export default function MenuBar() {
                 </ButtonGroup>
                 <ButtonGroup>
                     <Button variant="outline" asChild>
-                        <Link href={web.home().url} prefetch>
-                            ตารางสด
+                        <Link href={web.match.live().url} prefetch>
+                            ผลบอลสด
                         </Link>
                     </Button>
                     <DropdownMenu>
@@ -42,7 +42,7 @@ export default function MenuBar() {
                         <DropdownMenuContent align="end" className="w-52">
                             <DropdownMenuGroup>
                                 <DropdownMenuItem asChild className="cursor-pointer">
-                                    <Link href={web.match.fixture().url} prefetch>
+                                    <Link href={web.home().url} prefetch>
                                         <CalendarPlusIcon />
                                         ตารางการแข่ง
                                     </Link>
