@@ -1,5 +1,7 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,6 +53,7 @@ export default function Standing(request: any) {
 
 function StandingTable({ items }: { items: StageType }) {
     const standings = items.group.standing;
+    const sortedStandings = [...standings].sort((a, b) => a.rank - b.rank);
     return (
         <Table>
             <TableHeader>
@@ -67,9 +70,15 @@ function StandingTable({ items }: { items: StageType }) {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {items.group.standing.map((item: StandingType) => (
+                {sortedStandings.map((item: StandingType) => (
                     <TableRow>
-                        <TableCell>{item.team.name}</TableCell>
+                        <TableCell className="flex gap-2 items-center">
+                            <Avatar className="size-5">
+                                <AvatarImage src={item.team.logo} />
+                                <AvatarFallback className="animate-pulse" />
+                            </Avatar>
+                            {item.team.name}
+                        </TableCell>
                         <TableCell className="text-center">{item.matches}</TableCell>
                         <TableCell className="text-center">{item.won}</TableCell>
                         <TableCell className="text-center">{item.drawn}</TableCell>
