@@ -26,7 +26,7 @@ export default function Home(request: any) {
                 <MenuBar />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {posts.map((post: PostType) => (
-                        <Link href={web.post.view({id: post.id}).url} key={post.id}>
+                        <Link href={web.post.view({ id: post.id }).url} key={post.id}>
                             <PostCard item={post} />
                         </Link>
                     ))}
@@ -37,7 +37,7 @@ export default function Home(request: any) {
 }
 
 
-function PostCard({item}:{item: any}) {
+function PostCard({ item }: { item: any }) {
     const user = item.user as UserGuast;
     const match = item.match as MatchType;
     const ss = item.season as UserSeasonType;
@@ -51,23 +51,27 @@ function PostCard({item}:{item: any}) {
                         <AvatarFallback className="capitalize">{user.username.charAt(1)}</AvatarFallback>
                     </Avatar>
                     <span className="font-normal">{user.name}</span>
-                    {rank.level !== 0 && (
-                        <ExpertBadge level={rank.level} type={rank.type_text} />
-                    )}
+                    <ExpertBadge item={user} />
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex gap-2">
-                    <div className="flex gap-2">
+                <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        <span className="text-foreground font-bold">{match.home.name}</span>
                         <Avatar className="size-4">
                             <AvatarImage src={match.home.logo} />
                             <AvatarFallback className="animate-pulse"></AvatarFallback>
                         </Avatar>
+                    </div>
+                    <span className="text-muted-foreground">vs</span>
+                    <div className="flex gap-2 items-center">
                         <Avatar className="size-4">
                             <AvatarImage src={match.away.logo} />
                             <AvatarFallback className="animate-pulse"></AvatarFallback>
                         </Avatar>
+                        <span className="text-foreground font-bold">{match.away.name}</span>
                     </div>
-                    <span className="text-foreground font-bold">{match.home.name} <span className="text-muted-foreground">vs</span> {match.away.name}</span>
+                </div>
             </CardContent>
             <CardFooter className="flex gap-2 justify-between text-sm text-muted-foreground">
                 <span>views</span>

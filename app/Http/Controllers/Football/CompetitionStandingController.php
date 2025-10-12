@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Football;
 
+use App\Helpers\ConJobHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Football\Competition;
 use App\Models\Football\CompetitionGroup;
@@ -19,6 +20,7 @@ class CompetitionStandingController extends Controller
     public function index()
     {
         try{
+            set_time_limit(180);
             $API_KEY = env('LIVE_SCORE_API_KEY');
             $API_SECRET = env('LIVE_SCORE_API_SECRET');
             $LANG = env('APP_LOCALE');
@@ -51,7 +53,7 @@ class CompetitionStandingController extends Controller
 
                         $group_id = [];
                         foreach ($item->stages[0]->groups[0]->standings as $stan) {
-                            $standing = CompetitionGroupStanding::where('team_id', Team::where('team_id', $stan->team->id)->first()->id)->first();
+                            $standing = Team::where('team_id', $stan->team->id)->first() ? CompetitionGroupStanding::where('team_id', Team::where('team_id', $stan->team->id)->first()->id)->first() : null;
                             if(!$standing){ $standing = new CompetitionGroupStanding(); }
 
                             $standing->rank = $stan->rank;
@@ -63,7 +65,7 @@ class CompetitionStandingController extends Controller
                             $standing->lost = $stan->lost;
                             $standing->drawn = $stan->drawn;
                             $standing->won = $stan->won;
-                            $standing->team_id = Team::where('team_id', $stan->team->id)->first()->id ?? $stan->team->id;
+                            $standing->team_id = ConJobHelper::CheckTeamAndInsert($stan->team)->id ?? null;
                             $standing->save();
                             $group_id[] = $standing->id;
                         }

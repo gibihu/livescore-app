@@ -10,9 +10,12 @@ import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
 import { UserGuast } from "@/types/user";
 import { Head, Link } from "@inertiajs/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useState } from "react";
 import { Podium } from "../posts/view";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ShowMatch(request: any) {
 
@@ -72,8 +75,9 @@ function ContentTabs({ request }: { request: any }) {
     const posts = request.posts as PostType[];
     const match = request.match as MatchType;
     return (
-        <Tabs defaultValue="post" className="w-full">
+        <Tabs defaultValue="index" className="w-full">
             <TabsList>
+                <TabsTrigger value="index">ทีเด็ด</TabsTrigger>
                 <TabsTrigger value="post">ทีเด็ด</TabsTrigger>
                 <TabsTrigger value="players">นักเตะ</TabsTrigger>
                 {match.live_status === "LIVE" || match.live_status === "END_LIVE" ? (
@@ -81,6 +85,7 @@ function ContentTabs({ request }: { request: any }) {
                 ) : null}
             </TabsList>
             <div className="p-0 md:p-4">
+                <TabsContent value="index"><FootballField item={[]} /></TabsContent>
                 <TabsContent value="post" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {posts.length > 0 ? (posts.map((post: PostType) => (
                         <PostCard item={post} key={post.id} />
@@ -106,7 +111,7 @@ function ContentPosts({ post }: { post: PostType }) {
 function PostCard({ item }: { item: any }) {
     const user = item.user as UserGuast;
     return (
-        <Link href={web.post.view({id: item.id}).url}>
+        <Link href={web.post.view({ id: item.id }).url}>
             <Card className="gap-1 py-4">
                 <CardHeader>
                     <CardTitle className="line-clamp-1 text-sm  flex gap-2 items-center">
@@ -132,5 +137,111 @@ function PostCard({ item }: { item: any }) {
                 </CardFooter>
             </Card>
         </Link>
+    );
+}
+
+
+function FootballField({ item }: { item: any[] }) {
+
+    const mock = [
+        {
+            user: {
+                name: 'JJJ',
+                avatar: 'https://github.com/shadcn.png'
+            },
+            content: '555+'
+        },
+        {
+            user: {
+                name: 'JJJ',
+                avatar: 'https://github.com/shadcn.png'
+            },
+            content: '555+'
+        },
+        {
+            user: {
+                name: 'JJJ',
+                avatar: 'https://github.com/shadcn.png'
+            },
+            content: ' asld kaskm dklansk ldnaklsn ldnakl sndkl naskl ndklasn kldasn kldakls kldmaklsn daslk'
+        },
+    ];
+
+    return (
+        <div className="grid grid-cols-5 gap-2">
+            <Card className="col-span-3 p-0 overflow-hidden">
+                <div className="flex flex-col gap-4">
+                    {/* <div className="w-full h-50  bg-border animate-pulse"></div> */}
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <Skeleton className="w-full h-50" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>สนาม</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <Skeleton className="w-full h-20" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>กราฟ</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+            </Card>
+            <Card className="col-span-2 pb-0">
+                <div className="flex flex-col h-full">
+                    <div className="flex flex-col gap-3 h-full px-2">
+                        {mock.map((item: any, key: any) => (
+                            <ChatItem item={item} key={key} />
+                        ))}
+                    </div>
+                    <ChatInputArea />
+                </div>
+            </Card>
+        </div>
+    );
+}
+
+
+function ChatInputArea() {
+    const [message, setMessage] = useState("");
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // ป้องกันการขึ้นบรรทัดใหม่
+            // ส่งข้อความ
+            console.log("ส่งข้อความ:", message);
+            setMessage(""); // ล้าง textarea
+        }
+        // ถ้า Shift+Enter จะปล่อยให้ขึ้นบรรทัดใหม่ตามปกติ
+    };
+
+    return (
+        <div className="flex items-center p-2">
+            <Textarea
+                placeholder="แสดงความคิดเห็น..."
+                className="resize-none"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+            />
+        </div>
+    );
+}
+
+function ChatItem({ item }: { item: any }) {
+    return (
+        <div className="flex gap-3 items-start">
+            <div className="flex gap-1 items-center">
+                <Avatar className="size-6">
+                    <AvatarImage src={item.user.avatar} />
+                    <AvatarFallback className="bg-border animate-pulse" />
+                </Avatar>
+                <span className="text-sm text-muted-foreground">{item.user.name}</span>
+            </div>
+            <span className="text-wrap">{item.content}</span>
+        </div>
     );
 }

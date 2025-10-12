@@ -102,3 +102,62 @@ export interface OddsType{
     2: number;
     X: number;
 }
+
+
+export interface StageType{
+    id: string;
+    name: string;
+    competition: CompetitionType,
+    competition_id: string;
+    group: GroupType;
+    group_id: string;
+    season: SeasonType;
+
+
+    deleted_at: string;
+    updated_at: string;
+    created_at: string;
+}
+
+
+export interface GroupType {
+    id: string;
+    group_id: number;
+    name: string;
+    standings_id: string[];
+    standing: StandingType[];
+    deleted_at: string;
+    updated_at: string;
+    created_at: string;
+}
+
+
+export interface SeasonType {
+    id: string;
+    name: string;
+    name_th: string;
+    season_id: number;
+    start: string;
+    end: string;
+    updated_at: string;
+    created_at: string;
+}
+
+export interface StandingType{
+    id: string;
+    drawn: number;
+    goal_diff: number;
+    goals_conceded: number;
+    goals_scored: number;
+    lost: number;
+    matches: number;
+    points: number;
+    won: number;
+    rank: number;
+    team_id: string;
+    team: TeamType;
+
+    deleted_at: string;
+    updated_at: string;
+    created_at: string;
+}

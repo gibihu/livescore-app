@@ -124,7 +124,7 @@ export default function View(request: any) {
                                             <div className="flex gap-2">
                                                 <span className=" capitalize texte-sm">{post.user.name}</span>
                                                 {post.user.rank.level !== 0 && (
-                                                    <ExpertBadge level={post.user.rank.level} type={post.user.rank.type_text} />
+                                                    <ExpertBadge item={post.user}/>
                                                 )}
                                             </div>
                                             <span className=" uppercase text-xs  text-muted-foreground">{post.user.tier_text}</span>

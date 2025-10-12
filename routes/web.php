@@ -14,6 +14,7 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
         Route::get('history', 'historyMatch')->name('history');
         Route::get('live', 'liveMatches')->name('live');
         Route::get('show/{id}', 'showMatch')->name('view');
+        Route::get('standings', 'standings')->name('standings');
     });
 
 

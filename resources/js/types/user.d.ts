@@ -28,6 +28,13 @@ export interface UserRankType {
     id: string;
     user_id: string;
     level: number;
+    level_text: string;
+    level_json: {
+        id: number;
+        name: string;
+        min_exp: number;
+        max_exp: number;
+    };
     score: number;
     season: UserSeasonType;
     type: number;

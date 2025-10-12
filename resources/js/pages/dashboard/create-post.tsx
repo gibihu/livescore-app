@@ -750,11 +750,15 @@ function SelectNegotiable(
 
     const request = usePage().props;
     const rateDate = request.rateData as RateType[];
-    console.log(defaultValue);
+
+    if (!value) {
+        onChange?.('0');
+    }
+
 
     return (
         <Select
-            value={value?.toString()}
+            value={value ? value?.toString() : '0'}
             defaultValue={defaultValue}
             onValueChange={(val) => onChange?.(val)}
         >

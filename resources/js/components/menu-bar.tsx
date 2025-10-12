@@ -47,9 +47,11 @@ export default function MenuBar() {
                                         ตารางการแข่ง
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <ArchiveIcon />
-                                    Archive
+                                <DropdownMenuItem asChild>
+                                    <Link href={web.match.standings().url}>
+                                        <ArchiveIcon />
+                                        ตารางคะแนน
+                                    </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
