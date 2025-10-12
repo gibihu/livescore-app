@@ -57,7 +57,7 @@ function PostCard({ item }: { item: any }) {
             <CardContent className="flex gap-2">
                 <div className="flex gap-2">
                     <div className="flex gap-2 items-center">
-                        <span className="text-foreground font-bold">{match.home.name}</span>
+                        <span className="text-foreground font-bold text-end">{match.home.name}</span>
                         <Avatar className="size-4">
                             <AvatarImage src={match.home.logo} />
                             <AvatarFallback className="animate-pulse"></AvatarFallback>
