@@ -10,6 +10,7 @@ use App\Models\Users\Follow;
 use App\Models\Users\Inventory;
 use App\Models\Users\User;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -27,58 +28,71 @@ class PostWebPageController extends Controller
 
     public function PostShowOne($id)
     {
-        try{
+        try {
             $is_unlock = false;
-            if (Auth::check()) {
-                $user = Auth::user();
+            $follow = null;
+            $post = Post::with('user')->findOrFail($id);
 
-                // ดึงโพสต์ครั้งเดียว
-                $post = Post::with('user')->findOrFail($id);
-                if($post->type == Post::TYPE_HANDICAP){
-                    $post->hiddens = (object) [
-                        'value_2' => RateHelper::getItem($post->hidden["value_2"]),
-                    ];
-                }
-                if (!$post) {
-                    abort(404);
-                }
+            if ($post->type == Post::TYPE_HANDICAP) {
+                $post->hiddens = (object)[
+                    'value_2' => RateHelper::getItem($post->hidden["value_2"]),
+                ];
+            }
+            if ($post->match->live_status !== 'END_LIVE') {
+                if (Auth::check()) {
+                    $user = Auth::user();
+                    if (!$post) {
+                        abort(404);
+                    }
 
-                // ตรวจว่ามี inventory หรือไม่
-                $inventory = Inventory::where([
-                    ['user_id', $user->id],
-                    ['source_type', Inventory::TYPE_POST],
-                    ['source_id', $id],
-                ])->first();
+                    // ตรวจว่ามี inventory หรือไม่
+                    $inventory = Inventory::where([
+                        ['user_id', $user->id],
+                        ['source_type', Inventory::TYPE_POST],
+                        ['source_id', $id],
+                    ])->first();
 
-                // ตรวจ follow (ข้ามถ้าเจ้าของโพสต์เอง)
-                $follow = $user->id == $post->user_id
-                    ? false
-                    : Follow::with('followed')
-                        ->where('follower_id', $user->id)
-                        ->where('followed_id', $post->user_id)
-                        ->first();
+                    // ตรวจ follow (ข้ามถ้าเจ้าของโพสต์เอง)
+                    $follow = $user->id == $post->user_id
+                        ? false
+                        : Follow::with('followed')
+                            ->where('follower_id', $user->id)
+                            ->where('followed_id', $post->user_id)
+                            ->first();
 
-                // กรณีมีสิทธิ์เข้าถึง (ไม่ต้อง query $post ใหม่)
-                $canAccess = $inventory || $user->role == User::ROLE_ADMIN || $user->id == $post->user_id;
-                if (!$canAccess) {
+                    // กรณีมีสิทธิ์เข้าถึง (ไม่ต้อง query $post ใหม่)
+                    $canAccess = $inventory || $user->role == User::ROLE_ADMIN || $user->id == $post->user_id;
+                    if (!$canAccess) {
+                        $post = Post::select('id', 'title', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
+                            ->with('user')
+                            ->find($id);
+                    } else {
+                        $is_unlock = true;
+                    }
+                } else {
+                    // guest -> ดึงเฉพาะข้อมูลจำเป็น
                     $post = Post::select('id', 'title', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
                         ->with('user')
                         ->find($id);
-                }else{
-                    $is_unlock = true;
                 }
             } else {
-                // guest -> ดึงเฉพาะข้อมูลจำเป็น
-                $post = Post::select('id', 'title', 'user_id', 'ref_id', 'points', 'ref_type', 'privacy', 'status', 'type')
-                    ->with('user')
-                    ->find($id);
-
-                $follow = null;
+                $is_unlock = true;
             }
+
             $post->match = Matchs::find($post->ref_id);
             return Inertia::render('posts/view', compact('post', 'follow', 'is_unlock'));
+        }catch (ModelNotFoundException $e){
+            if(config('app.debug')){
+                dd($e->getMessage());
+            }else{
+                abort(404);
+            }
         }catch (Exception $e){
-            abort(404);
+            if(config('app.debug')){
+                dd($e);
+            }else{
+                abort(500);
+            }
         }
     }
 

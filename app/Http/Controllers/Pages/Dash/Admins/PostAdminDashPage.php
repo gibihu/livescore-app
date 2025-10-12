@@ -39,7 +39,7 @@ class PostAdminDashPage extends Controller
 
             if($post->type == Post::TYPE_HANDICAP){
                 $post->hiddens = (object) [
-                    'value_1' => RateHelper::getItem($post->hidden["value_1"]),
+                    'value_2' => RateHelper::getItem($post->hidden["value_2"]),
                 ];
             }
             if(!$post->summary_at && $post->match->live_status == 'END_LIVE'){
