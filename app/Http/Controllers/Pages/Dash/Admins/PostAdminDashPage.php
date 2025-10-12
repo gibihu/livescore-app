@@ -23,7 +23,7 @@ class PostAdminDashPage extends Controller
 
     public function PostTable(Request $request)
     {
-        $posts = Post::with('user')->orderBy('created_at', 'desc')->get();
+        $posts = Post::with('user', 'match')->orderBy('created_at', 'desc')->get();
         $posts->transform(function($item) {
             $item->title_short = Str::limit($item->title, 40, '...');
             return $item;
@@ -42,7 +42,7 @@ class PostAdminDashPage extends Controller
                     'value_1' => RateHelper::getItem($post->hidden["value_1"]),
                 ];
             }
-            if(!$post->summary_at){
+            if(!$post->summary_at && $post->match->live_status == 'END_LIVE'){
                 $post = PostHelper::SummaryOfType($post);
                 $post->summary_at = Carbon::now();
                 unset($post->hiddens);
@@ -50,7 +50,7 @@ class PostAdminDashPage extends Controller
 
                 if($post->type == Post::TYPE_HANDICAP){
                     $post->hiddens = (object) [
-                        'value_1' => RateHelper::getItem($post->hidden["value_1"]),
+                        'value_2' => RateHelper::getItem($post->hidden["value_2"]),
                     ];
                 }
             }

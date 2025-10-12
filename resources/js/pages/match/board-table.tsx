@@ -63,32 +63,32 @@ export function BoardTable({ items, isFetch = false, type = 'live', fixture_date
                         </TableHead>
                         <TableHead className="w-full">{type == 'fixture' ? (
                             <div className="flex gap-2">
-                                <Link href={`${web.match.fixture().url}?date=${fixtureDate_3.toISOString().slice(0, 10)}`}>
+                                <Link href={`${web.home().url}?date=${fixtureDate_3.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost" className="text-muted-foreground">
                                         <span>{fixtureDate_3.toISOString().slice(5, 10)}</span>
                                     </Button>
                                 </Link>
-                                <Link href={`${web.match.fixture().url}?date=${fixtureDate_2.toISOString().slice(0, 10)}`}>
+                                <Link href={`${web.home().url}?date=${fixtureDate_2.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost" className="text-muted-foreground">
                                         <span>{fixtureDate_2.toISOString().slice(5, 10)}</span>
                                     </Button>
                                 </Link>
-                                <Link href={`${web.match.fixture().url}?date=${date.toISOString().slice(0, 10)}`}>
+                                <Link href={`${web.home().url}?date=${date.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost">
                                         <span>วันนี้</span>
                                     </Button>
                                 </Link>
-                                <Link href={`${web.match.fixture().url}?date=${fixtureDate1.toISOString().slice(0, 10)}`}>
+                                <Link href={`${web.home().url}?date=${fixtureDate1.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost">
                                         <span>{fixtureDate1.toISOString().slice(5, 10)}</span>
                                     </Button>
                                 </Link>
-                                <Link href={`${web.match.fixture().url}?date=${fixtureDate2.toISOString().slice(0, 10)}`}>
+                                <Link href={`${web.home().url}?date=${fixtureDate2.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost">
                                         <span>{fixtureDate2.toISOString().slice(5, 10)}</span>
                                     </Button>
                                 </Link>
-                                <Link href={`${web.match.fixture().url}?date=${fixtureDate3.toISOString().slice(0, 10)}`}>
+                                <Link href={`${web.home().url}?date=${fixtureDate3.toISOString().slice(0, 10)}`}>
                                     <Button asChild variant="ghost">
                                         <span>{fixtureDate3.toISOString().slice(5, 10)}</span>
                                     </Button>

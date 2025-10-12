@@ -24,6 +24,7 @@ class PostHelper
     public static function SummaryOfType($post)
     {
         $match = $post->match;
+        if($match->live_status !== 'END_LIVE'){ return $post; }
         $score = $match->scores['score'];
         $home_score = (int) substr($score, 0, 1);
         $away_score = (int) substr($score, -1);
@@ -49,7 +50,7 @@ class PostHelper
 
     private static function CalHandicap($post, $h_score, $a_score)
     {
-        $value = $post->hiddens->value_1->value;
+        $value = $post->hiddens->value_2->value;
         $sum_score = $h_score - $a_score;
         $sum = $sum_score + $value;
         $decimal = $sum - floor($sum);

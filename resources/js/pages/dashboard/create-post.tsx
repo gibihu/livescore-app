@@ -82,11 +82,18 @@ export default function CreatePostPage(request: any) {
         value_hidden_6: z.string().optional(),
     }).superRefine((data, ctx) => {
         if (data.type === 1) {
-            if (!data.value_hidden_6?.trim()) {
+            if (!data.value_hidden_1?.trim()) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: "กรุณาเพิ่มข้อมูล",
                     path: ['value_hidden_1']
+                });
+            }
+            if (!data.value_hidden_2?.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "กรุณาเพิ่มข้อมูล",
+                    path: ['value_hidden_2']
                 });
             }
         }
@@ -99,7 +106,7 @@ export default function CreatePostPage(request: any) {
                     path: ['value_hidden_1']
                 });
             }
-            if (!data.value_hidden_6?.trim()) {
+            if (!data.value_hidden_2?.trim()) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: "กรุณาเพิ่มข้อมูล",
@@ -395,20 +402,68 @@ export default function CreatePostPage(request: any) {
                                             {(() => {
                                                 if (select_option === 1) {
                                                     return (
-                                                        <div className="flex gap-4 w-full">
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="value_hidden_1"
-                                                                render={({ field, fieldState }) => (
-                                                                    <FormItem className="flex-1">
-                                                                        <FormLabel className="mb-2">รอคาต่อรอง</FormLabel>
-                                                                        <FormControl>
-                                                                            <SelectNegotiable value={field.value} onChange={field.onChange} />
-                                                                        </FormControl>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
+                                                        <div className="flex flex-col gap-4">
+                                                            <div className="flex justify-center h-full">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_1"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex flex-col items-center gap-4">
+                                                                            <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
+                                                                            <FormControl>
+                                                                                <RadioGroup className="flex gap-8" {...field} onValueChange={field.onChange}>
+
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="0"
+                                                                                            id="option-two"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-two"
+                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
+                                                                                        >
+                                                                                            {matchSelected?.home.name}
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <RadioGroupItem
+                                                                                            value="1"
+                                                                                            id="option-one"
+                                                                                            className="peer sr-only"
+                                                                                        />
+                                                                                        <Label
+                                                                                            htmlFor="option-one"
+                                                                                            className="flex gap-1 items-center  cursor-pointer rounded-lg border py-4 px-8 transition peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-white"
+                                                                                        >
+                                                                                            {matchSelected?.away.name}
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                </RadioGroup>
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                            <div className="flex gap-4 w-full">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="value_hidden_2"
+                                                                    render={({ field, fieldState }) => (
+                                                                        <FormItem className="flex-1">
+                                                                            <FormLabel className="mb-2">รอคาต่อรอง</FormLabel>
+                                                                            <FormControl>
+                                                                                <SelectNegotiable
+                                                                                    {...field}
+                                                                                    onChange={(e)=>field.onChange(e)}
+                                                                                />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     );
                                                 } else if (select_option === 2) {
@@ -544,48 +599,48 @@ export default function CreatePostPage(request: any) {
                                                                                 <FormControl>
                                                                                     <RadioGroup className="flex gap-4" {...field} onValueChange={field.onChange}>
 
-                                                                                    <div>
-                                                                                        <RadioGroupItem
-                                                                                            value="1"
-                                                                                            id="option-one"
-                                                                                            className="peer sr-only"
-                                                                                        />
-                                                                                        <Label
-                                                                                            htmlFor="option-one"
-                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
-                                                                                        >
-                                                                                            เจ้าบ้าน
-                                                                                        </Label>
-                                                                                    </div>
+                                                                                        <div>
+                                                                                            <RadioGroupItem
+                                                                                                value="1"
+                                                                                                id="option-one"
+                                                                                                className="peer sr-only"
+                                                                                            />
+                                                                                            <Label
+                                                                                                htmlFor="option-one"
+                                                                                                className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                            >
+                                                                                                เจ้าบ้าน
+                                                                                            </Label>
+                                                                                        </div>
 
-                                                                                    <div>
-                                                                                        <RadioGroupItem
-                                                                                            value="x"
-                                                                                            id="option-x"
-                                                                                            className="peer sr-only"
-                                                                                        />
-                                                                                        <Label
-                                                                                            htmlFor="option-x"
-                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
-                                                                                        >
-                                                                                            เสมอ
-                                                                                        </Label>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <RadioGroupItem
-                                                                                            value="2"
-                                                                                            id="option-two"
-                                                                                            className="peer sr-only"
-                                                                                        />
-                                                                                        <Label
-                                                                                            htmlFor="option-two"
-                                                                                            className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
-                                                                                        >
-                                                                                            ทีมเยือน
-                                                                                        </Label>
-                                                                                    </div>
+                                                                                        <div>
+                                                                                            <RadioGroupItem
+                                                                                                value="x"
+                                                                                                id="option-x"
+                                                                                                className="peer sr-only"
+                                                                                            />
+                                                                                            <Label
+                                                                                                htmlFor="option-x"
+                                                                                                className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                            >
+                                                                                                เสมอ
+                                                                                            </Label>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <RadioGroupItem
+                                                                                                value="2"
+                                                                                                id="option-two"
+                                                                                                className="peer sr-only"
+                                                                                            />
+                                                                                            <Label
+                                                                                                htmlFor="option-two"
+                                                                                                className="flex gap-1 items-center cursor-pointer rounded-lg border py-3 px-8 transition peer-data-[state=checked]:bg-primary"
+                                                                                            >
+                                                                                                ทีมเยือน
+                                                                                            </Label>
+                                                                                        </div>
 
-                                                                                </RadioGroup>
+                                                                                    </RadioGroup>
                                                                                 </FormControl>
                                                                             </FormItem>
                                                                         )}
@@ -671,22 +726,19 @@ function SelectNegotiable(
         onChange,
         className,
         value,
-        defaultVal,
     }: {
         onChange?: (e: string) => void,
         className?: string,
         value?: string,
-        defaultVal?: string,
     }
 ) {
 
     const request = usePage().props;
     const rateDate = request.rateData as RateType[];
 
-
     return (
         <Select
-            value={value?.toString() || defaultVal?.toString() || '0'}
+            value={value?.toString() || '0'}
             onValueChange={(val) => onChange?.(val)}
         >
             <SelectTrigger className={cn('w-full', className)}>

@@ -87,13 +87,12 @@ class PostApisController extends Controller
         try{
             $user = User::with('wallet')->find(Auth::id());
             $post = Post::with('user')->find($id);
-            if($user->wallet->points > $post->points && $user->id !== $post->user_id){
-                        $poser = User::find($post->user_id);
-                        $fee = $this->CompareFee($poser->tier);
-                if(
-                    WalletController::ActionsPoint($post->user_id, $post->points - ($post->points * $fee /100), WalletHistory::TYPE_INCOME, "ได้รับจากการปลดล็อโพสต์ $post->title")
+            if($user->wallet->points >= $post->points && $user->id !== $post->user_id){
+                $poser = User::find($post->user_id);
+                $fee = $this->CompareFee($poser->tier);
+                if( $post->points <= 0 || (WalletController::ActionsPoint($post->user_id, $post->points - ($post->points * $fee /100), WalletHistory::TYPE_INCOME, "ได้รับจากการปลดล็อโพสต์ $post->title")
                     &&
-                    WalletController::ActionsPoint($user->id, -$post->points, WalletHistory::TYPE_USED, "ลกเปลี่ยนโพสต์ $post->title")
+                    WalletController::ActionsPoint($user->id, -$post->points, WalletHistory::TYPE_USED, "ลกเปลี่ยนโพสต์ $post->title"))
                 ){
                     $inventory = new Inventory();
                     $inventory->user_id = $user->id;
@@ -102,7 +101,7 @@ class PostApisController extends Controller
                     $inventory->save();
                     $post->match = Matchs::find($post->ref_id);
                     $post->hiddens = (object) [
-                        'value_6' => RateHelper::getItem($post->hidden["value_6"]),
+                        'value_2' => RateHelper::getItem($post->hidden["value_2"]),
                     ];
                     if($inventory->save()){
                         return response()->json([
