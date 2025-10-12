@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Football\LiveScoreController as LiveController;
 use App\Models\Football\Competition as league;
+use App\Models\Football\CompetitionGroupStanding;
+use App\Models\Football\CompetitionStage;
 use App\Models\Football\Country;
 use App\Models\Football\Federation as Feder;
 use App\Models\Football\Matchs;
@@ -73,5 +75,41 @@ class WebPageController extends Controller
         $fixture_date = Carbon::parse($date)->format('Y-m-d');
 
         return Inertia::render('history', compact('matches', 'fixture_date'));
+    }
+
+    public function standings()
+    {
+        try{
+            $stages_db = CompetitionStage::all();
+            $stages = $stages_db
+                ->sortBy('created_at') // เรียงก่อน เพื่อให้ earliest ขึ้นก่อน
+                ->groupBy(fn($item) => $item->competition?->name)
+                ->map(fn($group) => $group->first()) // เอาอันแรกในแต่ละ group
+                ->values(); // reset key
+
+// จากนั้น map เพื่อดึง standings ตามที่คุณต้องการ
+            $stages->map(function ($item) {
+                $st_id = $item->group?->standings_id;
+
+                if (!empty($st_id)) {
+                    // รองรับกรณีที่ standings_id เก็บเป็น JSON string
+                    $ids = is_array($st_id) ? $st_id : json_decode($st_id, true);
+                    $item->group->standing = CompetitionGroupStanding::whereIn('id', $ids)->get();
+                } else {
+                    $item->group->standing = collect();
+                }
+
+                return $item;
+            });
+
+            return Inertia::render('match/standing', compact('stages'));
+
+        }catch (Exception $e) {
+            if(config('app.debug')) {
+                dd($e->getMessage());
+            }else{
+                abort(500);
+            }
+        }
     }
 }

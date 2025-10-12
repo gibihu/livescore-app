@@ -137,12 +137,22 @@ export function PostTable({ request, data }: { request?: any, data: PostType[] }
 
                 return (
                     <div className="w-full flex justify-end items-center gap-1">
-                        {!item.summary_at  && item.match.live_status == 'END_LIVE' && (
+                        {!item.summary_at && item.match.live_status == 'END_LIVE' ? (
                             <Button asChild className="gap-1">
                                 <Link href={dash.admin.post.summary({ id: item.id }).url}>
                                     อัพเดท <span><ChevronsUp /></span>
                                 </Link>
                             </Button>
+                        ) : (
+                            <div className="text-center pr-4">
+                                {
+                                    item.summary_at ? (<span className="text-muted-foreground">อัพเดทแล้ว</span>) :
+                                        (item.match.live_status !== 'END_LIVE' && (
+                                            <span className="text-muted-foreground">ยังไม่สามารถสรุปได้</span>
+                                        )
+                                    )
+                                }
+                            </div>
                         )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

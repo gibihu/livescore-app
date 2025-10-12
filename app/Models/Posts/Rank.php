@@ -2,8 +2,10 @@
 
 namespace App\Models\Posts;
 
+use App\Helpers\RankHelper;
 use App\Models\Users\User;
 use App\Traits\UserRankTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,7 +31,10 @@ class Rank extends Model
 
     protected $appends = [
         'type_text',
+        'level_text',
+        'level_json'
     ];
+
 
     public $timestamps = true;
 
@@ -40,5 +45,27 @@ class Rank extends Model
     public function season()
     {
         return $this->belongsTo(Season::class, 'season_id', 'id');
+    }
+
+    protected function levelText(): Attribute
+    {
+        return Attribute::get(function () {
+            $helperList = RankHelper::list(false);
+            $level = $this->level;
+
+            $item = collect($helperList)->firstWhere('id', $level);
+            return $item['name'] ?? 'Unknown';
+        });
+    }
+
+    protected function levelJson(): Attribute
+    {
+        return Attribute::get(function () {
+            $helperList = RankHelper::list(false);
+            $level = $this->level;
+
+            $item = collect($helperList)->firstWhere('id', $level);
+            return $item ?? [];
+        });
     }
 }

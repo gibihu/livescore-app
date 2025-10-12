@@ -1,13 +1,15 @@
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { UserGuast, UserType } from "@/types/user";
 
 
-export function ExpertBadge({ level, type }: { level: number, type?: string }) {
+export function ExpertBadge({ item }: { item: UserGuast }) {
+    const rank = item.rank;
     return (
         <div
             className={cn( "flex  items-center justify-center gap-1")}>
-            <span className="text-xs text-primary font-bold">W{level}</span>
-            <span className="text-xs text-primary font-bold">{type}</span>
+            {rank.level_text && (<span className="text-xs text-primary font-bold capitalize">{rank.level_text}</span>)}
+            {rank.type_text && (<span className="text-xs text-primary font-bold">{rank.type_text}</span>)}
         </div>
     );
 }
