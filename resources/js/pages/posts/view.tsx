@@ -281,7 +281,7 @@ function MatchBoard({ raw, item }: { raw: PostType, item: MatchType }) {
                     {item.country && (<span>{item.country?.name}</span>)}
                     <span>{item.date_th_short?.replaceAll("-", "/")}</span>
                     <span>{item.time.slice(0, 5)}</span>
-                    {item.status === "FINISHED" && (
+                    {item.status === "FINISHED" && !raw.summary_at && (
                         <span>กำลังสรุปลผล...</span>
                     )}
                 </div>
@@ -326,7 +326,7 @@ export function Podium({ item, logo_position = 'start' }: { item: any, logo_posi
                 <AvatarImage src={item.logo} />
                 <AvatarFallback className="animate-pulse" />
             </Avatar>
-            <span className="text-sm md:text-base text-end">{item.name}</span>
+            <span className={cn("text-sm md:text-base text-center")}>{item.name}</span>
         </div>
     );
 }
