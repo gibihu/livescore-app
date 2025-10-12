@@ -378,7 +378,16 @@ export default function CreatePostPage(request: any) {
                                                 <FormItem>
                                                     <FormControl>
                                                         <Select
-                                                            onValueChange={(val) => field.onChange(Number(val))}
+                                                            onValueChange={(val) => {
+                                                                form.setValue('value_hidden_1', '');
+                                                                form.setValue('value_hidden_2', '');
+                                                                form.setValue('value_hidden_3', '');
+                                                                form.setValue('value_hidden_4', '');
+                                                                form.setValue('value_hidden_5', '');
+                                                                form.setValue('value_hidden_6', '');
+                                                                field.onChange(Number(val));
+                                                                console.log(form.getValues('value_hidden_1'));
+                                                            }}
                                                             value={field.value.toString()}
                                                             defaultValue={field.value.toString()}
                                                         >
@@ -411,7 +420,7 @@ export default function CreatePostPage(request: any) {
                                                                         <FormItem className="flex flex-col items-center gap-4">
                                                                             <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
                                                                             <FormControl>
-                                                                                <RadioGroup className="flex gap-8" {...field} onValueChange={field.onChange}>
+                                                                                <RadioGroup className="flex gap-8" value={field.value} onValueChange={field.onChange}>
 
                                                                                     <div>
                                                                                         <RadioGroupItem
@@ -456,7 +465,11 @@ export default function CreatePostPage(request: any) {
                                                                             <FormControl>
                                                                                 <SelectNegotiable
                                                                                     {...field}
-                                                                                    onChange={(e)=>field.onChange(e)}
+                                                                                    defaultValue="0"
+                                                                                    onChange={(e) => {
+                                                                                        console.log(e);
+                                                                                        field.onChange(e);
+                                                                                    }}
                                                                                 />
                                                                             </FormControl>
                                                                             <FormMessage />
@@ -477,7 +490,7 @@ export default function CreatePostPage(request: any) {
                                                                         <FormItem className="flex flex-col items-center gap-4">
                                                                             <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
                                                                             <FormControl>
-                                                                                <RadioGroup className="flex gap-8" {...field} onValueChange={field.onChange}>
+                                                                                <RadioGroup className="flex gap-8" value={field.value} onValueChange={field.onChange}>
 
                                                                                     <div>
                                                                                         <RadioGroupItem
@@ -543,7 +556,7 @@ export default function CreatePostPage(request: any) {
                                                                         <FormItem className="flex flex-col gap-2 items-center">
                                                                             <FormLabel className="mb-2">ผลคาดการณ์</FormLabel>
                                                                             <FormControl>
-                                                                                <RadioGroup className="flex gap-2" {...field} onValueChange={field.onChange}>
+                                                                                <RadioGroup className="flex gap-2" value={field.value} onValueChange={field.onChange}>
 
                                                                                     <div>
                                                                                         <RadioGroupItem
@@ -597,7 +610,7 @@ export default function CreatePostPage(request: any) {
                                                                         render={({ field }) => (
                                                                             <FormItem className="col-span-4 text-center">
                                                                                 <FormControl>
-                                                                                    <RadioGroup className="flex gap-4" {...field} onValueChange={field.onChange}>
+                                                                                    <RadioGroup className="flex gap-4" value={field.value} onValueChange={field.onChange}>
 
                                                                                         <div>
                                                                                             <RadioGroupItem
@@ -726,19 +739,23 @@ function SelectNegotiable(
         onChange,
         className,
         value,
+        defaultValue = '0'
     }: {
         onChange?: (e: string) => void,
         className?: string,
         value?: string,
+        defaultValue?: string;
     }
 ) {
 
     const request = usePage().props;
     const rateDate = request.rateData as RateType[];
+    console.log(defaultValue);
 
     return (
         <Select
-            value={value?.toString() || '0'}
+            value={value?.toString()}
+            defaultValue={defaultValue}
             onValueChange={(val) => onChange?.(val)}
         >
             <SelectTrigger className={cn('w-full', className)}>
