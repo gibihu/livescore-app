@@ -42,6 +42,7 @@ Route::get('image/{name}', [ImageController:: class, 'show'])->name('image.show'
 Route::prefix('test')->name('test.')->group(function(){
     Route::get('/', [\App\Http\Controllers\Users\SeasonController::class, 'GetRank'])->name('index');
     Route::get('standing', [\App\Http\Controllers\Football\CompetitionStandingController::class, 'index'])->name('standing');
+    Route::get('history', [LiveScoreController::class, 'history']);
 });
 
 

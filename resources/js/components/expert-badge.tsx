@@ -9,7 +9,7 @@ export function ExpertBadge({ item }: { item: UserGuast }) {
         <div
             className={cn( "flex  items-center justify-center gap-1")}>
             {rank.level_text && (<span className="text-xs text-primary font-bold capitalize">{rank.level_text}</span>)}
-            {rank.type_text && (<span className="text-xs text-primary font-bold">{rank.type_text}</span>)}
+            {rank.type_text && rank.type_text !== "unknown" && (<span className="text-xs text-primary font-bold">{rank.type_text}</span>)}
         </div>
     );
 }

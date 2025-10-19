@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Football;
 
+use App\Helpers\ConJobHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Flag;
 use App\Models\Football\MatchEvent;
 use App\Models\Football\Matchs;
+use App\Repositories\Contracts\MatchRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -15,6 +17,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LiveScoreController extends Controller
 {
+    protected MatchRepository $match_;
+
+    public function __construct(MatchRepository $match_)
+    {
+        $this->match_ = $match_;
+    }
     public static function LiveScore()
     {
         try {
@@ -275,6 +283,61 @@ class LiveScoreController extends Controller
         } catch (\Exception $e) {
             throw $e;
             return false;
+        }
+    }
+
+    public function history()
+    {
+        try{
+
+            $API_KEY = config('api.livescore.api_key');
+            $API_SECRET = config('api.livescore.api_secret');
+            $LANG = config('app.locale');
+            $today = Carbon::yesterday()->format('Y-m-d');
+
+            $response = Http::get('https://livescore-api.com/api-client/matches/history.json', [
+                'key' => $API_KEY,
+                'secret' => $API_SECRET,
+                'lang' => $LANG,
+                'from' => $today,
+                'to' => $today,
+            ]);
+
+            if($response->successful()){
+                $date = $response->object();
+                $items = $date->data->match;
+
+                $total = [];
+                foreach ($items as $item) {
+                    try{
+                        $save = $this->match_->saveMatch($item);
+                        if($save){
+                            $total['success'][] = $save->id;
+                        }else{
+                            $total['fail'][] = $save;
+                        }
+                    }catch (Exception $e){
+                        return response()->json([
+                            'success' => false,
+                            'message' => $e->getMessage(),
+                            'code' => $e->getCode(),
+                        ], 500);
+                    }
+                }
+
+                return response()->json(['success' => true, 'data' => $total], 200);
+            }else{
+                return response()->json($response->json(), 500);
+            }
+        }catch (Exception $e) {
+            $response = [
+                'message' => $e->getMessage() ?? 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
         }
     }
 }

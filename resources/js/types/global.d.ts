@@ -66,4 +66,3 @@ export interface WalletType {
     created_at: string;
 }
 
-

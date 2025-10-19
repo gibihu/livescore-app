@@ -63,18 +63,19 @@ class GetMatchLive extends Command
                         if (!$match) {
                             $match = new Matchs;
                         }
-                        $match->match_id = $item->id ?? null;
-                        $match->fixture_id = $item->fixture_id ?? null;
+
+                        $match->match_id = $item->id ?? ($match ? $match->id : null);
+                        $match->fixture_id = $item->fixture_id ?? ($match ? $match->fixture_id : null);
                         $match->competition_id = $item->competition ? ConJobHelper::CheckCompetitionAndInsert($item->competition)->id : null;
                         $match->country_id = $item->country ? ConJobHelper::CheckCountryAndInsert($item->country)->id : null;
                         $match->home_team_id = $item->home ? ConJobHelper::CheckTeamAndInsert($item->home)->id : null;
                         $match->away_team_id = $item->away ? ConJobHelper::CheckTeamAndInsert($item->away)->id : null;
                         $match->federation_id = $item->federation ? ConJobHelper::CheckFederationAndInsert($item->federation)->id : null;
-                        $match->status = $item->status ?? null;
-                        $match->location = $item->location ?? null;
-                        $match->odds = $item->odds ?? null;
-                        $match->scores = $item->scores ?? null;
-                        $match->outcomes = $item->outcomes ?? null;
+                        $match->status = $item->status ?? ($match ? $match->status : null);
+                        $match->location = $item->location ?? ($match ? $match->location : null);
+                        $match->odds = $item->odds ?? ($match ? $match->odds : null);
+                        $match->scores = $item->scores ?? ($match ? $match->scores : null);
+                        $match->outcomes = $item->outcomes ?? ($match ? $match->outcomes : null);
 
                         $match->time = $item->time;
                         $match->scheduled = Carbon::parse($item->scheduled, 'UTC')->setTimezone('Asia/Bangkok')->format('H:i:s');
@@ -82,7 +83,7 @@ class GetMatchLive extends Command
                         $match->last_changed = Carbon::parse($item->last_changed, 'UTC')->setTimezone('Asia/Bangkok');
 
                         $match->live_status = 'LIVE';
-                        $match->urls = $item->urls ?? null;
+                        $match->urls = $item->urls ?? ($match ? $match->urls : null);
                         if($match->save()){
                             Log::info('บันทกสำเร็จ', ['id' => $match->id]);
                         }else{
