@@ -10,47 +10,61 @@ import {
 } from "@/components/ui/table"
 import { FilteredMatchesType, ShortName } from "@/lib/functions"
 import { cn } from "@/lib/utils"
-import { LoaderCircle } from "lucide-react"
-import React, { useState } from "react"
+import { LoaderCircle, Star } from "lucide-react"
+import React, { useEffect, useState } from "react"
 import { TableCellViewer, whoWon } from "./board-score"
 import ImageWithSkeleton from "@/components/ImageWithSkeleton"
 import web from "@/routes/web"
 import { Link } from "@inertiajs/react"
+import { Favorite } from "@/models/favorite"
+import { toast } from "sonner"
+import { FavoriteType } from "@/types/app"
 
 interface TypeOfCompo {
     items: FilteredMatchesType[];
     isFetch?: boolean;
     type?: string;
-    fixture_date?: string;
 }
 
-export function BoardTable({ items, isFetch = false, type = 'live', fixture_date }: TypeOfCompo) {
-    const [visibleCount, setVisibleCount] = useState(10);
+export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfCompo) {
+    const [favorites, setFavorites] = useState<FavoriteType[]>([]);
 
+    useEffect(() => {
+        setFavorites(Favorite.get());
+    }, []);
 
-    const handleLoadMore = () => {
-        setVisibleCount((prev) => prev + 10);
+    const handleFavorite = (match_id: string, status?: string) => {
+        try {
+            // ใช้ update() → จะอัปเดตหรือสร้างใหม่
+            const updatedFavorite = Favorite.update(match_id, { status: status ?? 'active' });
+
+            // อัปเดต state
+            setFavorites((prev) => {
+                const existsIndex = prev.findIndex(f => f.match_id === match_id);
+                if (existsIndex !== -1) {
+                    // มีอยู่แล้ว → replace element
+                    const newArr = [...prev];
+                    newArr[existsIndex] = updatedFavorite;
+                    return newArr;
+                } else {
+                    // ไม่มี → เพิ่มใหม่
+                    return [...prev, updatedFavorite];
+                }
+            });
+
+            toast.success('อัพเดทรายการโปรดเรียบร้อย');
+        } catch (error) {
+            console.error('Error:', error);
+            let message = "เกิดข้อผิดพลาดบางอย่าง";
+            if (error instanceof Error) {
+                message = error.message;
+            } else if (typeof error === "string") {
+                message = error;
+            }
+            toast.error(message);
+        }
     };
-    const handleLoadLess = () => {
-        setVisibleCount((prev) => prev - 10);
-    };
 
-    const visibleData = items.slice(0, visibleCount);
-    const date = new Date();
-
-    const fixtureDate1 = new Date(date);
-    const fixtureDate2 = new Date(fixtureDate1);
-    const fixtureDate3 = new Date(fixtureDate2);
-
-    const fixtureDate_2 = new Date(fixtureDate1);
-    const fixtureDate_3 = new Date(fixtureDate1);
-
-    fixtureDate1.setDate(fixtureDate1.getDate() + 1);
-    fixtureDate2.setDate(fixtureDate1.getDate() + 1);
-    fixtureDate3.setDate(fixtureDate2.getDate() + 1);
-
-    fixtureDate_2.setDate(fixtureDate1.getDate() - 2);
-    fixtureDate_3.setDate(fixtureDate_2.getDate() - 1);
 
     return (
         <Card className="py-0">
@@ -61,48 +75,67 @@ export function BoardTable({ items, isFetch = false, type = 'live', fixture_date
                         <TableHead className="text-start">
                             {type == 'live' ? 'ไลฟ์สด' : `ตารางการแข่งขัน`}
                         </TableHead>
-                        <TableHead className="w-full">{type == 'fixture' ? (
-                            <div className="flex gap-2">
-                                <Link href={`${web.home().url}?date=${fixtureDate_3.toISOString().slice(0, 10)}`}>
-                                    <Button asChild variant="ghost" className="text-muted-foreground">
-                                        <span>{fixtureDate_3.toISOString().slice(5, 10)}</span>
-                                    </Button>
-                                </Link>
-                                <Link href={`${web.home().url}?date=${fixtureDate_2.toISOString().slice(0, 10)}`}>
-                                    <Button asChild variant="ghost" className="text-muted-foreground">
-                                        <span>{fixtureDate_2.toISOString().slice(5, 10)}</span>
-                                    </Button>
-                                </Link>
-                                <Link href={`${web.home().url}?date=${date.toISOString().slice(0, 10)}`}>
-                                    <Button asChild variant="ghost">
-                                        <span>วันนี้</span>
-                                    </Button>
-                                </Link>
-                                <Link href={`${web.home().url}?date=${fixtureDate1.toISOString().slice(0, 10)}`}>
-                                    <Button asChild variant="ghost">
-                                        <span>{fixtureDate1.toISOString().slice(5, 10)}</span>
-                                    </Button>
-                                </Link>
-                                <Link href={`${web.home().url}?date=${fixtureDate2.toISOString().slice(0, 10)}`}>
-                                    <Button asChild variant="ghost">
-                                        <span>{fixtureDate2.toISOString().slice(5, 10)}</span>
-                                    </Button>
-                                </Link>
-                                <Link href={`${web.home().url}?date=${fixtureDate3.toISOString().slice(0, 10)}`}>
-                                    <Button asChild variant="ghost">
-                                        <span>{fixtureDate3.toISOString().slice(5, 10)}</span>
-                                    </Button>
-                                </Link>
-                            </div>
-                        ) : ''}</TableHead>
-                        <TableHead></TableHead>
+                        <TableHead className="w-full">
+                            {type == 'fixture' ? (() => {
+                                const date = new Date();
+
+                                const fixtureDate1 = new Date(date);
+                                const fixtureDate2 = new Date(fixtureDate1);
+                                const fixtureDate3 = new Date(fixtureDate2);
+
+                                const fixtureDate_2 = new Date(fixtureDate1);
+                                const fixtureDate_3 = new Date(fixtureDate1);
+
+                                fixtureDate1.setDate(fixtureDate1.getDate() + 1);
+                                fixtureDate2.setDate(fixtureDate1.getDate() + 1);
+                                fixtureDate3.setDate(fixtureDate2.getDate() + 1);
+
+                                fixtureDate_2.setDate(fixtureDate1.getDate() - 2);
+                                fixtureDate_3.setDate(fixtureDate_2.getDate() - 1);
+                                return (
+                                    <div className="flex gap-2">
+                                        <Link href={`${web.home().url}?date=${fixtureDate_3.toISOString().slice(0, 10)}`}>
+                                            <Button asChild variant="ghost" className="text-muted-foreground">
+                                                <span>{fixtureDate_3.toISOString().slice(5, 10)}</span>
+                                            </Button>
+                                        </Link>
+                                        <Link href={`${web.home().url}?date=${fixtureDate_2.toISOString().slice(0, 10)}`}>
+                                            <Button asChild variant="ghost" className="text-muted-foreground">
+                                                <span>{fixtureDate_2.toISOString().slice(5, 10)}</span>
+                                            </Button>
+                                        </Link>
+                                        <Link href={`${web.home().url}?date=${date.toISOString().slice(0, 10)}`}>
+                                            <Button asChild variant="ghost">
+                                                <span>วันนี้</span>
+                                            </Button>
+                                        </Link>
+                                        <Link href={`${web.home().url}?date=${fixtureDate1.toISOString().slice(0, 10)}`}>
+                                            <Button asChild variant="ghost">
+                                                <span>{fixtureDate1.toISOString().slice(5, 10)}</span>
+                                            </Button>
+                                        </Link>
+                                        <Link href={`${web.home().url}?date=${fixtureDate2.toISOString().slice(0, 10)}`}>
+                                            <Button asChild variant="ghost">
+                                                <span>{fixtureDate2.toISOString().slice(5, 10)}</span>
+                                            </Button>
+                                        </Link>
+                                        <Link href={`${web.home().url}?date=${fixtureDate3.toISOString().slice(0, 10)}`}>
+                                            <Button asChild variant="ghost">
+                                                <span>{fixtureDate3.toISOString().slice(5, 10)}</span>
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                );
+                            })() : ''}
+                        </TableHead>
+                        <TableHead colSpan={2}></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {!isFetch ? (items.map((item, index) => (
                         <React.Fragment key={index}>
                             <TableRow className="bg-primary/20">
-                                <TableCell colSpan={3}>
+                                <TableCell colSpan={4}>
                                     <div className="flex gap-2 items-center">
                                         {item.location && (
                                             <>
@@ -197,6 +230,28 @@ export function BoardTable({ items, isFetch = false, type = 'live', fixture_date
                                                     </div>
                                                 </div>
                                             </TableCellViewer>
+                                        </TableCell>
+                                        <TableCell className="min-w-15 flex gap-2">
+                                            <div className="w-1 h-12 rounded-full bg-input"></div>
+                                            <div className="w-max flex items-center justify-center">
+                                                {
+                                                    (() => {
+                                                        const fav = favorites.find((fav: FavoriteType) => fav.match_id === match.id);
+                                                        if (!fav || fav.status != "atctive") return (
+                                                            <Button variant="ghost" onClick={() => handleFavorite(match.id, "atctive")}>
+                                                                <Star className="text-amber-400" />
+                                                            </Button>
+                                                        );
+
+                                                        return fav.status == "atctive" ? (
+                                                            <Button variant="ghost" onClick={() => handleFavorite(fav.match_id, 'inactive')}>
+                                                                <Star className="text-amber-400" fill="currentColor" />
+                                                            </Button>
+                                                        ) : ( null );
+                                                    })()
+                                                }
+
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 );

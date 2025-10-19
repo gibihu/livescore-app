@@ -43,7 +43,7 @@ function PostCard({ item }: { item: any }) {
     const ss = item.season as UserSeasonType;
     const rank = user.rank as UserRankType;
     return (
-        <Card className="gap-1 py-4">
+        <Card className="gap-1 py-4 h-full">
             <CardHeader>
                 <CardTitle className="line-clamp-1 text-sm  flex gap-2 items-center">
                     <Avatar>
