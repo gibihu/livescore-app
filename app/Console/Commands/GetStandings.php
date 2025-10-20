@@ -1,29 +1,46 @@
 <?php
 
-namespace App\Http\Controllers\Football;
+namespace App\Console\Commands;
 
 use App\Helpers\ConJobHelper;
-use App\Http\Controllers\Controller;
 use App\Models\Football\Competition;
 use App\Models\Football\CompetitionGroup;
-use App\Models\Football\CompetitionStage;
 use App\Models\Football\CompetitionGroupStanding;
-use App\Models\Football\Federation;
+use App\Models\Football\CompetitionStage;
 use App\Models\Football\Seasons;
 use App\Models\Football\Team;
-use Exception;
-use Illuminate\Http\Request;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-class CompetitionStandingController extends Controller
+class GetStandings extends Command
 {
-    public function index()
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:get-standings';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
     {
+        Log::info('');
+        Log::info('=== Start Update Standing Job ===');
         try{
             set_time_limit(180);
-            $API_KEY = env('LIVE_SCORE_API_KEY');
-            $API_SECRET = env('LIVE_SCORE_API_SECRET');
-            $LANG = env('APP_LOCALE');
+            $API_KEY = config('api.livescore.api_key');
+            $API_SECRET = config('api.livescore.api_secret');
+            $LANG = config('app.locale');
 
             $competitions = Competition::query()
                 ->where('is_league', true)
@@ -104,19 +121,21 @@ class CompetitionStandingController extends Controller
                         ];
                     }
                 }
-                return response()->json([
+                return Log::info('สำเร็จ', [
                     'message' => 'สำเร็จ',
                     'data' => $all,
                     'fail' => $fail,
                     'code' => $response->status(),
-                ], $response->status());
+                ]);
             }
 
-        }catch (Exception $e){
-            return response()->json([
+        } catch (Throwable $e) {
+            Log::error('Error in Standing Job', [
                 'message' => $e->getMessage(),
-                'code' => 500,
-            ], 500);
+            ]);
         }
+
+        Log::info('=== End Standing Job ===');
+        Log::info('');
     }
 }

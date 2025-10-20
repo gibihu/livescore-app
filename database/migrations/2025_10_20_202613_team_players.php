@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('match_players', function (Blueprint $table) {
+        Schema::create('team_players', function (Blueprint $table) {
             $table->char('id', 36)->primary();
             $table->bigInteger('player_id')->index();
             $table->char('team_id', 36)->nullable()->unique();
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('name_th')->nullable();
             $table->boolean('substitution')->default(false);
             $table->string('shirt_number')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('match_players');
+        Schema::dropIfExists('team_players');
     }
 };

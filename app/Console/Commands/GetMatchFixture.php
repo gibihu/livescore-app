@@ -38,9 +38,9 @@ class GetMatchFixture extends Command
         Log::info('');
         Log::info('=== Start Update Fixture Job ===');
         try{
-            $API_KEY = env('LIVE_SCORE_API_KEY');
-            $API_SECRET = env('LIVE_SCORE_API_SECRET');
-            $LANG = env('APP_LOCALE');
+            $API_KEY = config('api.livescore.api_key');
+            $API_SECRET = config('api.livescore.api_secret');
+            $LANG = config('app.locale');
             $date = Carbon::now()->addDays(3)->format('Y-m-d');
 
             $config = new stdClass();
