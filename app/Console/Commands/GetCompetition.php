@@ -35,9 +35,9 @@ class GetCompetition extends Command
         Log::info('');
         Log::info('=== Start Update Competition Job ===');
         try{
-            $API_KEY = env('LIVE_SCORE_API_KEY');
-            $API_SECRET = env('LIVE_SCORE_API_SECRET');
-            $LANG = env('APP_LOCALE');
+            $API_KEY = config('api.livescore.api_key');
+            $API_SECRET = config('api.livescore.api_secret');
+            $LANG = config('app.locale');
 
             $response = Http::get('https://livescore-api.com/api-client/competitions/list.json', [
                 'key' => $API_KEY,

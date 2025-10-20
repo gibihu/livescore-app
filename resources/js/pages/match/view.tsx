@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import MatchEvent from "./event";
 
 export default function ShowMatch(request: any) {
 
@@ -77,7 +78,7 @@ function ContentTabs({ request }: { request: any }) {
     return (
         <Tabs defaultValue="index" className="w-full">
             <TabsList>
-                <TabsTrigger value="index">ทีเด็ด</TabsTrigger>
+                <TabsTrigger value="index">การแข่งขัน</TabsTrigger>
                 <TabsTrigger value="post">ทีเด็ด</TabsTrigger>
                 <TabsTrigger value="players">นักเตะ</TabsTrigger>
                 {match.live_status === "LIVE" || match.live_status === "END_LIVE" ? (
@@ -85,7 +86,12 @@ function ContentTabs({ request }: { request: any }) {
                 ) : null}
             </TabsList>
             <div className="p-0 md:p-4">
-                <TabsContent value="index"><FootballField item={[]} /></TabsContent>
+                <TabsContent value="index">
+                    <div className="flex flex-col gap-4">
+                        <FootballField item={[]} />
+                        <MatchEvent main_item={match} match_id={match.id} />
+                    </div>
+                </TabsContent>
                 <TabsContent value="post" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {posts.length > 0 ? (posts.map((post: PostType) => (
                         <PostCard item={post} key={post.id} />
