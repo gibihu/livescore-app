@@ -20,14 +20,14 @@ jobs:
 
       - name: Deploy code and Build on Server
         run: |
-          ssh -o StrictHostKeyChecking=no smsbkk@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
-            cd /home/smsbkk
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
+            cd ../var/www/vhosts/banpalball.com
 
-            if [ ! -d "SYSTEMSMSBKK" ]; then
-              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEMSMSBKK
+            if [ ! -d "SYSTEM" ]; then
+              git clone git@github.com:gibihu/livescore-app.git SYSTEM
             fi
 
-            cd SYSTEMSMSBKK
+            cd SYSTEM
 
             git fetch origin main
             git reset --hard HEAD
@@ -35,7 +35,7 @@ jobs:
             git pull origin main
             echo 'Git pull completed on server.'
 
-            source /home/smsbkk/nodevenv/SYSTEMSMSBKK/20/bin/activate
+            source ../var/www/vhosts/banpalball.com/nodevenv/SYSTEM/20/bin/activate
             echo 'Node.js virtual environment activated.'
 
             npm install --legacy-peer-deps || true
@@ -48,14 +48,14 @@ jobs:
             echo 'Permissions set completed on server.'
 
             php artisan storage:link
-            echo 'Laravel storage:link executed on SYSTEMSMSBKK/public.'
+            echo 'Laravel storage:link executed on SYSTEM/public.'
 
             rsync -avz --delete \
               --exclude 'index.php' \
-              /home/smsbkk/SYSTEMSMSBKK/public/ \
-              /home/smsbkk/public_html/
-            echo 'Public folder synced from SYSTEMSMSBKK to public_html.'
-            cat > /home/smsbkk/public_html/index.php << 'END'
+              ../var/www/vhosts/banpalball.com/SYSTEM/public/ \
+              ../var/www/vhosts/banpalball.com/httpdocs/
+            echo 'Public folder synced from SYSTEM to httpdocs.'
+            cat > ../var/www/vhosts/banpalball.com/httpdocs/index.php << 'END'
           <?php
 
           use Illuminate\Foundation\Application;
@@ -63,17 +63,17 @@ jobs:
 
           define('LARAVEL_START', microtime(true));
 
-          if (file_exists($maintenance = __DIR__.'/../SYSTEMSMSBKK/storage/framework/maintenance.php')) {
+          if (file_exists($maintenance = __DIR__.'/../SYSTEM/storage/framework/maintenance.php')) {
               require $maintenance;
           }
 
-          require __DIR__.'/../SYSTEMSMSBKK/vendor/autoload.php';
+          require __DIR__.'/../SYSTEM/vendor/autoload.php';
 
-          $app = require_once __DIR__.'/../SYSTEMSMSBKK/bootstrap/app.php';
+          $app = require_once __DIR__.'/../SYSTEM/bootstrap/app.php';
 
           $app->handleRequest(Request::capture());
           END
-            echo 'Custom index.php created in public_html.'
+            echo 'Custom index.php created in httpdocs.'
 
             composer install
             php artisan migrate --force
