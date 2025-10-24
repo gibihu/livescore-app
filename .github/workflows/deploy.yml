@@ -20,11 +20,11 @@ jobs:
 
       - name: Deploy code and Build on Server
         run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
             cd ../var/www/vhosts/banpalball.com
 
             if [ ! -d "SYSTEM" ]; then
-              git clone git@github.com:${{ secrets.USERNAME_GITHUB }}/${{ secrets.NAME_REPO }}.git SYSTEM
+              git clone git@github.com:gibihu/livescore-app.git SYSTEM
             fi
 
             cd SYSTEM
