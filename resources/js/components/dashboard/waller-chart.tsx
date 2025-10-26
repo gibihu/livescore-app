@@ -31,6 +31,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "../ui/input"
 import api from "@/routes/api"
 import { toast } from "sonner"
+import { summary } from "@/routes/dash/admin/post"
 
 export const description = "A radial chart with stacked sections"
 
@@ -288,13 +289,15 @@ function PopUpExchangeIncome({ request, children }: { request: any, children: Re
     const [open, setOpen] = useState(false);
 
     const schema = z.object({
-        amount: z.number({ message: "กรอกตัวเลข" }).int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.income, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" })
+        amount: z.number({ message: "กรอกตัวเลข" }).int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.income, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" }),
+        summary: z.number().optional(),
     });
     type FormValues = z.infer<typeof schema>;
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
             amount: user.wallet.income,
+            summary: user.wallet.income - (user.wallet.income*0.2)
         },
         mode: "onChange",
     });
@@ -309,7 +312,10 @@ function PopUpExchangeIncome({ request, children }: { request: any, children: Re
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({
+                        amount: data.amount,
+                        summary: Math.round(data.amount - (data.amount * 0.2)),
+                    })
                 });
 
                 const result = await res.json();
