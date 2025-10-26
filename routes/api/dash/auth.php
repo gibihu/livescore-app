@@ -39,6 +39,9 @@ Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
                 Route::get('packages', 'show')->name('packages');
                 Route::get('generate', 'generatePackage')->name('generate');
             });
+            Route::prefix('income')->name('income.')->group(function(){
+                Route::post('exchange', 'incomeToPoint')->name('exchange.point');
+            });
         });
         Route::controller(TransApiController::class)->group(function(){
             Route::prefix('transaction')->name('transaction.')->group(function(){

@@ -34,7 +34,7 @@ jobs:
             git pull origin main
             echo 'Git pull completed on server.'
 
-            source /nodevenv/SYSTEM/20/bin/activate
+            source /.nodevenv/versions/24/bin/
             echo 'Node.js virtual environment activated.'
 
             npm install --legacy-peer-deps || true

@@ -18,6 +18,11 @@ class Team extends Model
         'logo',
         'stadium',
         'country_id',
+        'players',
+    ];
+
+    protected $casts = [
+        'players' => 'array',
     ];
 
 

@@ -11,12 +11,11 @@ class PostReport extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'report_posts';
+    protected $table = 'post_reports';
     public $incrementing = false;
     protected $keyType = 'string'; // เพราะใช้ char(36)
 
     protected $fillable = [
-        'id',
         'user_id',
         'post_id',
         'title',

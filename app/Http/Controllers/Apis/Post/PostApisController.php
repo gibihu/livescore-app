@@ -89,8 +89,12 @@ class PostApisController extends Controller
             $post = Post::with('user')->find($id);
             if($user->wallet->points >= $post->points && $user->id !== $post->user_id){
                 $poser = User::find($post->user_id);
-                $fee = $this->CompareFee($poser->tier);
-                if( $post->points <= 0 || (WalletController::ActionsPoint($post->user_id, $post->points - ($post->points * $fee /100), WalletHistory::TYPE_INCOME, "ได้รับจากการปลดล็อโพสต์ $post->title")
+                $fee = (float) $poser->rank->level_json['rate'] + (float) $poser->custom_rate;
+                $references = [
+                    'type' => 'post',
+                    'id' => $post->id,
+                ];
+                if( $post->points <= 0 || (WalletController::ActionsPoint($post->user_id, $post->points - ($post->points * $fee /100), WalletHistory::TYPE_INCOME, "ได้รับจากการปลดล็อโพสต์ $post->title", $references)
                     &&
                     WalletController::ActionsPoint($user->id, -$post->points, WalletHistory::TYPE_USED, "ลกเปลี่ยนโพสต์ $post->title"))
                 ){

@@ -12,7 +12,7 @@ import {
     type SortingState,
     type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Settings } from "lucide-react"
 import * as React from "react"
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
@@ -37,12 +37,14 @@ import {
 import { toast } from "sonner"
 import { UserType } from "@/types/user"
 import { AuthType } from "@/types/auth"
-import { usePage } from "@inertiajs/react"
+import { Link, usePage } from "@inertiajs/react"
 import api from "@/routes/api"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import dash from "@/routes/dash"
 
 
 
-export function UserTable() {
+export function UserTable({ request }: { request: any }) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     const auth = usePage().props.auth as AuthType;
     const user = auth.user as UserType;
@@ -53,25 +55,14 @@ export function UserTable() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const [users, setUsers] = React.useState<UserType[]>([]);
+    const [users, setUsers] = React.useState<UserType[]>(request.users ?? [] as UserType[]);
 
-    React.useEffect(() => {
-        const fetchData = async () => {
-            const res = await fetch(api.dash.admin.users.table().url);
-            const result: any = await res.json();
-            if (result.code == 200) {
-                const data = result.data;
-                setUsers(data || []);
-            } else {
-                toast.error(result.message, { description: 'code: ' + result.code || '' });
-            }
-        }
-        fetchData();
-    }, []);
+    console.log(request);
+
 
 
     const [isFetch, setIsFetch] = React.useState<boolean>(false);
-    const handdleUpdateRole = ( id: string, role: string ) => {
+    const handdleUpdateRole = (id: string, role: string) => {
         const fetchData = async () => {
             try {
                 setIsFetch(true);
@@ -110,11 +101,11 @@ export function UserTable() {
     };
 
 
-    function handleUpdateTier(id: string, tier: string){
+    function handleUpdateTier(id: string, tier: string) {
         const fetchData = async () => {
-            try{
+            try {
                 setIsFetch(true);
-                const res = await fetch(api.dash.admin.users.tier.update({user_id: id}).url, {
+                const res = await fetch(api.dash.admin.users.tier.update({ user_id: id }).url, {
                     method: 'PATCH',
                     credentials: "include",
                     headers: {
@@ -127,7 +118,7 @@ export function UserTable() {
                     })
                 })
                 const result = await res.json();
-                if(result.code == 200){
+                if (result.code == 200) {
                     const data = result.data;
                     setUsers(prev =>
                         prev.map(user =>
@@ -135,7 +126,7 @@ export function UserTable() {
                         )
                     );
                     toast.success(result.message);
-                }else{
+                } else {
                     toast.error(result.message);
                 }
             } catch (error) {
@@ -157,7 +148,7 @@ export function UserTable() {
 
 
 
-    const createColumns = (handdleUpdateRole: (id: string, roel:string) => void, handleUpdateTier: (id: string, tier: string) => void, isFetch: () => boolean): ColumnDef<any>[] => [
+    const createColumns = (handdleUpdateRole: (id: string, roel: string) => void, handleUpdateTier: (id: string, tier: string) => void, isFetch: () => boolean): ColumnDef<any>[] => [
         {
             accessorKey: "no",
             header: (() => (null)),
@@ -178,122 +169,60 @@ export function UserTable() {
             ),
         },
         {
-            accessorKey: "tier_text",
-            header: ({ column }) => {
+            accessorKey: "custom_rate",
+            header: "ตั่งค่าเรท",
+            cell: ({ row }) => {
+                const rate = row.original.custom_rate;
                 return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Tier
-                        <ArrowUpDown />
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="link" className="pl-0">+{rate}%</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                                <DialogDescription>
+                                    This action cannot be undone. This will permanently delete your account
+                                    and remove your data from our servers.
+                                </DialogDescription>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
                 )
             },
+        },
+        {
+            accessorKey: "tier_text",
+            header: "Tier",
             cell: ({ row }) => {
-                const [value, setValue] = React.useState<string>(row.original.tier_text);
-                const [isOpen, setIsOpen] = React.useState<boolean>(false);
-                // const [i, setI] = React.useState<string>();
-
-
-
+                const rank = row.original.rank;
                 return (
-                    <div className="flex justify-end">
-                        <Label htmlFor={`${row.original.id}`} className="sr-only">
-                            tier
-                        </Label>
-                        <Select defaultValue={value} value={value} onValueChange={(val)=>{
-                            setIsOpen(true);
-                            setValue(val);
-                            }} disabled={isFetch()}>
-                            <SelectTrigger
-                                className="w-full capitalize **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-                                id={`${row.original.id}`}
-                            >
-                                <SelectValue placeholder="เลือกสถาณะ"/>
-                            </SelectTrigger>
-                            <SelectContent align="end" className="w-full" >
-                                <SelectItem value="bronze" className="capitalize">bronze</SelectItem>
-                                <SelectItem value="silver" className="capitalize">silver</SelectItem>
-                                <SelectItem value="gold" className="capitalize">gold</SelectItem>
-                                <SelectItem value="vip" className="capitalize">vip</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <AlertDialog open={isOpen}>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>คุณแน่ใจ?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        คุณต้องการเปลี่ยนบทบาทของ <span className="text-foreground">{row.original.username}</span> เป็น <span className="text-foreground capitalize">{value}</span> หรือไม่?
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={()=>{setIsOpen(false); setValue(row.original.tier_text)}}>ยกเลิก</AlertDialogCancel>
-                                    <AlertDialogAction onClick={()=>(handleUpdateTier(row.original.id, value))}>ยืนยัน</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                )
+                    <div className="capitalize">{rank.level_text}</div>
+                );
             },
         },
         {
             accessorKey: "point",
-            header: ()=>(
+            header: () => (
                 <div className="w-full text-center">Point</div>
             ),
             cell: ({ row }) => (
-                <div className="capitalize text-center">{row.original.wallet.points}</div>
+                <div className="capitalize text-center">{Number(row.original.wallet.points).toLocaleString()}</div>
             ),
         },
         {
-            accessorKey: "status_text",
-            header: (() => (
-                <p className="text-end pe-2">สถาณะ</p>
-            )),
+            accessorKey: "actions",
+            header: '',
             cell: ({ row }) => {
-                const [value, setValue] = React.useState<string>(row.original.role_text);
-                const [isOpen, setIsOpen] = React.useState<boolean>(false);
-                // const [i, setI] = React.useState<string>();
-
-
+                const item = row.original;
 
                 return (
-                    <div className="flex justify-end">
-                        <Label htmlFor={`${row.original.id}`} className="sr-only">
-                            สถาณะ
-                        </Label>
-                        <Select defaultValue={value} value={value} onValueChange={(val)=>{
-                            setIsOpen(true);
-                            setValue(val);
-                            }} disabled={isFetch()}>
-                            <SelectTrigger
-                                className="w-full **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-                                id={`${row.original.id}`}
-                            >
-                                <SelectValue placeholder="เลือกสถาณะ" />
-                            </SelectTrigger>
-                            <SelectContent align="end" className="w-full" >
-                                <SelectItem value="user">ผู้ใช้</SelectItem>
-                                <SelectItem value="admin">แอดมิน</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <AlertDialog open={isOpen}>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>คุณแน่ใจ?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        คุณต้องการเปลี่ยนบทบาทของ <span className="text-foreground">{row.original.username}</span> เป็น <span className="text-foreground">{row.original.role_text == 'user' ? 'แอดมิน' : 'ผู้ใช้'}</span> หรือไม่?
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={()=>{setIsOpen(false); setValue(row.original.role_text)}}>ยกเลิก</AlertDialogCancel>
-                                    <AlertDialogAction onClick={()=>(handdleUpdateRole(row.original.id, value))}>ยืนยัน</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                    <div className="flex gap-2 flex-wrap justify-end">
+                        <Link href={dash.admin.users.setting({ id: item.id }).url}>
+                            <Button variant="ghost">
+                                <Settings />
+                            </Button>
+                        </Link>
                     </div>
                 )
             },

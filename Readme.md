@@ -56,6 +56,28 @@ php artisan schedule:run
 
 * * * * * cd /path/to/laravel && php artisan schedule:run >> /dev/null 2>&1
 
+php artisan make:seeder SdServersTableSeeder
+php artisan db:seed
+php artisan migrate:fresh --seed
+
+
+
+composer create-project laravel/laravel="10.12.*" gembulk
+cd gembulk
+
+composer require laravel/breeze --dev
+
+php artisan breeze:install react
+
+
+composer require laravel-lang/lang
+#php artisan lang:publish th
+php artisan lang:add th
+php artisan lang:update
+
+
+
+
 ```
 
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('report_posts', function (Blueprint $table) {
+        Schema::create('post_reports', function (Blueprint $table) {
             $table->char('id', 36)->primary();
 
             // FK ไป users.id (คนรายงาน)
@@ -46,6 +46,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('report_posts');
+        Schema::dropIfExists('post_reports');
     }
 };

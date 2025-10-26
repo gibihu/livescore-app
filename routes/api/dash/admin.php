@@ -1,12 +1,10 @@
 <?php
 
-use App\Http\Controllers\Apis\Post\PostReportApiController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Apis\Dash\Admin\User\UserAdminDashApiController;
 use App\Http\Controllers\Apis\Admins\UserAdminApiController;
 use App\Http\Controllers\Apis\Admins\TransAdminApiController;
 use App\Http\Controllers\Apis\Admins\WalletAdminApiController;
-use App\Http\Controllers\Apis\Admins\PostAdminApiController;
 
 
 Route::middleware('auth', 'role:admin')->prefix('api')->name('api.')->group(function () {
@@ -19,6 +17,11 @@ Route::middleware('auth', 'role:admin')->prefix('api')->name('api.')->group(func
                 Route::prefix('tier')->name('tier.')->group(function(){
                     Route::patch('{user_id}/tier', 'update_tier', )->name('update');
                 });
+            });
+        });
+        Route::controller(UserAdminDashApiController::class)->group(function(){
+            Route::prefix('users')->name('users.')->group(function(){
+                Route::post('setting/{id}', 'store')->name('store');
             });
         });
         Route::controller(TransAdminApiController::class)->group(function(){

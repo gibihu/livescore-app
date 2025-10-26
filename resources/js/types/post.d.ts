@@ -12,14 +12,6 @@ export interface PostType {
     points: number;
     description: string;
 
-    // negotiate: string;
-    // hl_expected: boolean;
-    // hl_negotiate: string;
-    // hl_description: string;
-    // eod_expected: boolean;
-    // eod_description: string;
-    // oxt_expected: [number, number, number]; // 1 x 2
-    // oxt_description: string;
     show: ValueType;
     hidden: ValueType;
     hiddens: MainValueObjectType;
@@ -35,6 +27,7 @@ export interface PostType {
     result: number;
     result_text: string;
     summary_at: string;
+    view: number;
 }
 
 
@@ -60,4 +53,20 @@ interface ValueObjectType{
     message?: string;
     title: string;
     value: number;
+}
+
+
+export interface ReportType{
+    id: string;
+    user_id: string;
+    post_id: string;
+    title: string;
+    description: string;
+    category: string;
+    status: number;
+    meta: string;
+    attachments: string;
+    priority: number;
+    updated_at: string;
+    created_at: string;
 }

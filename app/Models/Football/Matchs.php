@@ -21,6 +21,8 @@ class Matchs extends Model
         'country_id',
         'home_team_id',
         'away_team_id',
+        'home_lineups',
+        'away_lineups',
         'round',
         'date',
         'location',

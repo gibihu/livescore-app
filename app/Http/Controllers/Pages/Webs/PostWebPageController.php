@@ -18,7 +18,7 @@ class PostWebPageController extends Controller
 {
     public function PostShowAll()
     {
-        $posts = Post::where('privacy', Post::PUBLIC)->where('ref_type', Post::REFTYPE_MATCH)->select('id','points','title', 'privacy', 'status', 'user_id', 'ref_id', 'ref_type', 'type', 'ss_id')->orderBy('created_at', 'DESC')->get();
+        $posts = Post::where('privacy', Post::PUBLIC)->where('ref_type', Post::REFTYPE_MATCH)->select('id','points','title', 'privacy', 'status', 'user_id', 'ref_id', 'ref_type', 'type', 'ss_id', 'view')->orderBy('created_at', 'DESC')->get();
         $posts->map(function ($post) {
             $post->match = Matchs::select('home_team_id', 'away_team_id')->find($post->ref_id);
             return $post;
@@ -32,6 +32,8 @@ class PostWebPageController extends Controller
             $is_unlock = false;
             $follow = null;
             $post = Post::with('user')->findOrFail($id);
+            $post->view = $post->view + 1;
+            $post->save();
 
             if ($post->type == Post::TYPE_HANDICAP) {
                 $post->hiddens = (object)[
