@@ -167,6 +167,7 @@ class GetMatchFixture extends Command
                             $config->page = $data->data->next_page !== false ? $config->page + 1 : $config->page;
                         }
                     }else{
+                        $config->next_page = false;
                         Log::error('Api Fixture error', [json_encode($response->json())]);
                     }
                 }
