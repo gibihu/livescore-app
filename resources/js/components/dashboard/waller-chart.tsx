@@ -47,8 +47,8 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-export function WallerChart() {
-    const auth: AuthType = usePage().props.auth as AuthType;
+export function WallerChart({ request }: { request: any }) {
+    const auth: AuthType = request.auth as AuthType;
     const user = auth.user as UserType;
     const chartData = [{ income: user.wallet.income || 0, points: user.wallet.points || 0 }]
     const totalVisitors = chartData[0].income + chartData[0].points;
@@ -67,7 +67,8 @@ export function WallerChart() {
                     >
                         <RadialBarChart
                             data={chartData}
-                            endAngle={180}
+                            startAngle={180}
+                            endAngle={0}
                             innerRadius={80}
                             outerRadius={130}
                         >
@@ -123,52 +124,55 @@ export function WallerChart() {
 
                     <div className="w-full flex justify-between">
                         <div className="flex gap-2 items-center">
-                            <div className="size-3 bg-chart-2 rounded"></div>
-                            <p className="text-sm text-muted-foreground">รายได้</p>
-                        </div>
-                        <span className="text-sm">{user?.wallet.income.toLocaleString()}</span>
-                    </div>
-
-                    <div className="w-full flex justify-between">
-                        <div className="flex gap-2 items-center">
                             <div className="size-3 bg-chart-1 rounded"></div>
                             <p className="text-sm text-muted-foreground">พอยต์</p>
                         </div>
                         <span className="text-sm">{user?.wallet.points.toLocaleString()}</span>
                     </div>
 
+                    <div className="w-full flex justify-between">
+                        <div className="flex gap-2 items-center">
+                            <div className="size-3 bg-chart-2 rounded"></div>
+                            <p className="text-sm text-muted-foreground">รายได้</p>
+                        </div>
+                        <span className="text-sm">{user?.wallet.income.toLocaleString()}</span>
+                    </div>
+
                 </div>
             </CardContent>
-            <CardFooter className="flex-col gap-2 text-sm items-end">
-                <PopUpExchange>
+            <CardFooter className="flex gap-2 text-sm justify-end">
+                <PopUpExchangeIncome request={request}>
+                    <Button>
+                        แปลง
+                    </Button>
+                </PopUpExchangeIncome>
+                <PopUpExchangePoint request={request}>
                     <Button>
                         แลก
                     </Button>
-                </PopUpExchange>
+                </PopUpExchangePoint>
             </CardFooter>
         </Card>
     )
 }
 
 
-function PopUpExchange({ children }: { children: ReactNode }) {
+function PopUpExchangePoint({ request, children }: { request: any, children: ReactNode }) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-    const auth: AuthType = usePage().props.auth as AuthType;
+    const auth: AuthType = request.auth as AuthType;
     const user = auth.user as UserType;
 
     const [isFetch, setIsFetch] = useState<boolean>(false);
     const [open, setOpen] = useState(false);
 
     const schema = z.object({
-        account_number: z.string().min(10, { message: "ขั้นต่ำ 10 ตัว" }),
-        amount: z.number().int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.income, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" })
+        amount: z.number().int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.points, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" })
     });
     type FormValues = z.infer<typeof schema>;
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
-            amount: user.wallet.income,
-            account_number: ''
+            amount: user.wallet.points,
         },
         mode: "onChange",
     });
@@ -215,7 +219,7 @@ function PopUpExchange({ children }: { children: ReactNode }) {
     }
 
     const amount = form.watch('amount');
-    const calculated = ((amount - amount * 0.3) * Number(EXCHANGE_RATE)).toFixed(2);
+    const calculated = (amount * Number(EXCHANGE_RATE)).toFixed(2);
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
@@ -232,19 +236,6 @@ function PopUpExchange({ children }: { children: ReactNode }) {
                                 <div className="flex flex-col gap-2">
                                     <FormField
                                         control={form.control}
-                                        name="account_number"
-                                        render={({ field, fieldState }) => (
-                                            <FormItem className="col-span-4">
-                                                <FormLabel>เลขบัญชี</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="กรอกเลขบัญชี" {...field} disabled={isFetch}/>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
                                         name="amount"
                                         render={({ field, fieldState }) => (
                                             <FormItem className="col-span-4">
@@ -254,7 +245,7 @@ function PopUpExchange({ children }: { children: ReactNode }) {
                                                 </FormControl>
                                                 {!fieldState.error && (
                                                     <FormDescription>
-                                                        พอยต์จะถูกหัก 30% รายได้สุทธิ {field.value - (field.value * 30 / 100)} พอยต์
+                                                        ไม่มีค่าธรรมเนียมในการแลกเปลี่ยน
                                                     </FormDescription>
                                                 )}
                                                 <FormMessage />
@@ -266,6 +257,119 @@ function PopUpExchange({ children }: { children: ReactNode }) {
                                         <span>อัตตราการแลกเปลี่ยน 1 : {EXCHANGE_RATE}</span>
                                         <span>รายได้สุทธิ {calculated} ฿</span>
                                     </div>
+                                </div>
+
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <Button
+                                disabled={isFetch}
+                            >
+                                {isFetch && (<LoaderCircle className="size-4 animate-spin" />)}
+                                ยืนบัน
+                            </Button>
+                        </AlertDialogFooter>
+                    </form>
+                </Form>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+}
+
+
+function PopUpExchangeIncome({ request, children }: { request: any, children: ReactNode }) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+    const auth: AuthType = request.auth as AuthType;
+    const user = auth.user as UserType;
+    const chagePercent = 2 as number;
+
+    const [isFetch, setIsFetch] = useState<boolean>(false);
+    const [open, setOpen] = useState(false);
+
+    const schema = z.object({
+        amount: z.number({ message: "กรอกตัวเลข" }).int({ message: "กรอกจำนวนเต็มเท่านั้น" }).min(100, { message: "ขั้นต่ำ 100 พอยต์" }).max(user.wallet.income, { message: "ไม่สามารถแลกได้เกินพอยต์ของคุณ" })
+    });
+    type FormValues = z.infer<typeof schema>;
+    const form = useForm<FormValues>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            amount: user.wallet.income,
+        },
+        mode: "onChange",
+    });
+    const onSubmit = (data: FormValues) => {
+        const fetchData = async () => {
+            try {
+                setIsFetch(true);
+                const res = await fetch(api.dash.income.exchange.point().url, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (result.code == 200) {
+                    toast.error(result.message);
+                    setOpen(false);
+                    router.reload();
+                } else {
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        };
+        fetchData();
+    }
+
+    return (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+                {children}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>แปลงรายได้เป็นพอยต์</AlertDialogTitle>
+                            <AlertDialogDescription asChild>
+
+                                <div className="flex flex-col gap-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="amount"
+                                        render={({ field, fieldState }) => (
+                                            <FormItem className="col-span-4">
+                                                <FormLabel>พอยต์</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="กรอกจำนวน" type="number" {...field} disabled={isFetch} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription>
+                                                    พอยต์จะถูกหัก {chagePercent}%
+                                                </FormDescription>
+                                                <FormDescription>
+                                                    แปลงได้ {Math.round(field.value - (field.value * chagePercent / 100))} พอยต์
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
 
                             </AlertDialogDescription>

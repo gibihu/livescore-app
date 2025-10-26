@@ -24,11 +24,14 @@ class User extends Authenticatable
         'name',
         'username',
         'email',
+        'avatar',
+        'bio',
         'password',
         'tier',
         'exp',
         'role',
         'rank_id',
+        'email_verified_at',
     ];
 
     /**
@@ -49,7 +52,8 @@ class User extends Authenticatable
     ];
 
     protected $with = [
-        'rank'
+        'rank',
+        'bank_account',
     ];
 
     /**
@@ -84,6 +88,11 @@ class User extends Authenticatable
                 'type' => 0,
             ]);
     }
+    public function bank_account()
+    {
+        return $this->hasOne(UserBankAccount::class, 'user_id', 'id');
+    }
+
     public function getActiveRankAttribute()
     {
         // ถ้ามี rank_id อยู่แล้ว ใช้อันนี้เลย

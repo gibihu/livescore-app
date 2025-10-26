@@ -54,6 +54,10 @@ export interface WalletHistoryType {
         email: string,
     };
     description?: string;
+    references: {
+        type: string;
+        id: string;
+    };
     updated_at: string;
     created_at: string;
 }

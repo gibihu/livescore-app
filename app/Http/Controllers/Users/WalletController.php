@@ -11,13 +11,13 @@ use Illuminate\Support\Str;
 
 class WalletController extends Controller
 {
-    public static function ActionsPoint($user_id, $points, $type, $description){
+    public static function ActionsPoint($user_id, $points, $type, $description, $reference = []){
         try{
             if($user_id && $points){
                 try{
                     $wallet = Wallet::where('user_id', $user_id)->firstOrFail();
                     if($wallet){
-                        $history = self::history($wallet->id, $points, $type, $description);
+                        $history = self::history($wallet->id, $points, $type, $description, $reference);
                         if($history){
                             if($type == WalletHistory::TYPE_INCOME || $type == WalletHistory::TYPE_REMOVED) {
                                 $wallet->income = $wallet->income + $points;
@@ -42,7 +42,7 @@ class WalletController extends Controller
     }
 
 
-    private static function history($wallet_id, $amount, $type = WalletHistory::TYPE_BONUS, $description = ''){
+    private static function history($wallet_id, $amount, $type = WalletHistory::TYPE_BONUS, $description = '', $reference = []){
         try{
             $history = WalletHistory::create([
                 'id' => Str::uuid(),
@@ -50,7 +50,8 @@ class WalletController extends Controller
                 'change_amount' => $amount,
                 'role' => $amount >= 0 ? 1 : 2,
                 'type' => $type,
-                'description' => $description
+                'description' => $description,
+                'references' => $reference,
             ]);
             return $history;
         }catch (Exception $e) {

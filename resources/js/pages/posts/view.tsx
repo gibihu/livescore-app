@@ -48,7 +48,7 @@ export default function View(request: any) {
                         if (res.status === 401) {
                             const result = await res.json();
                             toast.error(result.message);
-                        } else {
+                        } else if (res.status === 419) {
                             toast.error('เกิดข้อผิดพลาดจาก server', { description: 'กรุณาลองอีกครั่งหลังรีโหลด' });
                             setTimeout(()=>{
                                 window.location.reload();

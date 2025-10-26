@@ -18,11 +18,13 @@ class WalletHistory extends Model
         'type',
         'description',
         'change_amount',
+        'references',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'references' => 'json',
     ];
     protected $appends = [
         'type_text',
@@ -54,11 +56,11 @@ class WalletHistory extends Model
     const TYPE_INCOME = 4;
     const TYPE_BONUS = 5;
     public static $typeLabels = [
-        self::TYPE_USED => 'used',
-        self::TYPE_TOPUP => 'topup',
-        self::TYPE_REMOVED => 'removed',
-        self::TYPE_INCOME => 'income',
-        self::TYPE_BONUS => 'bonus',
+        self::TYPE_USED => 'used', //  ใช้
+        self::TYPE_TOPUP => 'topup', // เติม
+        self::TYPE_REMOVED => 'removed', // ลบ
+        self::TYPE_INCOME => 'income', // รายได้
+        self::TYPE_BONUS => 'bonus', // โบนัส
     ];
     public function getTypeTextAttribute()
     {

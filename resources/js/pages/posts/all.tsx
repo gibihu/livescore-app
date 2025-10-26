@@ -10,6 +10,7 @@ import { MatchType } from "@/types/match";
 import { PostType } from "@/types/post";
 import { UserGuast, UserRankType, UserSeasonType } from "@/types/user";
 import { Head, Link } from "@inertiajs/react";
+import { Eye } from "lucide-react";
 import { useState } from "react";
 
 export default function Home(request: any) {
@@ -24,12 +25,16 @@ export default function Home(request: any) {
 
             <div className="flex flex-col gap-4  mt-4">
                 <MenuBar />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {posts.map((post: PostType) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    {posts.length > 0 ? posts.map((post: PostType) => (
                         <Link href={web.post.view({ id: post.id }).url} key={post.id}>
                             <PostCard item={post} />
                         </Link>
-                    ))}
+                    )) : (
+                        <div className="w-full">
+                            <span className="text-accent">ไม่มีโพสต์</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>
@@ -54,8 +59,8 @@ function PostCard({ item }: { item: any }) {
                     <ExpertBadge item={user} />
                 </CardTitle>
             </CardHeader>
-            <CardContent className="flex gap-2">
-                <div className="flex gap-2">
+            <CardContent className="flex gap-2 h-full">
+                <div className="flex gap-2 items-center">
                     <div className="flex gap-2 items-center">
                         <span className="text-foreground font-bold text-end">{match.home.name}</span>
                         <Avatar className="size-4">
@@ -74,7 +79,10 @@ function PostCard({ item }: { item: any }) {
                 </div>
             </CardContent>
             <CardFooter className="flex gap-2 justify-between text-sm text-muted-foreground">
-                <span>views</span>
+                <span className="flex gap-1 items-center text-xs">
+                    <Eye className="size-3" />
+                    {(item.view ?? "0").toLocaleString()}
+                </span>
                 <div className="flex gap-2 items-center">
                     <span>{item.type_text}</span>
                     <span>|</span>

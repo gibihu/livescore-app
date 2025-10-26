@@ -4,9 +4,10 @@ import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import web from "@/routes/web";
+import { ReportType } from "@/types/post";
 import { MoreHorizontal } from "lucide-react";
 
-export default function ReportTable({ items }: { items: any[] }) {
+export default function ReportTable({ items }: { items: ReportType[] }) {
     return (
         <Card className="p-0 overflow-hidden">
             <Table>
@@ -17,7 +18,7 @@ export default function ReportTable({ items }: { items: any[] }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {(items && items.length > 0) ? items.map((item: any, index: number) => (
+                    {(items && items.length > 0) ? items.map((item: ReportType, index: number) => (
                         <TableRow key={index}>
                             <TableCell className="flex flex-col">
                                 <span><span className="text-muted-foreground">เรื่อง:</span> {item.title}</span>
@@ -37,9 +38,13 @@ export default function ReportTable({ items }: { items: any[] }) {
                                         <DropdownMenuLabel className="text-sm text-muted-foreground">ดำเนินการ</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
 
-                                        <a href={web.post.view({id: item.post_id}).url} target="_blank">
-                                            <DropdownMenuItem>ตรวจสอบ</DropdownMenuItem>
-                                        </a>
+                                        {item.post_id && (
+                                            <DropdownMenuItem asChild>
+                                                <a href={web.post.view({ id: item.post_id }).url ?? '#'} target="_blank">
+                                                    ตรวจสอบ
+                                                </a>
+                                            </DropdownMenuItem>
+                                        )}
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <Button variant="ghost" className="w-full ps-2 justify-start">

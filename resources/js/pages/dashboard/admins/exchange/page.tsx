@@ -3,7 +3,7 @@
 import AppLayout from "@/layouts/app-layout";
 import dash from "@/routes/dash";
 import { BreadcrumbItem } from "@/types";
-import { UserTable } from "../../../../components/dashboard/admins/user-table";
+import { UserTable } from "../../../../components/dashboard/admins/users/user-table";
 import { Head, Link, router } from "@inertiajs/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";

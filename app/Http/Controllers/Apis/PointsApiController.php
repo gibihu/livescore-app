@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Apis;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Users\WalletController;
 use App\Models\PackPoints;
+use App\Models\Users\Wallet;
+use App\Models\Users\WalletHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use RoundingMode;
 
 class PointsApiController extends Controller
 {
@@ -21,7 +25,7 @@ class PointsApiController extends Controller
             }else{
                 throw new Exception("ไม่สามารถหารด้วยศูนย์ได้!");
             }
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,
@@ -54,7 +58,7 @@ class PointsApiController extends Controller
             ], 200);
 
 
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,
@@ -89,7 +93,38 @@ class PointsApiController extends Controller
             }else{
                 throw new Exception("ไม่สามารถสร้างแพ็คเกจได้!");
             }
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+                'request' => $request->all(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function incomeToPoint(Request $request)
+    {
+        try{
+            $income = (int) $request->amount ?? 0;
+            $trans = round($income - ($income * 0.02));
+            $user = $request->user();
+            if(WalletController::ActionsPoint($user->id, -$income, WalletHistory::TYPE_REMOVED, "แปลงรายได้เป็นพอยต์ $income >> $trans"))
+            {
+                if(WalletController::ActionsPoint($user->id, $trans, WalletHistory::TYPE_BONUS, "ได้รับพอยต์จากการแปลงรายได้จำนวน $trans พอยต์"))
+                {
+                    return response()->json([
+                        'message' => 'สำเร็จ',
+                        'data' => $income,
+                        'code' => 200
+                    ], 200);
+                }
+            }
+            throw new Exception("ไม่สามารถบันทึกหรือแปลงได้");
+        }catch (Exception $e) {
             $response = [
                 'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
                 'code' => 500,

@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Pages\Dash\Admins\PostAdminDashPage;
+use App\Http\Controllers\Pages\Dash\Admins\UserAdminDashController;
 use App\Http\Controllers\Pages\Dash\PostPageController;
+use App\Http\Controllers\Pages\Dash\Users\WalletPageController;
+use App\Http\Controllers\Pages\DashPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\Pages\DashPageController;
 
 
 Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function () {
@@ -12,9 +14,9 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
         return Inertia::render('dashboard/page');
     })->name('index');
 
-    Route::get('wallet', function () {
-        return Inertia::render('dashboard/wallet');
-    })->name('wallet');
+    Route::controller(WalletPageController::class)->prefix('wallet')->group(function () {
+        Route::get('', 'index')->name('wallet');
+    });
 
     Route::get('point', function () {
         return Inertia::render('dashboard/point-page');
@@ -38,12 +40,11 @@ Route::middleware('auth')->prefix('dashboard')->name('dash.')->group(function ()
 
 
 Route::middleware('auth', 'role:admin')->prefix('dashboard/admin')->name('dash.admin.')->group(function () {
-    Route::prefix('users')->name('users.')->group(function(){
-        Route::get('table', function () {
-            return Inertia::render('dashboard/admins/users');
-        })->name('table');
+    Route::controller(UserAdminDashController::class)->prefix('users')->name('users.')->group(function(){
+        Route::get('table', 'table')->name('table');
+        Route::get('setting/{id}', 'setting')->name('setting');
         Route::get('payment', function () {
-            return Inertia::render('dashboard/admins/user-payment');
+            return Inertia::render('dashboard/admins/payment-list');
         })->name('payment');
     });
 

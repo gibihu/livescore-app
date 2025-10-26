@@ -12,6 +12,11 @@ export interface UserType {
     wallet: WalletType;
     retrieval_at?: string;
     rank: UserRankType;
+    email_verified_at: string;
+    custom_rate: number;
+    email: string;
+    created_at: string;
+    updated_at: string;
 }
 
 
@@ -34,6 +39,7 @@ export interface UserRankType {
         name: string;
         min_exp: number;
         max_exp: number;
+        rate: number;
     };
     score: number;
     season: UserSeasonType;

@@ -14,10 +14,6 @@ return new class extends Migration
         Schema::table('teams', function (Blueprint $table) {
             $table->json('players')->nullable();
         });
-        Schema::table('matches', function (Blueprint $table) {
-            $table->json('home_loneups')->nullable();
-            $table->json('away_loneups')->nullable();
-        });
     }
 
     /**
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('teams', function (Blueprint $table) {
+            $table->dropColumn('players');
+        });
     }
 };
