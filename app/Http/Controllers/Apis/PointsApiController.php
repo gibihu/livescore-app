@@ -110,7 +110,7 @@ class PointsApiController extends Controller
     {
         try{
             $income = (int) $request->amount ?? 0;
-            $trans = round($income - ($income * 0.02));
+            $trans = (float) $request->summary;
             $user = $request->user();
             if(WalletController::ActionsPoint($user->id, -$income, WalletHistory::TYPE_REMOVED, "แปลงรายได้เป็นพอยต์ $income >> $trans"))
             {
