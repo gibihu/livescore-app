@@ -138,14 +138,17 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                             <TableRow className="bg-primary/20">
                                 <TableCell colSpan={4}>
                                     <div className="flex gap-2 items-center">
-                                        {/* {item.location && (
+                                        {item.league && (
                                             <>
                                                 <span className="size-4 rounded-full">
-                                                    <ImageWithSkeleton src={item.location.logo ?? ''} alt={item.location.logo ?? ''} />
+                                                    <ImageWithSkeleton src={item.country.country_id ? `/flag?type=country&id=${item.country.country_id}` : 'https://cdn.live-score-api.com/teams/dc6704744f1bc0d01d3740eff2e5e3ec.png'} alt={item.country.name ?? ''} />
                                                 </span>
+                                                <div className="flex gap-1 items-end">
+                                                    <span>{item.league.name}</span>
+                                                    <span className="text-xs">({item.country.name})</span>
+                                                </div>
                                             </>
-                                        )} */}
-                                        <span>{item.name}</span>
+                                        )}
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -248,7 +251,7 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                             <Button variant="ghost" onClick={() => handleFavorite(fav.match_id, 'inactive')}>
                                                                 <Star className="text-amber-400" fill="currentColor" />
                                                             </Button>
-                                                        ) : ( null );
+                                                        ) : (null);
                                                     })()
                                                 }
 
