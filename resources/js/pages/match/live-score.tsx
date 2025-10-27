@@ -1,6 +1,6 @@
 
 import type { MatchType } from "@/types/match";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BoardScore } from "./board-score";
 import api from "@/routes/api";
@@ -11,58 +11,38 @@ import { FilteredMatchesType, groupMatches } from "@/lib/functions";
 
 
 const API_URL: string = import.meta.env.VITE_API_URL;
-export function LiveScore({match_items}:{match_items: MatchType[]}) {
+export function LiveScore({ match_items }: { match_items: MatchType[] }) {
     const [matches, setMatches] = useState<MatchType[]>(match_items);
-    const [filters, setFilters] = useState<FilteredMatchesType[]>([]);
 
     const [isMatchFetch, setIsMatchFetch] = useState<boolean>(true);
     const [isLeagueFetch, setIsLeagueFetch] = useState<boolean>(false);
     const [isPostfetch, setPostFetch] = useState<boolean>(false);
 
-    const [restep, setRestep] = useState<number>(1);
+    const groupedMatches = useMemo(() => {
+        const groups: Record<string, { name: string; matches: any[] }> = {};
 
-    useEffect(() => {
-        setRestep(2);
-        const intervalId = setInterval(hanffleRelod, 61000);
+        matches.forEach((match: any) => {
+            const leagueId = match.league?.id;
+            const leagueName = match.league?.name;
 
-        // // ล้าง interval เมื่อ component ถูก unmount
-        return () => clearInterval(intervalId);
-    }, []);
+            if (!leagueId) return; // เผื่อบาง match ไม่มี league
 
-    function hanffleRelod() {
-        const fetchData = async () => {
-            setIsMatchFetch(true);
-            const res = await fetch(api.match.live().url);
-
-            const result = await res.json();
-            if (result.code == 200) {
-                const data = await result.data;
-                setMatches(data);
-                setRestep(2);
-            } else {
-                const errors = result;
-                toast.error(result.message);
+            if (!groups[leagueId]) {
+                groups[leagueId] = {
+                    name: leagueName,
+                    matches: [],
+                };
             }
-            setIsMatchFetch(false);
-        };
-        if(restep == 1){
-            fetchData();
-        }
-    }
 
-    useEffect(() => {
-        if (restep == 2 && matches.length > 0) {
-            const updatedFilters = groupMatches(matches);
+            groups[leagueId].matches.push(match);
+        });
 
-            console.log(updatedFilters)
-
-            setFilters(updatedFilters);
-            setRestep(1);
-        }
-    }, [restep]);
+        // แปลง object → array [{ name, matches }]
+        return Object.values(groups);
+    }, [matches]);
 
 
     return (
-        <BoardTable items={filters} isFetch={false} />
+        <BoardTable items={groupedMatches} isFetch={false} />
     );
 }
