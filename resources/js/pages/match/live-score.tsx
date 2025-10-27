@@ -19,17 +19,19 @@ export function LiveScore({ match_items }: { match_items: MatchType[] }) {
     const [isPostfetch, setPostFetch] = useState<boolean>(false);
 
     const groupedMatches = useMemo(() => {
-        const groups: Record<string, { name: string; matches: any[] }> = {};
+        const groups: Record<string, { league: any; country: any; matches: any[] }> = {};
 
         matches.forEach((match: any) => {
             const leagueId = match.league?.id;
-            const leagueName = match.league?.name;
+            const leagueName = match.league;
+            const country = match.country;
 
             if (!leagueId) return; // เผื่อบาง match ไม่มี league
 
             if (!groups[leagueId]) {
                 groups[leagueId] = {
-                    name: leagueName,
+                    league: leagueName,
+                    country: country,
                     matches: [],
                 };
             }
@@ -41,6 +43,8 @@ export function LiveScore({ match_items }: { match_items: MatchType[] }) {
         return Object.values(groups);
     }, [matches]);
 
+
+    console.log(groupedMatches);
 
     return (
         <BoardTable items={groupedMatches} isFetch={false} />

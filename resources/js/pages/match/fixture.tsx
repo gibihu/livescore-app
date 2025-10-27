@@ -9,7 +9,7 @@ import { PostType } from "@/types/post";
 import { FilteredMatchesType, groupMatches } from "@/lib/functions";
 
 
-export default function FixtureScore({request}:{request: any}) {
+export default function FixtureScore({ request }: { request: any }) {
     console.log(request);
     const [matches, setMatches] = useState<MatchType[]>(request.matches as MatchType[]);
     const [filters, setFilters] = useState<FilteredMatchesType[]>([]);
@@ -17,36 +17,34 @@ export default function FixtureScore({request}:{request: any}) {
     const [isFetchBoard, setIsFetchBoard] = useState(false);
 
 
+    const groupedMatches = useMemo(() => {
+        const groups: Record<string, { league: any; country: any; matches: any[] }> = {};
 
+        matches.forEach((match: any) => {
+            const leagueId = match.league?.id;
+            const leagueName = match.league;
+            const country = match.country;
 
-        const groupedMatches = useMemo(() => {
-            const groups: Record<string, { name: string; matches: any[] }> = {};
+            if (!leagueId) return; // เผื่อบาง match ไม่มี league
 
-            matches.forEach((match: any) => {
-                const leagueId = match.league?.id;
-                const leagueName = match.league?.name;
+            if (!groups[leagueId]) {
+                groups[leagueId] = {
+                    league: leagueName,
+                    country: country,
+                    matches: [],
+                };
+            }
 
-                if (!leagueId) return; // เผื่อบาง match ไม่มี league
+            groups[leagueId].matches.push(match);
+        });
 
-                if (!groups[leagueId]) {
-                    groups[leagueId] = {
-                        name: leagueName,
-                        matches: [],
-                    };
-                }
-
-                groups[leagueId].matches.push(match);
-            });
-
-            // แปลง object → array [{ name, matches }]
-            return Object.values(groups);
-        }, [matches]);
-
-
+        // แปลง object → array [{ name, matches }]
+        return Object.values(groups);
+    }, [matches]);
 
 
     return (
         // <BoardScore items={matches} isFetch={isFetchBoard} />
-        <BoardTable items={groupedMatches} isFetch={isFetchBoard} type="fixture"/>
+        <BoardTable items={groupedMatches} isFetch={isFetchBoard} type="fixture" />
     );
 }
