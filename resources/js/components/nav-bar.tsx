@@ -34,7 +34,7 @@ export default function NavBar(){
                                     </Button>
                                 </div>
                                 <Link href="/dashboard"><Button asChild><span>Dashboard</span></Button></Link>
-                                <Link href={logout()} as="button"><Button asChild><span>ออระบบ</span></Button></Link>
+                                <Link href={logout()} as="button"><Button asChild><span>ออกระบบ</span></Button></Link>
                             </>
                         )
                     ) : (

@@ -2,7 +2,7 @@
 import api from "@/routes/api";
 import { CompetitionType } from "@/types/league";
 import type { MatchType } from "@/types/match";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BoardTable } from "./board-table";
 import { PostType } from "@/types/post";
@@ -18,16 +18,35 @@ export default function FixtureScore({request}:{request: any}) {
 
 
 
-    useEffect(() => {
-        const updatedFilters = groupMatches(matches);
-        setFilters(updatedFilters);
-    }, []);
+
+        const groupedMatches = useMemo(() => {
+            const groups: Record<string, { name: string; matches: any[] }> = {};
+
+            matches.forEach((match: any) => {
+                const leagueId = match.league?.id;
+                const leagueName = match.league?.name;
+
+                if (!leagueId) return; // เผื่อบาง match ไม่มี league
+
+                if (!groups[leagueId]) {
+                    groups[leagueId] = {
+                        name: leagueName,
+                        matches: [],
+                    };
+                }
+
+                groups[leagueId].matches.push(match);
+            });
+
+            // แปลง object → array [{ name, matches }]
+            return Object.values(groups);
+        }, [matches]);
 
 
 
 
     return (
         // <BoardScore items={matches} isFetch={isFetchBoard} />
-        <BoardTable items={filters} isFetch={isFetchBoard} type="fixture"/>
+        <BoardTable items={groupedMatches} isFetch={isFetchBoard} type="fixture"/>
     );
 }

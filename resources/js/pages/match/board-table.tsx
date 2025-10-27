@@ -19,9 +19,10 @@ import { Link } from "@inertiajs/react"
 import { Favorite } from "@/models/favorite"
 import { toast } from "sonner"
 import { FavoriteType } from "@/types/app"
+import { MatchType } from "@/types/match"
 
 interface TypeOfCompo {
-    items: FilteredMatchesType[];
+    items: any;
     isFetch?: boolean;
     type?: string;
 }
@@ -132,23 +133,23 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {!isFetch ? (items.map((item, index) => (
+                    {!isFetch ? (items.map((item: any, index: number) => (
                         <React.Fragment key={index}>
                             <TableRow className="bg-primary/20">
                                 <TableCell colSpan={4}>
                                     <div className="flex gap-2 items-center">
-                                        {item.location && (
+                                        {/* {item.location && (
                                             <>
                                                 <span className="size-4 rounded-full">
                                                     <ImageWithSkeleton src={item.location.logo ?? ''} alt={item.location.logo ?? ''} />
                                                 </span>
-                                                <span>{item.location.name}</span>
                                             </>
-                                        )}
+                                        )} */}
+                                        <span>{item.name}</span>
                                     </div>
                                 </TableCell>
                             </TableRow>
-                            {item.matches?.map((match, key) => {
+                            {item.matches?.map((match: MatchType, key: number) => {
                                 const [homeScoreStr, awayScoreStr] = (match.scores?.score?.split(" - ").map(s => s.trim())) ?? ["?", "?"];
                                 return (
                                     <TableRow key={key}>
