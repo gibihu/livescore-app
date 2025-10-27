@@ -141,11 +141,17 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                         {item.league && (
                                             <>
                                                 <span className="size-4 rounded-full">
-                                                    <ImageWithSkeleton src={item.country.country_id ? `/flag?type=country&id=${item.country.country_id}` : 'https://cdn.live-score-api.com/teams/dc6704744f1bc0d01d3740eff2e5e3ec.png'} alt={item.country.name ?? ''} />
+                                                    {item.country ? (
+                                                        <ImageWithSkeleton src={item.country.country_id ? `/flag?type=country&id=${item.country.country_id}` : 'https://cdn.live-score-api.com/teams/dc6704744f1bc0d01d3740eff2e5e3ec.png'} alt={item.country.name ?? ''} />
+                                                    ) :(
+                                                        <ImageWithSkeleton src={'https://cdn.live-score-api.com/teams/dc6704744f1bc0d01d3740eff2e5e3ec.png'} alt={item.league.name ?? ''} />
+                                                    )}
                                                 </span>
                                                 <div className="flex gap-1 items-end">
                                                     <span>{item.league.name}</span>
-                                                    <span className="text-xs">({item.country.name})</span>
+                                                    {item.country && (
+                                                        <span className="text-xs">({item.country.name})</span>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
