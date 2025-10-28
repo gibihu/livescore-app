@@ -4,6 +4,7 @@ use App\Http\Controllers\Apis\Football\CompetitionApiController as LeagueApiCont
 use App\Http\Controllers\Apis\Football\LiveScoreApiController;
 use App\Http\Controllers\Apis\Post\PostApisController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Apis\Users\RankUserApiController;
 
 Route::prefix('api')->name('api.')->group(function(){
     Route::controller(PostApisController::class)->group(function(){
@@ -11,6 +12,9 @@ Route::prefix('api')->name('api.')->group(function(){
             Route::get('', 'feed')->name('feed');
             Route::get('{id}', 'show')->name('show');
         });
+    });
+    Route::controller(RankUserApiController::class)->prefix('rank')->name('rank.')->group(function(){
+        Route::get('/feed', 'feed')->name('feed');
     });
 
     Route::controller(LiveScoreApiController::class)->group(function(){

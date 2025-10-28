@@ -229,11 +229,11 @@ export function TableViewImage({ item, className, children }: {
 }) {
     return (
         <Dialog>
-            <DialogTrigger className={className}>{children}</DialogTrigger>
-            <DialogContent className="max-h-svh max-w-[90svw] w-max sm:max-w-auto">
+            <DialogTrigger className={className} asChild>{children}</DialogTrigger>
+            <DialogContent className="max-h-svh max-w-svw w-max sm:max-w-auto">
                 <DialogTitle className="sr-only">หัวเรื่องของ dialog</DialogTitle>
                 <DialogHeader>
-                    <DialogDescription>
+                    <DialogDescription asChild>
                         <ImageWithSkeleton src={item.slip_url ?? ''} alt={item.slip_url ?? 'No Image'}
                             title='' className='max-h-[90svh] max-w-[90svw] w-max object-contain' />
                     </DialogDescription>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 
 
 Schedule::command('app:get-match-live')->everyMinute();
+Schedule::command('app:summary-post-match')->everyTenSeconds();
 //Schedule::command('app:get-match-fixture')->everyMinute();
 //Schedule::command('app:get-match-history')->everyMinute();
 //Schedule::command('app:get-standings')->everyMinute();

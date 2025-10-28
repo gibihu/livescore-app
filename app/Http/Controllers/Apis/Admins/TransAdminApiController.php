@@ -71,7 +71,8 @@ class TransAdminApiController extends Controller
                 switch($status){
                     case 'approved':
                         $tranDB = Transaction::where('id', $tran_id)->first();
-                        if($tranDB){
+                        $customer = User::find($tranDB->user_id);
+                        if($tranDB && $customer){
                             if($tranDB->status == Transaction::STATUS_APPROVED || $tranDB->status == Transaction::STATUS_REJECTED) { throw new Exception("ไม่สามารถบันทึกซ้ำได้"); }
 
                             $tranDB->update([
@@ -82,6 +83,10 @@ class TransAdminApiController extends Controller
                             $wallet = Wallet::where('user_id', $tranDB->user_id)->first();
                             if($wallet){
                                 $update = WalletController::ActionsPoint($wallet->user_id, $tranDB->points, WalletHistory::TYPE_TOPUP, 'เติมพอยต์ผ่านการยืนยัน');
+                                if (!$customer->paid_at) {
+                                    $customer->paid_at = Carbon::now();
+                                    $customer->save(); // คืนค่า boolean
+                                }
                                 return response()->json([
                                     'message' => 'สำเร็จ',
                                     'data' => $update,

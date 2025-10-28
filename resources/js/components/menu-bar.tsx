@@ -33,6 +33,11 @@ export default function MenuBar() {
                             ผลบอลสด
                         </Link>
                     </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={web.home().url} prefetch>
+                            ตารางการแข่ง
+                        </Link>
+                    </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="icon" aria-label="More Options">
@@ -41,39 +46,11 @@ export default function MenuBar() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
                             <DropdownMenuGroup>
-                                <DropdownMenuItem asChild className="cursor-pointer">
-                                    <Link href={web.home().url} prefetch>
-                                        <CalendarPlusIcon />
-                                        ตารางการแข่ง
-                                    </Link>
-                                </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link href={web.match.standings().url}>
                                         <ArchiveIcon />
                                         ตารางคะแนน
                                     </Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem>
-                                    <ClockIcon />
-                                    Snooze
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <CalendarPlusIcon />
-                                    Add to Calendar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <ListFilterPlusIcon />
-                                    Add to List
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem variant="destructive">
-                                    <Trash2Icon />
-                                    Trash
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>

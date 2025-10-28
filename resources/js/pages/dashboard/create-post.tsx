@@ -30,7 +30,7 @@ import { CompetitionType } from "@/types/league";
 import { MatchType } from "@/types/match";
 import { UserType } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Head, router, usePage } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Avatar } from "@radix-ui/react-avatar";
 import { Circle, CircleQuestionMark, LoaderCircle, Triangle } from "lucide-react";
 import { title } from "process";
@@ -43,9 +43,9 @@ import * as z from "zod";
 
 export default function CreatePostPage(request: any) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-    // 2. setup form
     const auth = request.auth as AuthType;
     const user = auth?.user as UserType;
+    console.log(request);
 
     const itemsForSelect = {
         matches: request.matches as MatchType[],
@@ -58,6 +58,23 @@ export default function CreatePostPage(request: any) {
         setMaxPoints(MaxPoints(user?.tier_text || 'bronze'));
     }, [user]);
     const [isFetch, setIsFetch] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (user.paid_at !== null) {
+            setIsFetch(false);
+        } else {
+            setIsFetch(true);
+            toast.loading("คุณไม่มีประวัติการเติมพอยต์", {
+                action: <div className="flex flex-1 justify-end">
+                    <Link href={dash.point().url}>
+                        <Button>
+                            พอยต์
+                        </Button>
+                    </Link>
+                </div>
+            })
+        }
+    }, [user]);
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),

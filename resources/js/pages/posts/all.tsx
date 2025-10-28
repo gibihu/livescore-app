@@ -4,6 +4,7 @@ import MenuBar from "@/components/menu-bar";
 import NavBar from "@/components/nav-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppLayout from "@/layouts/layout";
 import web from "@/routes/web";
 import { MatchType } from "@/types/match";
@@ -12,6 +13,7 @@ import { UserGuast, UserRankType, UserSeasonType } from "@/types/user";
 import { Head, Link } from "@inertiajs/react";
 import { Eye } from "lucide-react";
 import { useState } from "react";
+import { RankPage } from "./ranks";
 
 export default function Home(request: any) {
     const [posts, setPosts] = useState<PostType[]>(request.posts as PostType[]);
@@ -25,17 +27,28 @@ export default function Home(request: any) {
 
             <div className="flex flex-col gap-4  mt-4">
                 <MenuBar />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-                    {posts.length > 0 ? posts.map((post: PostType) => (
-                        <Link href={web.post.view({ id: post.id }).url} key={post.id}>
-                            <PostCard item={post} />
-                        </Link>
-                    )) : (
-                        <div className="w-full">
-                            <span className="text-accent">ไม่มีโพสต์</span>
+                <Tabs defaultValue="posts" className="w-full">
+                    <TabsList>
+                        <TabsTrigger value="posts">โพสต์</TabsTrigger>
+                        <TabsTrigger value="ranks">แรงค์</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="posts">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                            {posts.length > 0 ? posts.map((post: PostType) => (
+                                <Link href={web.post.view({ id: post.id }).url} key={post.id}>
+                                    <PostCard item={post} />
+                                </Link>
+                            )) : (
+                                <div className="w-full">
+                                    <span className="text-accent">ไม่มีโพสต์</span>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
+                    </TabsContent>
+                    <TabsContent value="ranks">
+                        <RankPage />
+                    </TabsContent>
+                </Tabs>
             </div>
         </AppLayout>
     );

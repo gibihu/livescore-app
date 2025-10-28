@@ -218,7 +218,7 @@ class TransApiController extends Controller
 
             // wallet -> history -> transac
 
-            if($user->wallet->income >= $amount){
+            if($user->wallet->points >= $amount){
                 $total = new \stdClass();
                 $total->point = $amount - $amount*0.3;
                 $total->price = $total->point * $rate;
@@ -234,7 +234,7 @@ class TransApiController extends Controller
                     $trans->account_number = $request->account_number ?? '';
                     if($trans->save()){
                         return response()->json([
-                            'message' => 'บันทุกสำเร็จ',
+                            'message' => 'บันทึกสำเร็จ',
                             'data' => $trans,
                             'code' => 201
                         ], 201);

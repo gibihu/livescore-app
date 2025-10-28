@@ -26,6 +26,7 @@ class User extends Authenticatable
         'email',
         'avatar',
         'bio',
+        'paid_at',
         'password',
         'tier',
         'exp',

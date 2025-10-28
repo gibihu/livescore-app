@@ -85,16 +85,16 @@ export function AppSidebar() {
                             icon: UsersRound
                         },
                         {
-                            title: "รายการพอยต์",
-                            href: dash.admin.users.payment().url,
-                            isActive: true,
-                            icon: HandCoins
-                        },
-                        {
                             title: "ทีเด็ดทั้งหมด",
                             href: dash.admin.post.table().url,
                             isActive: true,
                             icon: SwatchBook,
+                        },
+                        {
+                            title: "รายการพอยต์",
+                            href: dash.admin.users.payment().url,
+                            isActive: true,
+                            icon: HandCoins
                         },
                         {
                             title: "รายงาน",

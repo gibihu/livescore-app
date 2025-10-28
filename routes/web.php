@@ -17,6 +17,10 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
         Route::get('standings', 'standings')->name('standings');
     });
 
+    Route::prefix('team')->name('team.')->group(function(){
+        Route::get('{id}', 'showTeam')->name('item');
+    });
+
 
     Route::prefix('post')->controller(PostWebPageController::class)->name('post.')->group(function(){
         Route::get('', 'PostShowAll')->name('all');
