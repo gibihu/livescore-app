@@ -133,4 +133,27 @@ class LiveScoreApiController extends Controller
             return response()->json($response, 500);
         }
     }
+
+    public function getFavorite(Request $request)
+    {
+        try{
+            $items = $request->items;
+            $matches = Matchs::whereIn('id', $items)->get();
+
+            return response()->json([
+                'message' => 'สำเร็จ',
+                'data' => $matches,
+                'code' => 200,
+            ], 200);
+        }catch (Exception $e) {
+            $response = [
+                'message' => 'มีบางอย่างผิดพลาด โปรดลองอีกครั้งในภายหลัง',
+                'code' => 500,
+            ];
+            if(env('APP_DEBUG')) $response['debug'] = [
+                'message' => $e->getMessage(),
+            ];
+            return response()->json($response, 500);
+        }
+    }
 }

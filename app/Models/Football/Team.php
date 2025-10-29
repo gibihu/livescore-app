@@ -18,18 +18,16 @@ class Team extends Model
         'logo',
         'stadium',
         'country_id',
-        'players',
     ];
-
-    protected $casts = [
-        'players' => 'array',
-    ];
-
 
     public $timestamps = true;
 
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id', 'id');
+    }
+    public function players()
+    {
+        return $this->hasOne(Players::class, 'team_id');
     }
 }

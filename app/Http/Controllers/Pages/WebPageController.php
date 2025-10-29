@@ -129,4 +129,8 @@ class WebPageController extends Controller
             }
         }
     }
+
+    public function showFavorite(Request $request){
+        return Inertia::render('match/favorites/list');
+    }
 }

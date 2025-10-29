@@ -1,25 +1,29 @@
 
 import type { MatchType } from "@/types/match";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { BoardScore } from "./board-score";
-import api from "@/routes/api";
-import { CompetitionType } from "@/types/league";
 import { BoardTable } from "./board-table";
-import { PostType } from "@/types/post";
-import { FilteredMatchesType, groupMatches } from "@/lib/functions";
 
+interface FilterType {
+    league: any;
+    country: any;
+    matches: MatchType[]
+}
 
 const API_URL: string = import.meta.env.VITE_API_URL;
-export function LiveScore({ match_items }: { match_items: MatchType[] }) {
-    const [matches, setMatches] = useState<MatchType[]>(match_items);
-
+export function LiveScore({ match_items, isFetch }: { match_items: MatchType[], isFetch?: boolean }) {
+    const [matches, setMatches] = useState<MatchType[]>([]);
     const [isMatchFetch, setIsMatchFetch] = useState<boolean>(true);
     const [isLeagueFetch, setIsLeagueFetch] = useState<boolean>(false);
     const [isPostfetch, setPostFetch] = useState<boolean>(false);
+    const [filtered, setFiltered] = useState<FilterType[]>();
+
+    useEffect(() => {
+        setMatches(match_items);
+    }, [match_items]);
+
 
     const groupedMatches = useMemo(() => {
-        const groups: Record<string, { league: any; country: any; matches: any[] }> = {};
+        const groups: Record<string, FilterType> = {};
 
         matches.forEach((match: any) => {
             const leagueId = match.league?.id;
@@ -40,13 +44,10 @@ export function LiveScore({ match_items }: { match_items: MatchType[] }) {
         });
 
         // แปลง object → array [{ name, matches }]
-        return Object.values(groups);
+        setFiltered(Object.values(groups));
     }, [matches]);
 
-
-    console.log(groupedMatches);
-
     return (
-        <BoardTable items={groupedMatches} isFetch={false} />
+        <BoardTable items={filtered} isFetch={isFetch} />
     );
 }
