@@ -8,6 +8,7 @@ use App\Models\Football\Competition as league;
 use App\Models\Football\CompetitionGroupStanding;
 use App\Models\Football\CompetitionStage;
 use App\Models\Football\Country;
+use App\Models\Football\Team;
 use App\Models\Football\Federation as Feder;
 use App\Models\Football\Matchs;
 use App\Models\Football\Seasons;
@@ -111,5 +112,25 @@ class WebPageController extends Controller
                 abort(500);
             }
         }
+    }
+
+    public function showTeam(Request $request, $id)
+    {
+        try{
+            $team = Team::find($id);
+            if($team){
+                return Inertia::render('match/teams/show', compact('team'));
+            }
+        }catch (Exception $e) {
+            if(config('app.debug')) {
+                dd($e->getMessage());
+            }else{
+                abort(500);
+            }
+        }
+    }
+
+    public function showFavorite(Request $request){
+        return Inertia::render('match/favorites/list');
     }
 }

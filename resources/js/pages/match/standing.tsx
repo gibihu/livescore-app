@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppLayout from "@/layouts/layout";
 import test from "@/routes/test";
+import web from "@/routes/web";
 import { StageType, StandingType } from "@/types/match";
 import { Head, Link } from "@inertiajs/react";
 
@@ -23,7 +24,7 @@ export default function Standing(request: any) {
 
             <div className="flex flex-col gap-4  mt-4">
                 <MenuBar />
-                {stages && stages.length > 0 ?(
+                {stages && stages.length > 0 ? (
                     <Tabs defaultValue={stages[0].id}>
                         <TabsList>
                             {stages.map((item: StageType) => (
@@ -40,7 +41,7 @@ export default function Standing(request: any) {
                             </TabsContent>
                         ))}
                     </Tabs>
-                ): (
+                ) : (
                     <span className="text-muted-foreground">
                         <Link href={test.standing().url} >ไม่มีข้อมูล</Link>
                     </span>
@@ -72,12 +73,16 @@ function StandingTable({ items }: { items: StageType }) {
             <TableBody>
                 {sortedStandings.map((item: StandingType) => (
                     <TableRow>
-                        <TableCell className="flex gap-2 items-center">
-                            <Avatar className="size-5">
-                                <AvatarImage src={item.team.logo} />
-                                <AvatarFallback className="animate-pulse" />
-                            </Avatar>
-                            {item.team.name}
+                        <TableCell>
+                            <Link href={web.team.item({ id: item.team_id })}>
+                                <div className="flex gap-2 items-center">
+                                    <Avatar className="size-5">
+                                        <AvatarImage src={item.team.logo} />
+                                        <AvatarFallback className="animate-pulse" />
+                                    </Avatar>
+                                    {item.team.name}
+                                </div>
+                            </Link>
                         </TableCell>
                         <TableCell className="text-center">{item.matches}</TableCell>
                         <TableCell className="text-center">{item.won}</TableCell>

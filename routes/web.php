@@ -15,6 +15,11 @@ Route::controller(WebPageController::class)->name('web.')->group(function () {
         Route::get('live', 'liveMatches')->name('live');
         Route::get('show/{id}', 'showMatch')->name('view');
         Route::get('standings', 'standings')->name('standings');
+        Route::get('favorite', 'showFavorite')->name('favorite');
+    });
+
+    Route::prefix('team')->name('team.')->group(function(){
+        Route::get('{id}', 'showTeam')->name('item');
     });
 
 
@@ -43,6 +48,7 @@ Route::prefix('test')->name('test.')->group(function(){
     Route::get('/', [\App\Http\Controllers\Users\SeasonController::class, 'GetRank'])->name('index');
     Route::get('standing', [\App\Http\Controllers\Football\CompetitionStandingController::class, 'index'])->name('standing');
     Route::get('history', [LiveScoreController::class, 'history']);
+    Route::get('player', [\App\Http\Controllers\TestController::class, 'plyers']);
 });
 
 

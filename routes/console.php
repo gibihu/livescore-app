@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Artisan;
 
 
 Schedule::command('app:get-match-live')->everyMinute();
+// Schedule::command('app:summary-post-match')->everyMinute();
 //Schedule::command('app:get-match-fixture')->everyMinute();
 //Schedule::command('app:get-match-history')->everyMinute();
 //Schedule::command('app:get-standings')->everyMinute();
 
 
+Schedule::command('app:summary-post-match')->hourly();
 Schedule::command('app:get-match-history')->dailyAt('00:15');
 Schedule::command('app:get-match-fixture')->dailyAt('00:20');
 Schedule::command('app:get-standings')->dailyAt('00:25');

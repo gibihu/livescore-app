@@ -8,26 +8,31 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table"
-import { FilteredMatchesType, ShortName } from "@/lib/functions"
+import { FilteredMatchesType, formatDateLocal, ShortName } from "@/lib/functions"
 import { cn } from "@/lib/utils"
-import { LoaderCircle, Star } from "lucide-react"
+import { CalendarIcon, ChevronDownIcon, LoaderCircle, Star } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { TableCellViewer, whoWon } from "./board-score"
 import ImageWithSkeleton from "@/components/ImageWithSkeleton"
-import web from "@/routes/web"
-import { Link } from "@inertiajs/react"
+import web, { home } from "@/routes/web"
+import { Link, router } from "@inertiajs/react"
 import { Favorite } from "@/models/favorite"
 import { toast } from "sonner"
 import { FavoriteType } from "@/types/app"
 import { MatchType } from "@/types/match"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
+import { Label } from "@/components/ui/label"
 
 interface TypeOfCompo {
+    request?: any;
     items: any;
     isFetch?: boolean;
     type?: string;
 }
 
-export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfCompo) {
+export function BoardTable({ request, items, isFetch = false, type = 'live' }: TypeOfCompo) {
     const [favorites, setFavorites] = useState<FavoriteType[]>([]);
 
     useEffect(() => {
@@ -76,55 +81,44 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                         <TableHead className="text-start">
                             {type == 'live' ? 'ไลฟ์สด' : `ตารางการแข่งขัน`}
                         </TableHead>
-                        <TableHead className="w-full">
+                        <TableHead className="w-full justify-end">
                             {type == 'fixture' ? (() => {
-                                const date = new Date();
+                                const [date, setDate] = React.useState<Date | undefined>(
+                                    request.fixture_date ? new Date(request.fixture_date) : new Date()
+                                );
 
-                                const fixtureDate1 = new Date(date);
-                                const fixtureDate2 = new Date(fixtureDate1);
-                                const fixtureDate3 = new Date(fixtureDate2);
 
-                                const fixtureDate_2 = new Date(fixtureDate1);
-                                const fixtureDate_3 = new Date(fixtureDate1);
+                                function handleClick(date: Date | undefined) {
+                                    if (!date) return;
 
-                                fixtureDate1.setDate(fixtureDate1.getDate() + 1);
-                                fixtureDate2.setDate(fixtureDate1.getDate() + 1);
-                                fixtureDate3.setDate(fixtureDate2.getDate() + 1);
-
-                                fixtureDate_2.setDate(fixtureDate1.getDate() - 2);
-                                fixtureDate_3.setDate(fixtureDate_2.getDate() - 1);
+                                    const value = formatDateLocal(date);
+                                    router.visit(`${home().url}?date=${value}`);
+                                }
                                 return (
-                                    <div className="flex gap-2">
-                                        <Link href={`${web.home().url}?date=${fixtureDate_3.toISOString().slice(0, 10)}`}>
-                                            <Button asChild variant="ghost" className="text-muted-foreground">
-                                                <span>{fixtureDate_3.toISOString().slice(5, 10)}</span>
-                                            </Button>
-                                        </Link>
-                                        <Link href={`${web.home().url}?date=${fixtureDate_2.toISOString().slice(0, 10)}`}>
-                                            <Button asChild variant="ghost" className="text-muted-foreground">
-                                                <span>{fixtureDate_2.toISOString().slice(5, 10)}</span>
-                                            </Button>
-                                        </Link>
-                                        <Link href={`${web.home().url}?date=${date.toISOString().slice(0, 10)}`}>
-                                            <Button asChild variant="ghost">
-                                                <span>วันนี้</span>
-                                            </Button>
-                                        </Link>
-                                        <Link href={`${web.home().url}?date=${fixtureDate1.toISOString().slice(0, 10)}`}>
-                                            <Button asChild variant="ghost">
-                                                <span>{fixtureDate1.toISOString().slice(5, 10)}</span>
-                                            </Button>
-                                        </Link>
-                                        <Link href={`${web.home().url}?date=${fixtureDate2.toISOString().slice(0, 10)}`}>
-                                            <Button asChild variant="ghost">
-                                                <span>{fixtureDate2.toISOString().slice(5, 10)}</span>
-                                            </Button>
-                                        </Link>
-                                        <Link href={`${web.home().url}?date=${fixtureDate3.toISOString().slice(0, 10)}`}>
-                                            <Button asChild variant="ghost">
-                                                <span>{fixtureDate3.toISOString().slice(5, 10)}</span>
-                                            </Button>
-                                        </Link>
+                                    <div className="flex flex-col gap-3">
+                                        <Popover >
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    id="date"
+                                                    className="w-48 justify-between font-normal"
+                                                >
+                                                    {date ? date.toLocaleDateString() : "Select date"}
+                                                    <ChevronDownIcon />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={date}
+                                                    captionLayout="dropdown"
+                                                    onSelect={(date) => {
+                                                        setDate(date)
+                                                        handleClick(date);
+                                                    }}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
                                 );
                             })() : ''}
@@ -143,7 +137,7 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                 <span className="size-4 rounded-full">
                                                     {item.country ? (
                                                         <ImageWithSkeleton src={item.country.country_id ? `/flag?type=country&id=${item.country.country_id}` : 'https://cdn.live-score-api.com/teams/dc6704744f1bc0d01d3740eff2e5e3ec.png'} alt={item.country.name ?? ''} />
-                                                    ) :(
+                                                    ) : (
                                                         <ImageWithSkeleton src={'https://cdn.live-score-api.com/teams/dc6704744f1bc0d01d3740eff2e5e3ec.png'} alt={item.league.name ?? ''} />
                                                     )}
                                                 </span>
@@ -173,35 +167,10 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                 </div>
                                             </TableCellViewer>
                                         </TableCell>
-                                        <TableCell className="flex items-center space-x-4">
-                                            <div className="w-1 h-12 rounded-full bg-input"></div>
-                                            {type == 'fixture' ? (
-                                                <TableCellViewer item={match} className="w-full h-14" matchEvent={type == 'fixture' ? false : true} type={type}>
-                                                    <div className="flex flex-col gap-1">
-                                                        <div className="flex gap-2  items-center justify-between w-full">
-                                                            <div className="flex gap-2 items-center">
-                                                                <img src={match.home.logo} alt={match.home.logo} className="size-4" />
-                                                                <span className={cn("line-clamp-1 hidden md:block")}>{match.home.name}</span>
-                                                                <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.home.name)}.</span>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <span>{homeScoreStr}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-2  items-center justify-between w-full">
-                                                            <div className="flex gap-2 items-center">
-                                                                <img src={match.away.logo} alt={match.away.logo} className="size-4" />
-                                                                <span className={cn("line-clamp-1 hidden md:block")}>{match.away.name}</span>
-                                                                <span className={cn("line-clamp-1 md:hidden")}>{ShortName(match.away.name)}.</span>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <span>{awayScoreStr}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </TableCellViewer>
-                                            ) : (
-                                                <div className="w-full">
+                                        <TableCell>
+                                            <div className="flex items-center space-x-4 h-full">
+                                                <div className="w-1 h-12 rounded-full bg-input"></div>
+                                                <div className="w-full flex-col justify-between">
                                                     <Link href={web.match.view({ id: match.id }).url}>
                                                         <div className="flex flex-col gap-1">
                                                             <div className="flex gap-2  items-center justify-between w-full">
@@ -227,8 +196,8 @@ export function BoardTable({ items, isFetch = false, type = 'live' }: TypeOfComp
                                                         </div>
                                                     </Link>
                                                 </div>
-                                            )}
-                                            <div className="w-1 h-12 rounded-full bg-input"></div>
+                                                <div className="w-1 h-12 rounded-full bg-input"></div>
+                                            </div>
                                         </TableCell>
                                         <TableCell className="min-w-15">
                                             <TableCellViewer item={match} className="w-full h-full" matchEvent={type == 'fixture' ? false : true} type={type}>

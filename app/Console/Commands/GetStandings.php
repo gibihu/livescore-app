@@ -44,11 +44,6 @@ class GetStandings extends Command
 
             $competitions = Competition::query()
                 ->where('is_league', true)
-                ->where('tier', '<', 3)
-                ->whereHas('season', function ($q) {
-                    $q->whereRaw("CAST(SUBSTRING_INDEX(name, '/', 1) AS UNSIGNED) >= 2025");
-                })
-                ->with('season')
                 ->whereIn('name', [
                     'Bundesliga', 'LaLiga Santander', 'Premier League', 'J. League',
                     'Serie A', 'UEFA EURO Qualification', 'UEFA Nations League',
@@ -57,6 +52,7 @@ class GetStandings extends Command
                 ->orderBy('competition_id', 'asc')
                 ->get()
                 ->unique('name'); // เอาแค่ตัวแรกต่อชื่อ
+			//Log::error('Competitions Data', ['data' => json_encode($competitions)]);
 
             if($competitions->isNotEmpty()){
 
@@ -108,7 +104,17 @@ class GetStandings extends Command
                         $stage->stage_id = $i_stage->id;
                         $stage->name = $i_stage->name;
                         $stage->competition_id = Competition::where('competition_id', $item->competition->id)->first()->id ?? $item->competition->id;
-                        $stage->season_id = Seasons::where('season_id', $item->season->id)->first()->id ?? $item->season->id;
+                        if(!empty($stage->season)){
+                            $ss = $stage->season;
+                            $exists = Seasons::where('season_id', $ss->id)->first() ?? new Seasons;
+
+                            $exists->season_id = (int) $ss->id;
+                            $exists->name = $ss->name;
+                            $exists->start = $ss->start;
+                            $exists->end = $ss->end;
+                            $exists->save();
+                            $$stage->season_id = $exists->id;
+                        }
                         $stage->group_id = $group->id;
                         $stage->save();
 
@@ -123,7 +129,7 @@ class GetStandings extends Command
                 }
                 return Log::info('สำเร็จ', [
                     'message' => 'สำเร็จ',
-                    'data' => $all,
+                    // 'data' => $all,
                     'fail' => $fail,
                     'code' => $response->status(),
                 ]);

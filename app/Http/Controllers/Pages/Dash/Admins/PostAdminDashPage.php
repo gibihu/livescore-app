@@ -35,6 +35,7 @@ class PostAdminDashPage extends Controller
     public function PostSummary(Request $request, $id)
     {
         try{
+
             $post = Post::with('user', 'match')->where('ref_type', Post::REFTYPE_MATCH)->findOrFail($id);
 
             if($post->type == Post::TYPE_HANDICAP){
@@ -42,18 +43,18 @@ class PostAdminDashPage extends Controller
                     'value_2' => RateHelper::getItem($post->hidden["value_2"]),
                 ];
             }
-            if(!$post->summary_at && $post->match->live_status == 'END_LIVE'){
-                $post = PostHelper::SummaryOfType($post);
-                $post->summary_at = Carbon::now();
-                unset($post->hiddens);
-                $post->save();
+            // if(!$post->summary_at && $post->match->live_status == 'END_LIVE' && $post->match->status == "FINISHED"){
+            //     $post = PostHelper::SummaryOfType($post);
+            //     $post->summary_at = Carbon::now();
+            //     unset($post->hiddens);
+            //     // $post->save();
 
-                if($post->type == Post::TYPE_HANDICAP){
-                    $post->hiddens = (object) [
-                        'value_2' => RateHelper::getItem($post->hidden["value_2"]),
-                    ];
-                }
-            }
+            //     if($post->type == Post::TYPE_HANDICAP){
+            //         $post->hiddens = (object) [
+            //             'value_2' => RateHelper::getItem($post->hidden["value_2"]),
+            //         ];
+            //     }
+            // }
 
 
             return Inertia::render('dashboard/admins/posts/summary', compact('post'));

@@ -9,9 +9,8 @@ import { PostType } from "@/types/post";
 import { FilteredMatchesType, groupMatches } from "@/lib/functions";
 
 
-export default function FixtureScore({ request }: { request: any }) {
-    console.log(request);
-    const [matches, setMatches] = useState<MatchType[]>(request.matches as MatchType[]);
+export default function FixtureScore({ request, items }: { request: any, items: any }) {
+    const [matches, setMatches] = useState<MatchType[]>(items as MatchType[]);
     const [filters, setFilters] = useState<FilteredMatchesType[]>([]);
 
     const [isFetchBoard, setIsFetchBoard] = useState(false);
@@ -45,6 +44,6 @@ export default function FixtureScore({ request }: { request: any }) {
 
     return (
         // <BoardScore items={matches} isFetch={isFetchBoard} />
-        <BoardTable items={groupedMatches} isFetch={isFetchBoard} type="fixture" />
+        <BoardTable items={groupedMatches} isFetch={isFetchBoard} request={request} type="fixture" />
     );
 }

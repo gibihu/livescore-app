@@ -9,6 +9,7 @@ export interface UserType {
     tier?: number;
     tier_text?: string;
     exp?: number;
+    paid_at: string | null;
     wallet: WalletType;
     retrieval_at?: string;
     rank: UserRankType;
@@ -49,6 +50,7 @@ export interface UserRankType {
     deleted_at: string;
     updated_at: string;
     created_at: string;
+    user?: UserGuast;
 }
 
 export interface UserSeasonType {

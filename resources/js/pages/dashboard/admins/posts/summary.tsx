@@ -60,11 +60,13 @@ export default function PostSummaryPage(request: any) {
                 <div className="flex justify-center">
                     <div className="w-sm">
                         <div className="relative">
-                            <ContentForSale item={post} />
                             {post.summary_at && (
-                                <div className="absolute -top-4 -right-4 rotate-12">
-                                    <TagResult item={post} />
-                                </div>
+                                <>
+                                    <ContentForSale item={post} />
+                                    <div className="absolute -top-4 -right-4 rotate-12">
+                                        <TagResult item={post} />
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
@@ -80,9 +82,11 @@ export default function PostSummaryPage(request: any) {
                                 </Avatar>
                                 <span className="text-sm">{user.name}</span>
                                 {rank.level !== 0 && (
-                                    <ExpertBadge level={rank.level} type={rank.type_text} />
+                                    <ExpertBadge item={user} />
                                 )}
-                                <span>{post.result_text}</span>
+                                {post.summary_at && (
+                                    <span>{post.result_text}</span>
+                                )}
                             </div>
                         </div>
                     </Card>

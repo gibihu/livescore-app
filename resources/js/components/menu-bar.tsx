@@ -4,15 +4,18 @@ import web from "@/routes/web";
 import dash from "@/routes/dash";
 import { AuthType } from "@/types/auth";
 import { ButtonGroup } from "./ui/button-group";
-import { ArchiveIcon, ArrowLeftIcon, CalendarPlusIcon, ClockIcon, ListFilterPlusIcon, MailCheckIcon, MoreHorizontalIcon, TagIcon, Trash2Icon } from "lucide-react";
+import { ArchiveIcon, ArrowLeftIcon, CalendarPlusIcon, ClockIcon, ListFilterPlusIcon, MailCheckIcon, MoreHorizontalIcon, Star, TagIcon, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
-export default function MenuBar() {
+export default function MenuBar({children}:{children?: React.ReactNode}) {
     const auth = usePage().props.auth as AuthType;
     return (
-        <div className="w-full flex justify-end gap-2 flex-wrap">
+        <div className="w-full flex flex-col-reverse sm:flex-row justify-between gap-2 flex-wrap">
+            <div>
+                {children}
+            </div>
 
-            <ButtonGroup>
+            <ButtonGroup className="w-full sm:w-auto justify-end">
                 <ButtonGroup>
                     {auth.user && (
                         <Button variant="outline" asChild>
@@ -33,6 +36,11 @@ export default function MenuBar() {
                             ผลบอลสด
                         </Link>
                     </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={web.home().url} prefetch>
+                            ตารางการแข่ง
+                        </Link>
+                    </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="icon" aria-label="More Options">
@@ -41,39 +49,17 @@ export default function MenuBar() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
                             <DropdownMenuGroup>
-                                <DropdownMenuItem asChild className="cursor-pointer">
-                                    <Link href={web.home().url} prefetch>
-                                        <CalendarPlusIcon />
-                                        ตารางการแข่ง
-                                    </Link>
-                                </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link href={web.match.standings().url}>
                                         <ArchiveIcon />
                                         ตารางคะแนน
                                     </Link>
                                 </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem>
-                                    <ClockIcon />
-                                    Snooze
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <CalendarPlusIcon />
-                                    Add to Calendar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <ListFilterPlusIcon />
-                                    Add to List
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem variant="destructive">
-                                    <Trash2Icon />
-                                    Trash
+                                <DropdownMenuItem asChild>
+                                    <Link href={web.match.favorite().url}>
+                                        <Star />
+                                        รายการโปรด
+                                    </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
