@@ -118,10 +118,11 @@ class LiveScoreController extends Controller
         }
     }
 
-    public static function LiveEvent($match_id, $status)
+    public static function LiveEvent($match_id)
     {
         try {
-            $match = MatchEvent::where('match_id', $match_id)->first();
+            $mt = Matchs::find($match_id);
+            $match = MatchEvent::where('match_id', $mt->id)->first();
             if ($match) {
                 $item = json_decode($match->json, true);
 
@@ -141,19 +142,19 @@ class LiveScoreController extends Controller
                 $match->update(['is_updating' => 1]);
             } else {
                 $match = MatchEvent::create([
-                    'match_id' => $match_id,
+                    'match_id' => $mt->id,
                     'is_updating' => 1,
-                    'status' => $status,
+                    'status' => 'NOT STARTED',
                 ]);
             }
 
             try {
                 // เรียก API
-                $API_KEY = env('LIVE_SCORE_API_KEY');
-                $API_SECRET = env('LIVE_SCORE_API_SECRET');
+                $API_KEY = config('api.livescore.api_key');
+                $API_SECRET = config('api.livescore.api_secret');
 
                 $response = Http::get('https://livescore-api.com/api-client/scores/events.json', [
-                    'id' => $match_id,
+                    'id' => $mt->match_id,
                     'key' => $API_KEY,
                     'secret' => $API_SECRET,
                 ]);

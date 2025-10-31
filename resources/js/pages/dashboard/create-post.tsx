@@ -288,13 +288,14 @@ export default function CreatePostPage(request: any) {
                                                     </DialogTrigger>
                                                     <DialogContent>
                                                         <DialogHeader>
-                                                            <DialogTitle>การกำหนดพอยต์สูงสุดตามระดับ Tier</DialogTitle>
+                                                            <DialogTitle>การสร้างทีเด็ดอาจมีเรทค่าธรรมเนียมแตกต่างกัน</DialogTitle>
                                                             <DialogDescription className="my-2" asChild>
                                                                 <ul className="flex flex-col gap-2 list-disc ps-10">
-                                                                    <li>Bronze : สูงสุด {(100).toLocaleString()} พอยต์</li>
-                                                                    <li>Silver : สูงสุด {(1000).toLocaleString()}  พอยต์</li>
-                                                                    <li>Gold   : สูงสุด {(100000).toLocaleString()}  พอยต์</li>
-                                                                    <li>VIP    : สูงสุด {(10000000).toLocaleString()}  พอยต์</li>
+                                                                    <li>Bronze    : ค่าธรรมเนียม {(5).toLocaleString()}%</li>
+                                                                    <li>Silver    : ค่าธรรมเนียม {(10).toLocaleString()}%</li>
+                                                                    <li>Gold      : ค่าธรรมเนียม {(15).toLocaleString()}%</li>
+                                                                    <li>Platinum  : ค่าธรรมเนียม {(20).toLocaleString()}%</li>
+                                                                    <li>Daimon    : ค่าธรรมเนียม {(25).toLocaleString()}%</li>
                                                                 </ul>
                                                             </DialogDescription>
                                                         </DialogHeader>
@@ -306,7 +307,7 @@ export default function CreatePostPage(request: any) {
                                             </FormControl>
                                             {!fieldState.error && (
                                                 <FormDescription className="capitalize">
-                                                    {user?.tier_text} จำนวนพอยต์สูงสุดอยู่ที่ {maxPoints.toLocaleString()} พอยต์
+                                                    ราคาทีเด็ด
                                                 </FormDescription>
                                             )}
                                             <FormMessage />
@@ -553,7 +554,21 @@ export default function CreatePostPage(request: any) {
                                                                         <FormItem className="flex-1">
                                                                             <FormLabel className="mb-2">ค่า</FormLabel>
                                                                             <FormControl>
-                                                                                <Input placeholder="เพิ่มคะแนน" type="number" {...field} disabled={isFetch} />
+                                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                                                    <SelectTrigger className="w-full">
+                                                                                        <SelectValue placeholder="Theme" />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        {[...Array(20)].map((_, i) => {
+                                                                                            const value = (i + 1).toString();
+                                                                                            return (
+                                                                                                <SelectItem key={value} value={value}>
+                                                                                                    {value}
+                                                                                                </SelectItem>
+                                                                                            );
+                                                                                        })}
+                                                                                    </SelectContent>
+                                                                                    </Select>
                                                                             </FormControl>
                                                                             <FormMessage />
                                                                         </FormItem>

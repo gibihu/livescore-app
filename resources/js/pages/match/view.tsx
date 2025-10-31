@@ -76,10 +76,10 @@ function ContentTabs({ request }: { request: any }) {
     const posts = request.posts as PostType[];
     const match = request.match as MatchType;
     return (
-        <Tabs defaultValue="index" className="w-full">
+        <Tabs defaultValue="post" className="w-full">
             <TabsList>
-                <TabsTrigger value="index">การแข่งขัน</TabsTrigger>
                 <TabsTrigger value="post">ทีเด็ด</TabsTrigger>
+                <TabsTrigger value="index">การแข่งขัน</TabsTrigger>
                 <TabsTrigger value="players">นักเตะ</TabsTrigger>
                 {match.live_status === "LIVE" || match.live_status === "END_LIVE" ? (
                     <TabsTrigger value="lineups">ตัวจริง</TabsTrigger>
@@ -88,7 +88,7 @@ function ContentTabs({ request }: { request: any }) {
             <div className="p-0 md:p-4">
                 <TabsContent value="index">
                     <div className="flex flex-col gap-4">
-                        <FootballField item={[]} />
+                        {/* <FootballField item={[]} /> */}
                         <MatchEvent main_item={match} match_id={match.id} />
                     </div>
                 </TabsContent>

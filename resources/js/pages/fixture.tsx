@@ -36,6 +36,7 @@ export default function Home(request: any) {
             return home.includes(lower) || away.includes(lower);
         });
 
+        console.log(input, result);
         setFilteredMatches(result);
 
     }, [input, matches]);
@@ -48,7 +49,7 @@ export default function Home(request: any) {
             <div className="flex flex-col gap-4  mt-4">
                 <MenuBar>
                     <Input
-                        className="max-w-full sm:max-w-xs"
+                        className="max-w-aut sm:max-w-xs"
                         placeholder="ค้นหาทีม"
                         onChange={e => setInput(e.target.value)}
                     />
