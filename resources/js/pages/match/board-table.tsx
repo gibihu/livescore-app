@@ -277,7 +277,7 @@ function ShowTimeOrText({ item }: { item: MatchType }) {
         <div className="text-primary flex gap-0 items-center">
             {item.status == "IN PLAY" && item.time !== 'FT' && item.time !== "HT" ? (
                 <span className="flex gap-1 items-start">
-                    {item.time.slice(0, 5)}
+                    {item.time}
                     <Circle fill="currentColor" className="text-primary size-1.5 animate-pulse" />
                 </span>
             ): (
