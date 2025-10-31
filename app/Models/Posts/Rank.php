@@ -13,8 +13,11 @@ class Rank extends Model
 {
     use HasUuids; // เพราะ id เป็น uuid
     use UserRankTrait;
+
     protected $table = 'user_ranks';
+
     public $incrementing = false;  // UUID ไม่ใช่ auto-increment
+
     protected $keyType = 'string'; // เพราะ UUID เป็น string
 
     protected $fillable = [
@@ -24,17 +27,17 @@ class Rank extends Model
         'season_id',
         'type',
     ];
+
     protected $with = [
-//        'user',
+        //        'user',
         'season',
     ];
 
     protected $appends = [
         'type_text',
         'level_text',
-        'level_json'
+        'level_json',
     ];
-
 
     public $timestamps = true;
 
@@ -42,6 +45,7 @@ class Rank extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id')->select('id', 'name', 'username', 'tier');
     }
+
     public function season()
     {
         return $this->belongsTo(Season::class, 'season_id', 'id');
@@ -54,6 +58,7 @@ class Rank extends Model
             $level = $this->level;
 
             $item = collect($helperList)->firstWhere('id', $level);
+
             return $item['name'] ?? 'Unknown';
         });
     }
@@ -65,7 +70,22 @@ class Rank extends Model
             $level = $this->level;
 
             $item = collect($helperList)->firstWhere('id', $level);
+
             return $item ?? [];
+        });
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+
+            // ถ้า score เปลี่ยนหรือเป็นครั้งแรก
+            if ($model->isDirty('score')) {
+                $newRank = RankHelper::getLevelByScore($model->score);
+                $model->level = $newRank['id']; // อัปเดต level
+            }
         });
     }
 }

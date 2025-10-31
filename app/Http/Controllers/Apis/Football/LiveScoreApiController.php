@@ -38,7 +38,7 @@ class LiveScoreApiController extends Controller
             $match_id = $request->id ?? 0;
             $status = $request->status ?? 'FINISHED';
             try{
-                $data = LiveController::LiveEvent($match_id, $status);
+                $data = LiveController::LiveEvent($match_id);
                 return response()->json([
                     'message' => 'สำเร็จ',
                     'data' => $data,

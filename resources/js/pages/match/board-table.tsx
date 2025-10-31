@@ -8,9 +8,9 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table"
-import { FilteredMatchesType, formatDateLocal, ShortName } from "@/lib/functions"
+import { FilteredMatchesType, formatDateLocal, ShortName, timeToShort } from "@/lib/functions"
 import { cn } from "@/lib/utils"
-import { CalendarIcon, ChevronDownIcon, LoaderCircle, Star } from "lucide-react"
+import { CalendarIcon, ChevronDownIcon, Circle, LoaderCircle, Star } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { TableCellViewer, whoWon } from "./board-score"
 import ImageWithSkeleton from "@/components/ImageWithSkeleton"
@@ -78,30 +78,31 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
                 {/* <Table className="table-fixed"> */}
                 <TableHeader>
                     <TableRow className="h-12">
-                        <TableHead className="text-start">
-                            {type == 'live' ? 'ไลฟ์สด' : `ตารางการแข่งขัน`}
-                        </TableHead>
-                        <TableHead className="w-full justify-end">
-                            {type == 'fixture' ? (() => {
-                                const [date, setDate] = React.useState<Date | undefined>(
-                                    request.fixture_date ? new Date(request.fixture_date) : new Date()
-                                );
+                        <TableHead className="w-full" colSpan={3}>
+                            <div className="w-full flex gap-3 justify-between items-center">
+
+                                <span>
+                                    {type == 'live' ? 'ไลฟ์สด' : `ตารางการแข่งขัน`}
+                                </span>
+                                {type == 'fixture' ? (() => {
+                                    const [date, setDate] = React.useState<Date | undefined>(
+                                        request.fixture_date ? new Date(request.fixture_date) : new Date()
+                                    );
 
 
-                                function handleClick(date: Date | undefined) {
-                                    if (!date) return;
+                                    function handleClick(date: Date | undefined) {
+                                        if (!date) return;
 
-                                    const value = formatDateLocal(date);
-                                    router.visit(`${home().url}?date=${value}`);
-                                }
-                                return (
-                                    <div className="flex flex-col gap-3">
+                                        const value = formatDateLocal(date);
+                                        router.visit(`${home().url}?date=${value}`);
+                                    }
+                                    return (
                                         <Popover >
                                             <PopoverTrigger asChild>
                                                 <Button
                                                     variant="outline"
                                                     id="date"
-                                                    className="w-48 justify-between font-normal"
+                                                    className="w-max justify-between font-normal"
                                                 >
                                                     {date ? date.toLocaleDateString() : "Select date"}
                                                     <ChevronDownIcon />
@@ -119,15 +120,15 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
                                                 />
                                             </PopoverContent>
                                         </Popover>
-                                    </div>
-                                );
-                            })() : ''}
+                                    );
+                                })() : ''}
+                            </div>
                         </TableHead>
-                        <TableHead colSpan={2}></TableHead>
+                        {/* <TableHead colSpan={2}></TableHead> */}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {!isFetch ? (items.map((item: any, index: number) => (
+                    {!isFetch ? (items.length > 0 ? (items.map((item: any, index: number) => (
                         <React.Fragment key={index}>
                             <TableRow className="bg-primary/20">
                                 <TableCell colSpan={4}>
@@ -156,16 +157,16 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
                                 const [homeScoreStr, awayScoreStr] = (match.scores?.score?.split(" - ").map(s => s.trim())) ?? ["?", "?"];
                                 return (
                                     <TableRow key={key}>
-                                        <TableCell>
-                                            <TableCellViewer item={match} className="h-14 w-full" matchEvent={type == 'fixture' ? false : true} type={type}>
+                                        <TableCell className="max-w-12 md:max-w-10">
+                                            <Link href={web.match.view({ id: match.id }).url}>
                                                 <div className="flex flex-col justify-center items-center w-full">
                                                     <div className="flex gap-2">
                                                         <span>{match.scheduled ? match.scheduled?.slice(0, 5) : match.date?.toString().slice(5, 10)}</span>
                                                         <span>|</span>
-                                                        <span className={cn('font-bold', (match.status !== 'NOT STARTED' && match.status !== 'FINISHED') ? "text-primary" : '')}>{type == 'live' ? match.time : match.time.slice(0, 5)}</span>
+                                                        <ShowTimeOrText item={match} />
                                                     </div>
                                                 </div>
-                                            </TableCellViewer>
+                                            </Link>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-4 h-full">
@@ -199,8 +200,8 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
                                                 <div className="w-1 h-12 rounded-full bg-input"></div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="min-w-15">
-                                            <TableCellViewer item={match} className="w-full h-full" matchEvent={type == 'fixture' ? false : true} type={type}>
+                                        {/* <TableCell className="min-w-15">
+                                            <Link href={web.match.view({ id: match.id }).url}>
                                                 <div className="flex flex-col justify-center items-center gap-2">
                                                     <div className="flex flex-col text-xs items-center justify-center gap-1">
                                                         <span>{match.odds?.pre?.['1'] ?? '-'}</span>
@@ -208,10 +209,9 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
                                                         <span>{match.odds?.pre?.['2'] ?? '-'}</span>
                                                     </div>
                                                 </div>
-                                            </TableCellViewer>
-                                        </TableCell>
-                                        <TableCell className="min-w-15 flex gap-2">
-                                            <div className="w-1 h-12 rounded-full bg-input"></div>
+                                            </Link>
+                                        </TableCell> */}
+                                        <TableCell className="max-w-8 md:max-w-5">
                                             <div className="w-max flex items-center justify-center">
                                                 {
                                                     (() => {
@@ -240,6 +240,14 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
                         <TableRow>
                             <TableCell colSpan={3}>
                                 <div className="w-full flex justify-center">
+                                    <span className="text-muted-foreground">ไม่พบข้อมูล</span>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    )) : (
+                        <TableRow>
+                            <TableCell colSpan={3}>
+                                <div className="w-full flex justify-center">
                                     <LoaderCircle className="animate-spin size-5" />
                                 </div>
                             </TableCell>
@@ -261,4 +269,27 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
             </div> */}
         </Card>
     )
+}
+
+
+function ShowTimeOrText({ item }: { item: MatchType }) {
+    return (
+        <div className="text-primary flex gap-0 items-center">
+            {item.status == "IN PLAY" && item.time !== 'FT' ? (
+                <span className="flex gap-1 items-start">
+                    {item.time.length <= 6 ? item.time : timeToShort(item.time.slice(0, 5))}
+                    <Circle fill="currentColor" className="text-primary size-1.5 animate-pulse" />
+                </span>
+            ): (
+                <span>
+                    {item.time !== "FT" && item.time !== "HT" ? (
+                        timeToShort(item.time.slice(0, 5))
+                    ) : (
+                        item.time
+                    )}
+                </span>
+            )
+        }
+        </div>
+    );
 }

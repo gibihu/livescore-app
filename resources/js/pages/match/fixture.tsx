@@ -10,8 +10,12 @@ import { FilteredMatchesType, groupMatches } from "@/lib/functions";
 
 
 export default function FixtureScore({ request, items }: { request: any, items: any }) {
-    const [matches, setMatches] = useState<MatchType[]>(items as MatchType[]);
+    const [matches, setMatches] = useState<MatchType[]>([]);
     const [filters, setFilters] = useState<FilteredMatchesType[]>([]);
+
+    useEffect(()=>{
+        setMatches(items as MatchType[]);
+    },[items]);
 
     const [isFetchBoard, setIsFetchBoard] = useState(false);
 

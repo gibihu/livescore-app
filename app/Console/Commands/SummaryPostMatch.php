@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Posts\Post;
-use Carbon\Carbon;
 use App\Helpers\PostHelper;
 use App\Helpers\RateHelper;
+use App\Models\Posts\Post;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class SummaryPostMatch extends Command
@@ -33,20 +33,24 @@ class SummaryPostMatch extends Command
         $start = Carbon::now();
         Log::info('');
         Log::info('=== Start Update Summay Posts Job ===');
-        try{
+        try {
             $posts = Post::with('user', 'match')->where('ref_type', Post::REFTYPE_MATCH)->get();
 
-            foreach($posts as $post){
-                if($post->type == Post::TYPE_HANDICAP){
+            foreach ($posts as $post) {
+                if ($post->type == Post::TYPE_HANDICAP) {
                     $post->hiddens = (object) [
-                        'value_2' => RateHelper::getItem($post->hidden["value_2"]),
+                        'value_2' => RateHelper::getItem($post->hidden['value_2']),
                     ];
                 }
-                if(!$post->summary_at && $post->match->live_status == 'END_LIVE' && $post->match->status == "FINISHED"){
+                if (! $post->summary_at && $post->match->live_status == 'END_LIVE' && $post->match->status == 'FINISHED') {
                     $post = PostHelper::SummaryOfType($post);
                     $post->summary_at = Carbon::now();
                     unset($post->hiddens);
                     $post->save();
+                    $post->user->rank->update([
+                        'score' => $post->user->rank->score + ($post->result > 0 ? 3 : 0),
+                    ]);
+
                 }
             }
         } catch (Throwable $e) {

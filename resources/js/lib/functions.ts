@@ -1,7 +1,7 @@
 import { MatchType } from "@/types/match";
 import { useEffect, useState } from "react";
 
-function ShortName(name: string): string {
+export function ShortName(name: string): string {
     const parts = name.trim().split(" ").filter(Boolean);
 
     if (parts.length === 1) {
@@ -16,7 +16,7 @@ function ShortName(name: string): string {
     }
 }
 
-function EventTrans(event: string): string {
+export function EventTrans(event: string): string {
     let text = '';
     switch (event) {
         case 'GOAL':
@@ -25,14 +25,23 @@ function EventTrans(event: string): string {
         case 'GOAL_PENALTY':
             text = 'ทำประตูจุดโทษ';
             break;
+        case 'OWN_GOAL':
+            text = 'ทำประตูตัวเอง';
+            break;
         case 'YELLOW_CARD':
             text = 'ใบเหลือง';
             break;
         case 'RED_CARD':
             text = 'ใบเแดง';
             break;
+        case 'YELLOW_RED_CARD':
+            text = 'ใบเหลืองใบที่สอง';
+            break;
         case 'SUBSTITUTION':
             text = 'เปลี่ยนตัว';
+            break;
+        case 'MISSED_PENALTY':
+            text = 'พลาดจุดโทษ';
             break;
         default:
             text = 'ไม่ทราบอีเว้น';
@@ -41,7 +50,7 @@ function EventTrans(event: string): string {
     return text;
 }
 
-function timeDiff(futureDate: string | Date): string {
+export function timeDiff(futureDate: string | Date): string {
     const now: Date = new Date();
     const future: Date = typeof futureDate === "string" ? new Date(futureDate) : futureDate;
 
@@ -66,7 +75,7 @@ function timeDiff(futureDate: string | Date): string {
     return `${days} วัน ${hours} ชั่วโมง ${minutes} นาที ${seconds} วินาที`;
 }
 
-function timeDiffRounded(futureDate: string | Date): string {
+export function timeDiffRounded(futureDate: string | Date): string {
     const now: Date = new Date();
     const future: Date = typeof futureDate === "string" ? new Date(futureDate) : futureDate;
 
@@ -94,7 +103,7 @@ function timeDiffRounded(futureDate: string | Date): string {
     const seconds: number = Math.floor(diffMs / 1000);
     return `${seconds} วิ.`;
 }
-function formatDateTime(input: string): string {
+export function formatDateTime(input: string): string {
     if (!input) return input;
     const date = new Date(input.replace(" ", "T"));
     // แปลง "2025-09-19 09:54:16" → "2025-09-19T09:54:16"
@@ -111,11 +120,11 @@ function formatDateTime(input: string): string {
 }
 
 
-function isUpper(amount: number) {
+export function isUpper(amount: number) {
     return amount >= 0 ? true : false;
 }
 
-function timeAgoShort(isoDate?: string): string {
+export function timeAgoShort(isoDate?: string): string {
     if (!isoDate) { return isoDate || ''; }
     const date = new Date(isoDate);
     const now = new Date();
@@ -136,12 +145,12 @@ function timeAgoShort(isoDate?: string): string {
     return `${diffYear} ปี`;
 }
 
-function truncateMessage(message: string, maxLength = 200, dot = false): string {
+export function truncateMessage(message: string, maxLength = 200, dot = false): string {
     let show = message.length > maxLength ? message.slice(0, maxLength) : message;
     return show + (dot && '...');
 }
 
-function translateStatus(status: string) {
+export function translateStatus(status: string) {
     let text = '';
     switch (status) {
         case 'pending':
@@ -180,7 +189,7 @@ function translateStatus(status: string) {
     return text;
 }
 
-function convertUTC(
+export function convertUTC(
     date: string,
     time: string,
     targetOffset: number = 7,
@@ -222,7 +231,7 @@ export interface FilteredMatchesType {
     matches: MatchType[];
 }
 
-function groupMatches(matches: MatchType[]): FilteredMatchesType[] {
+export function groupMatches(matches: MatchType[]): FilteredMatchesType[] {
     const groups: { [key: string]: FilteredMatchesType } = {};
 
     matches.forEach((match) => {
@@ -319,7 +328,7 @@ function groupMatches(matches: MatchType[]): FilteredMatchesType[] {
     // return Object.values(groups);
 }
 
-function Trans1X2ToString(value: string){
+export function Trans1X2ToString(value: string){
     switch(value){
         case '1':
             return 'เจ้าบ้าน';
@@ -331,7 +340,7 @@ function Trans1X2ToString(value: string){
             return 'ไม่รู้จักค่า หากผิดพลากติดต่อผู้ดูแล';
     }
 }
-function formatDateLocal(date: Date) {
+export function formatDateLocal(date: Date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0"); // เดือน 0-indexed
     const d = String(date.getDate()).padStart(2, "0");
@@ -339,18 +348,8 @@ function formatDateLocal(date: Date) {
     return `${y}-${m}-${d}`;
 }
 
-export {
-    ShortName, // แปลงชื่อเป็ตัวย่อ
-    EventTrans, //แปลง status เป็นภาษาไทย
-    timeDiff, //แปลง Data เป็นวันที่ภาษาไทย
-    timeDiffRounded, // แปลง Data เป็นวันที่แบบย่อ
-    formatDateTime, // แปลงวันที่เต็มเป็นสั่นๆ 9/19 22:30
-    isUpper, //เพิ่มขึ้นหรือลดลง
-    timeAgoShort, //แปลงวันที่เป็นอดีตแบบสั้น
-    truncateMessage, // ตัดข้อความ
-    translateStatus, // แปลงสถานะเป็นภาษาไทย
-    convertUTC,
-    groupMatches, // filter live match
-    Trans1X2ToString,
-    formatDateLocal,
+export function timeToShort(t: string): string {
+  const [h, m] = t.split(":");
+  const hour = parseInt(h, 10).toString(); // ตัด 0 ข้างหน้า
+  return `${hour}:${m}`;
 }
