@@ -275,14 +275,14 @@ export function BoardTable({ request, items, isFetch = false, type = 'live' }: T
 function ShowTimeOrText({ item }: { item: MatchType }) {
     return (
         <div className="text-primary flex gap-0 items-center">
-            {item.status == "IN PLAY" && item.time !== 'FT' && item.time !== "HT" ? (
+            {item.status == "IN PLAY" || item.status == "ADDED TIME" ? (
                 <span className="flex gap-1 items-start">
                     {item.time}
                     <Circle fill="currentColor" className="text-primary size-1.5 animate-pulse" />
                 </span>
             ): (
                 <span>
-                    {item.time !== "FT" && item.time !== "HT" ? (
+                    {item.time !== "FT" && item.time !== "HT" && item.time != "ADDED TIME" ? (
                         timeToShort(item.time.slice(0, 5))
                     ) : (
                         item.time
